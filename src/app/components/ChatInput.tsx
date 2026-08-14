@@ -46,6 +46,19 @@ export default function ChatInput({ onSendMessage, disabled, centered = false }:
   const [input, setInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleOutsidePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (suggestionsRef.current && !suggestionsRef.current.contains(target) && target !== inputRef.current) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handleOutsidePointerDown);
+    return () => document.removeEventListener('pointerdown', handleOutsidePointerDown);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,7 +125,10 @@ export default function ChatInput({ onSendMessage, disabled, centered = false }:
 
       {/* Suggestions Popup - placed slightly below input */}
       {showSuggestions && filteredSuggestions.length > 0 && (
-        <div className="absolute top-[calc(100%+16px)] w-[110%] bg-[rgba(60,60,60,0.8)] backdrop-blur-xl rounded-[24px] shadow-[0px_8px_32px_0px_rgba(0,0,0,0.2)] border border-white/10 p-6 max-h-[300px] overflow-y-auto z-20">
+        <div
+          ref={suggestionsRef}
+          className="absolute left-1/2 top-[calc(100%+16px)] -translate-x-1/2 w-[480px] bg-[rgba(60,60,60,0.8)] backdrop-blur-xl rounded-[24px] shadow-[0px_8px_32px_0px_rgba(0,0,0,0.2)] border border-white/10 p-6 max-h-[300px] overflow-y-auto z-20"
+        >
           <div className="flex flex-col gap-6">
             {filteredSuggestions.map((category, idx) => (
               <div key={idx} className="flex flex-col gap-2">
