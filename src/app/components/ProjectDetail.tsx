@@ -39,10 +39,9 @@ export default function ProjectDetail({ mode }: Props) {
 
   return (
     <PageTransition>
-      <div
-        className="absolute inset-0 overflow-y-auto"
-        style={{ background: item.accentColor }}
-      >
+      <div className="absolute inset-0 overflow-y-auto">
+        {/* Semi-transparent background — lets the network show through */}
+        <div className="fixed inset-0 -z-[1]" style={{ background: item.accentColor, opacity: 0.88 }} />
         {/* Top nav */}
         <div className="sticky top-0 z-20 flex items-center justify-between px-8 py-5" style={{ background: item.accentColor }}>
           <motion.button

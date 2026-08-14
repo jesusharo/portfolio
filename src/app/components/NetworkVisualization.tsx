@@ -128,7 +128,7 @@ function FloatingNode({ node, mouseX, mouseY, reduceMotion }: FloatingNodeProps)
     <motion.div className={node.className} style={{ x: driftX, y: driftY }}>
       <motion.div className="absolute inset-0" style={{ x: mouseReactionX, y: mouseReactionY }}>
         <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox={node.viewBox}>
-          <circle cx={node.radius} cy={node.radius} fill={node.color} fillOpacity={0.5} r={node.radius} />
+          <circle cx={node.radius} cy={node.radius} fill="white" fillOpacity={0.12} r={node.radius} />
         </svg>
       </motion.div>
     </motion.div>
@@ -164,7 +164,7 @@ export default function NetworkVisualization() {
     >
       <div className="absolute inset-[0.57%_1.43%_1.05%_0.57%]">
         <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 946.709 946.663">
-          <path d={svgPaths.p11e15a00} stroke="#5F5F5F" strokeOpacity="0.5" strokeWidth="0.5" />
+          <path d={svgPaths.p11e15a00} stroke="white" strokeOpacity="0.08" strokeWidth="0.5" />
         </svg>
       </div>
       {nodes.map((node) => (
