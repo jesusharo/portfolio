@@ -163,7 +163,7 @@ const skills = [
 export default function AboutView() {
   const { setNetworkState } = useNetworkState();
   useEffect(() => {
-    setNetworkState('idle');
+    setNetworkState('conversation');
     return () => setNetworkState('idle');
   }, []);
 
