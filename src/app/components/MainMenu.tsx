@@ -50,10 +50,10 @@ export default function MainMenu() {
           <button
             key={link.id}
             onClick={() => navigate(link.path)}
-            className={`group relative cursor-pointer flex items-center justify-center size-[52px] rounded-full transition-colors ${
+            className={`group relative cursor-pointer flex items-center justify-center rounded-full transition-all duration-200 ${
               active
-                ? 'bg-[#d25d5f] text-white'
-                : 'bg-[#686868] text-white hover:bg-[#7a7a7a]'
+                ? 'size-[52px] bg-[#d25d5f] text-white'
+                : 'size-[44px] bg-[#686868] text-white hover:bg-[#7a7a7a]'
             }`}
           >
             <Icon
