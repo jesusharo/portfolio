@@ -82,7 +82,7 @@ export default function ChatInput({ onSendMessage, disabled, centered = false }:
     >
       
       <form onSubmit={handleSubmit} className="w-full relative z-30">
-        <div className="bg-[rgba(60,60,60,0.5)] backdrop-blur-xl content-stretch flex gap-[24px] items-center pl-[24px] pr-[8px] py-[24px] rounded-[32px] shadow-[0px_4px_36px_0px_rgba(0,0,0,0.05)] w-[480px] mx-auto">
+        <div className="bg-[rgba(60,60,60,0.5)] backdrop-blur-xl content-stretch flex gap-[24px] items-center pl-[24px] pr-[8px] py-[24px] rounded-[32px] shadow-[0px_4px_36px_0px_rgba(0,0,0,0.05)] w-[480px] mx-auto pt-[8px] pb-[8px]">
           <input
             ref={inputRef}
             type="text"

@@ -3,7 +3,6 @@ import { useChat } from '../hooks/useChat';
 import MessageBubble from './MessageBubble';
 import ChatInput from './ChatInput';
 import NetworkVisualization from './NetworkVisualization';
-import Sidebar from './Sidebar';
 import MainMenu from './MainMenu';
 
 export default function ChatView() {
@@ -23,12 +22,6 @@ export default function ChatView() {
   }, [activeConversation?.messages]);
 
   const hasMessages = activeConversation && activeConversation.messages.length > 0;
-
-  const handleQuestionClick = (id: string) => {
-    document.getElementById(`msg-${id}`)?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const userQuestions = activeConversation?.messages.filter(m => m.sender === 'user') || [];
 
   return (
     <div className="bg-[#1c1c1c] relative size-full overflow-hidden">
@@ -50,11 +43,6 @@ export default function ChatView() {
       </div>
       
       <MainMenu />
-
-      <Sidebar
-        questions={userQuestions}
-        onQuestionClick={handleQuestionClick}
-      />
 
       {/* Main Content */}
       <main className="absolute inset-0 overflow-hidden z-10 flex flex-col items-center pointer-events-none">
