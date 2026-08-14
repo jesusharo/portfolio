@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import NetworkVisualization from './NetworkVisualization';
 import MainMenu from './MainMenu';
+import PageTransition from './PageTransition';
 import { projects } from '../data/projects';
 
 function ProjectCircle({ project, index }: { project: typeof projects[0]; index: number }) {
@@ -26,6 +27,7 @@ function ProjectCircle({ project, index }: { project: typeof projects[0]; index:
 
 export default function ProjectsView() {
   return (
+    <PageTransition>
     <div className="bg-[#1c1c1c] relative size-full overflow-hidden">
       {/* Background blur */}
       <div className="absolute backdrop-blur-[20px] bg-gradient-to-t from-[69.674%] from-[rgba(0,0,0,0)] h-full left-0 to-[99.185%] to-[rgba(0,0,0,0.24)] top-0 w-full z-0" />
@@ -55,5 +57,6 @@ export default function ProjectsView() {
         </div>
       </div>
     </div>
+    </PageTransition>
   );
 }
