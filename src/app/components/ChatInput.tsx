@@ -136,11 +136,10 @@ export default function ChatInput({ onSendMessage, disabled, centered = false, o
             <button
               key={idx}
               onMouseDown={(e) => { e.preventDefault(); handleSuggestionClick(q); }}
-              className="px-[18px] py-[10px] rounded-[32px] text-left text-[1rem] leading-[1.4] font-['Source_Sans_3',sans-serif] text-[rgba(255,255,255,0.65)] backdrop-blur-xl transition-colors hover:text-[rgba(255,255,255,0.85)]"
+              className="px-[18px] py-[10px] rounded-[32px] text-left text-[1rem] leading-[1.4] font-['Source_Sans_3',sans-serif] text-[rgba(255,255,255,0.65)] transition-colors hover:text-[rgba(255,255,255,0.85)]"
               style={{
-                background: 'rgba(60,60,60,0.5)',
-                boxShadow: '0px 4px 36px rgba(0,0,0,0.05), inset 0px 1px 0px rgba(255,255,255,0.10), inset 0px -1px 0px rgba(0,0,0,0.15)',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: 'transparent',
+                border: '1px solid rgba(255,255,255,0.2)',
               }}
             >
               {q}
