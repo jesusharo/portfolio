@@ -122,11 +122,15 @@ export default function ChatInput({ onSendMessage, disabled, centered = false, o
         </div>
       </form>
 
-      {/* Suggestions — floating pills, left-aligned under input */}
+      {/* Suggestions — floating pills, above input when at bottom, below when centered */}
       {showSuggestions && filteredSuggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="absolute left-1/2 -translate-x-1/2 w-[480px] top-[calc(100%+8px)] flex flex-col items-start gap-[6px] z-20"
+          className={`absolute left-1/2 -translate-x-1/2 w-[480px] flex flex-col items-start gap-[6px] z-20 ${
+            centered
+              ? 'top-[calc(100%+8px)]'
+              : 'bottom-[calc(100%+8px)] flex-col-reverse'
+          }`}
         >
           {filteredSuggestions.map((q, idx) => (
             <button
