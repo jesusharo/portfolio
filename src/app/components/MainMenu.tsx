@@ -1,18 +1,42 @@
-import { Layout, BookOpen, User, MessageCircle } from 'lucide-react';
+import { BookMarked, Mail, Sparkles, Tags } from 'lucide-react';
+
+function AboutMeIcon() {
+  return (
+    <svg
+      width="17"
+      height="17"
+      viewBox="0 0 17 17"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <circle cx="8.5" cy="8.5" r="8" stroke="black" />
+      <path
+        d="M6.02335 5H4.90707V7.51156C4.7516 7.39478 4.55835 7.32558 4.34893 7.32558C3.83518 7.32558 3.4187 7.74205 3.4187 8.25581C3.4187 8.76958 3.83518 9.18605 4.34893 9.18605C4.55835 9.18605 4.7516 9.11685 4.90707 9.00007V10.9535H7.32568V12.1628H8.44196V9.83721H6.02335V5Z"
+        fill="black"
+      />
+      <path
+        d="M11.9768 8.25581C11.9768 8.76958 11.5604 9.18605 11.0466 9.18605C10.5329 9.18605 10.1164 8.76958 10.1164 8.25581C10.1164 7.74205 10.5329 7.32558 11.0466 7.32558C11.5604 7.32558 11.9768 7.74205 11.9768 8.25581Z"
+        fill="black"
+      />
+    </svg>
+  );
+}
 
 export default function MainMenu() {
   const links = [
-    { id: 'UI projects', icon: Layout },
-    { id: 'Case studies', icon: BookOpen },
-    { id: 'About me', icon: User },
-    { id: 'Assistant', icon: MessageCircle },
+    { id: 'UI projects', icon: Tags },
+    { id: 'Case studies', icon: BookMarked },
+    { id: 'Agent', icon: Sparkles },
+    { id: 'About me', icon: AboutMeIcon },
+    { id: 'Contact', icon: Mail },
   ];
 
   return (
     <div className="absolute flex flex-col gap-[16px] items-center left-[24px] top-1/2 -translate-y-1/2 w-[64px] z-30">
       {links.map((link) => {
         const Icon = link.icon;
-        const isActive = link.id === 'Assistant';
+        const isActive = link.id === 'Agent';
         
         return (
           <button
@@ -20,11 +44,11 @@ export default function MainMenu() {
             className={`group relative cursor-pointer flex items-center justify-center size-[52px] rounded-full transition-all ${
               isActive 
                 ? 'bg-[#d25d5f] text-white shadow-md scale-110' 
-                : 'bg-[#2A2A2A] border border-[#3C3C3C] text-[#686868] hover:border-[#4A4A4A] hover:text-[#A0A0A0] shadow-sm hover:scale-105'
+                : 'bg-[#686868] border border-[#686868] text-black hover:bg-[#7a7a7a] shadow-sm hover:scale-105'
             }`}
           >
             <Icon 
-              className="size-[22px] transition-colors" 
+              className="size-[28px] transition-colors" 
               strokeWidth={isActive ? 2.5 : 2}
             />
             
