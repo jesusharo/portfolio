@@ -1,11 +1,10 @@
 import { BookMarked, Mail, Sparkles, Tags } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router';
 
-function AboutMeIcon() {
+function AboutMeIcon({ className }: { className?: string }) {
   return (
     <svg
-      width="17"
-      height="17"
+      className={className}
       viewBox="0 0 17 17"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -51,15 +50,15 @@ export default function MainMenu() {
           <button
             key={link.id}
             onClick={() => navigate(link.path)}
-            className={`group relative cursor-pointer flex items-center justify-center size-[52px] rounded-full transition-all ${
+            className={`group relative cursor-pointer flex items-center justify-center size-[52px] rounded-full transition-colors ${
               active
-                ? 'bg-[#d25d5f] text-white shadow-md scale-110'
-                : 'bg-[#686868] border border-[#686868] text-white hover:bg-[#7a7a7a] shadow-sm hover:scale-105'
+                ? 'bg-[#d25d5f] text-white'
+                : 'bg-[#686868] text-white hover:bg-[#7a7a7a]'
             }`}
           >
             <Icon
-              className="size-[22px] transition-colors"
-              strokeWidth={active ? 2.5 : 2}
+              className="size-[22px]"
+              strokeWidth={2}
             />
 
             {/* Tooltip */}
