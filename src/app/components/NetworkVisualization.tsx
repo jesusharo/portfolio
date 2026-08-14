@@ -167,7 +167,7 @@ export default function NetworkVisualization() {
       className="absolute h-[961.324px] left-[50%] -translate-x-1/2 top-[50%] -translate-y-1/2 w-[965px] pointer-events-none origin-center"
       animate={{ scale }}
       transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-      style={{ filter: 'blur(30px)' }}
+      style={{ filter: 'blur(15px)' }}
     >
       <div className="absolute inset-[0.57%_1.43%_1.05%_0.57%]">
         <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 946.709 946.663">
