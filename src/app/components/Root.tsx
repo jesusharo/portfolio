@@ -1,13 +1,5 @@
-import { useLocation, Outlet } from 'react-router';
-import { AnimatePresence } from 'motion/react';
+import { Outlet } from 'react-router';
 
 export default function Root() {
-  const location = useLocation();
-  return (
-    <div className="relative w-full h-full overflow-hidden">
-      <AnimatePresence mode="sync">
-        <Outlet key={location.pathname} />
-      </AnimatePresence>
-    </div>
-  );
+  return <Outlet />;
 }
