@@ -5,6 +5,7 @@ import ProjectsView from "./components/ProjectsView";
 import CaseStudiesView from "./components/CaseStudiesView";
 import ProjectDetailProjects from "./components/ProjectDetailProjects";
 import ProjectDetailCases from "./components/ProjectDetailCases";
+import ContactView from "./components/ContactView";
 
 export const router = createBrowserRouter([
   {
@@ -17,6 +18,7 @@ export const router = createBrowserRouter([
       { path: "projects/:id", Component: ProjectDetailProjects },
       { path: "cases", Component: CaseStudiesView },
       { path: "cases/:id", Component: ProjectDetailCases },
+      { path: "contact", Component: ContactView },
     ],
   },
 ]);
