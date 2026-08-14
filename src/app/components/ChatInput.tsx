@@ -139,7 +139,6 @@ export default function ChatInput({ onSendMessage, disabled, centered = false, o
               className="px-[18px] py-[10px] rounded-[32px] text-left text-[1rem] leading-[1.4] font-['Source_Sans_3',sans-serif] text-[rgba(255,255,255,0.65)] transition-colors hover:text-[rgba(255,255,255,0.85)]"
               style={{
                 background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.2)',
               }}
             >
               {q}
