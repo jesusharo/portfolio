@@ -79,13 +79,10 @@ export default function ChatInput({ onSendMessage, disabled, centered = false, o
   };
 
   const filteredSuggestions = useMemo(() => {
-    if (!input.trim()) return CATEGORIZED_SUGGESTIONS;
-    
+    const allQuestions = CATEGORIZED_SUGGESTIONS.flatMap(cat => cat.questions);
+    if (!input.trim()) return allQuestions.slice(0, 5);
     const lowerInput = input.toLowerCase();
-    return CATEGORIZED_SUGGESTIONS.map(cat => ({
-      ...cat,
-      questions: cat.questions.filter(q => q.toLowerCase().includes(lowerInput))
-    })).filter(cat => cat.questions.length > 0);
+    return allQuestions.filter(q => q.toLowerCase().includes(lowerInput)).slice(0, 5);
   }, [input]);
 
   return (
@@ -125,32 +122,25 @@ export default function ChatInput({ onSendMessage, disabled, centered = false, o
         </div>
       </form>
 
-      {/* Suggestions Popup - placed slightly below input */}
+      {/* Suggestions — floating pills, left-aligned under input */}
       {showSuggestions && filteredSuggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="absolute left-1/2 top-[calc(100%+16px)] -translate-x-1/2 w-[480px] bg-[rgba(60,60,60,0.8)] backdrop-blur-xl rounded-[24px] shadow-[0px_8px_32px_0px_rgba(0,0,0,0.2)] border border-white/10 p-6 max-h-[300px] overflow-y-auto z-20"
+          className="absolute left-1/2 -translate-x-1/2 w-[480px] top-[calc(100%+8px)] flex flex-col items-start gap-[6px] z-20"
         >
-          <div className="flex flex-col gap-6">
-            {filteredSuggestions.map((category, idx) => (
-              <div key={idx} className="flex flex-col gap-2">
-                <h4 className="text-[12px] uppercase tracking-wider text-[#A0A0A0] font-bold font-['Source_Sans_Pro',sans-serif]">
-                  {category.category}
-                </h4>
-                <div className="flex flex-col gap-1">
-                  {category.questions.map((q, qIdx) => (
-                    <button
-                      key={qIdx}
-                      onClick={() => handleSuggestionClick(q)}
-                      className="text-left py-2 px-3 hover:bg-white/10 rounded-lg transition-colors font-['Source_Sans_3',sans-serif] text-[14px] text-white/90"
-                    >
-                      {q}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          {filteredSuggestions.map((q, idx) => (
+            <button
+              key={idx}
+              onMouseDown={(e) => { e.preventDefault(); handleSuggestionClick(q); }}
+              className={`px-[14px] py-[7px] rounded-[20px] text-left text-[13px] leading-[1.4] font-['Source_Sans_3',sans-serif] text-white transition-colors ${
+                idx === 0
+                  ? 'bg-[rgba(58,58,58,0.95)] backdrop-blur-xl hover:bg-[rgba(70,70,70,0.95)]'
+                  : 'bg-[rgba(50,50,50,0.55)] backdrop-blur-xl hover:bg-[rgba(60,60,60,0.75)]'
+              }`}
+            >
+              {q}
+            </button>
+          ))}
         </div>
       )}
     </div>
