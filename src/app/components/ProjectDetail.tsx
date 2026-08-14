@@ -19,7 +19,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   const currentIndex = items.findIndex(p => p.id === id);
   const item = items[currentIndex];
 
-  useEffect(() => { setNetworkState('focused'); }, []);
+  useEffect(() => { setNetworkState('conversation'); }, []);
 
   if (!item) {
     navigate(mode === 'projects' ? '/projects' : '/cases');
