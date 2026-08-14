@@ -48,40 +48,46 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
 
           {/* Sticky header — same solid color as background */}
           <div
-            className="sticky top-0 flex items-center justify-between px-8 py-5"
+            className="sticky top-0 flex items-center px-6 py-5"
             style={{ background: item.accentColor, zIndex: 20 }}
           >
-            <motion.button
-              whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
-              onClick={() => prevItem ? navigate(`${detailPath}/${prevItem.id}`) : navigate(listPath)}
-              className="size-[36px] flex items-center justify-center rounded-full text-white/60 hover:text-white transition-colors"
-            >
-              <ArrowLeft size={20} strokeWidth={1.5} />
-            </motion.button>
+            {/* Left spacer to balance the close button */}
+            <div className="w-[36px] shrink-0" />
 
-            <h1
-              className="text-white text-[1.25rem] font-semibold uppercase"
-              style={{ fontFamily: "'Source Sans 3', sans-serif", letterSpacing: '0.2em' }}
-            >
-              {item.name}
-            </h1>
+            {/* ← Title → grouped in center */}
+            <div className="flex-1 flex items-center justify-center gap-3">
+              <motion.button
+                whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
+                onClick={() => prevItem ? navigate(`${detailPath}/${prevItem.id}`) : navigate(listPath)}
+                className="size-[28px] flex items-center justify-center text-white/50 hover:text-white transition-colors"
+              >
+                <ArrowLeft size={16} strokeWidth={1.5} />
+              </motion.button>
 
-            <div className="flex items-center gap-2">
+              <h1
+                className="text-white text-[1.25rem] font-semibold uppercase"
+                style={{ fontFamily: "'Source Sans 3', sans-serif", letterSpacing: '0.2em' }}
+              >
+                {item.name}
+              </h1>
+
               <motion.button
                 whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
                 onClick={() => nextItem ? navigate(`${detailPath}/${nextItem.id}`) : navigate(listPath)}
-                className="size-[36px] flex items-center justify-center rounded-full text-white/60 hover:text-white transition-colors"
+                className="size-[28px] flex items-center justify-center text-white/50 hover:text-white transition-colors"
               >
-                <ArrowRight size={20} strokeWidth={1.5} />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
-                onClick={() => navigate(listPath)}
-                className="size-[36px] flex items-center justify-center rounded-full text-white/60 hover:text-white transition-colors ml-2"
-              >
-                <X size={18} strokeWidth={1.5} />
+                <ArrowRight size={16} strokeWidth={1.5} />
               </motion.button>
             </div>
+
+            {/* × on the far right edge */}
+            <motion.button
+              whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
+              onClick={() => navigate(listPath)}
+              className="size-[36px] shrink-0 flex items-center justify-center text-white/50 hover:text-white transition-colors"
+            >
+              <X size={16} strokeWidth={1.5} />
+            </motion.button>
           </div>
 
           {/* Preview area */}
