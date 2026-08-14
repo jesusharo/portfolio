@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import PageTransition from './PageTransition';
+import { useNetworkState } from '../context/NetworkStateContext';
 
 const FIELD_STYLE = {
   background: 'rgba(60,60,60,0.5)',
@@ -32,6 +33,12 @@ const LABEL_STYLE: React.CSSProperties = {
 export default function ContactView() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [sent, setSent] = useState(false);
+  const { setNetworkState } = useNetworkState();
+
+  useEffect(() => {
+    setNetworkState('conversation');
+    return () => setNetworkState('idle');
+  }, []);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
