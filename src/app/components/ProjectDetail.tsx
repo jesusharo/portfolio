@@ -20,6 +20,18 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
 
   useEffect(() => { setNetworkState('conversation'); }, []);
 
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        if (prevItem) navigate(`${detailPath}/${prevItem.id}`);
+      } else if (e.key === 'ArrowRight') {
+        if (nextItem) navigate(`${detailPath}/${nextItem.id}`);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [prevItem, nextItem, navigate, detailPath]);
+
   if (!item) {
     navigate(mode === 'projects' ? '/projects' : '/cases');
     return null;
