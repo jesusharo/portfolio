@@ -23,8 +23,7 @@ const LABEL_STYLE: React.CSSProperties = {
   fontFamily: "'Source Sans 3', sans-serif",
   fontSize: '0.8rem',
   fontWeight: 600,
-  letterSpacing: '0.12em',
-  textTransform: 'uppercase',
+  letterSpacing: '0.02em',
   color: 'rgba(255,255,255,0.45)',
   display: 'block',
   marginBottom: '8px',
@@ -62,8 +61,7 @@ export default function ContactView() {
               fontFamily: "'Source Sans 3', sans-serif",
               fontSize: '2rem',
               fontWeight: 700,
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
+              letterSpacing: '0.01em',
             }}
           >
             Contact
