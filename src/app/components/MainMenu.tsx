@@ -63,9 +63,7 @@ export default function MainMenu() {
 
             {/* Tooltip */}
             <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              <div className="bg-gray-900 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap shadow-lg">
-                <p className="font-semibold font-['Source_Sans_Pro',sans-serif]">{link.label}</p>
-              </div>
+              <p className="text-white/70 text-sm whitespace-nowrap font-['Source_Sans_3',sans-serif]">{link.label}</p>
             </div>
           </button>
         );
