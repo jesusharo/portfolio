@@ -52,13 +52,13 @@ export default function MainMenu() {
             onClick={() => navigate(link.path)}
             className={`group relative cursor-pointer flex items-center justify-center size-[52px] rounded-full transition-colors ${
               active
-                ? 'bg-[#d25d5f] text-white border border-[rgba(255,255,255,0.2)]'
-                : 'bg-[#686868] text-white hover:bg-[#7a7a7a] border border-[rgba(255,255,255,0.2)]'
+                ? 'bg-[#d25d5f] text-white'
+                : 'bg-[#686868] text-white hover:bg-[#7a7a7a]'
             }`}
           >
             <Icon
               className="size-[22px]"
-              strokeWidth={2}
+              strokeWidth={1}
             />
 
             {/* Tooltip */}
