@@ -1,4 +1,4 @@
-import { motion, useMotionValue, useReducedMotion, useTransform } from 'motion/react';
+import { motion, useAnimationFrame, useMotionValue, useReducedMotion, useTransform } from 'motion/react';
 import { useEffect, useMemo, useRef } from 'react';
 import svgPaths from '../../imports/svg-qeyvz6rlpu';
 
@@ -74,21 +74,31 @@ type FloatingNodeProps = {
 };
 
 function FloatingNode({ node, mouseX, mouseY, reduceMotion }: FloatingNodeProps) {
-  const drift = useMemo(() => {
-    const x = 7 + Math.random() * 22;
-    const y = 7 + Math.random() * 22;
+  const driftX = useMotionValue(0);
+  const driftY = useMotionValue(0);
+  const movement = useMemo(() => {
+    const amplitude = reduceMotion ? 4 : 14 + Math.random() * 22;
 
     return {
-      x: [0, x, -x * 0.65, x * 0.35, 0],
-      y: [0, -y * 0.6, y, -y * 0.3, 0],
-      transition: {
-        duration: 5 + Math.random() * 6,
-        delay: Math.random() * 3,
-        repeat: Infinity,
-        ease: 'easeInOut',
-      },
+      amplitudeX: amplitude * (0.8 + Math.random() * 0.4),
+      amplitudeY: amplitude * (0.8 + Math.random() * 0.4),
+      speedX: 0.00035 + Math.random() * 0.00022,
+      speedY: 0.0003 + Math.random() * 0.00024,
+      phaseX: Math.random() * Math.PI * 2,
+      phaseY: Math.random() * Math.PI * 2,
     };
   }, []);
+
+  useAnimationFrame((time) => {
+    driftX.set(
+      Math.sin(time * movement.speedX + movement.phaseX) * movement.amplitudeX
+      + Math.sin(time * movement.speedX * 0.47 + movement.phaseY) * movement.amplitudeX * 0.28,
+    );
+    driftY.set(
+      Math.cos(time * movement.speedY + movement.phaseY) * movement.amplitudeY
+      + Math.sin(time * movement.speedY * 0.53 + movement.phaseX) * movement.amplitudeY * 0.28,
+    );
+  });
 
   const mouseReactionX = useTransform([mouseX, mouseY], ([x, y]) => {
     const deltaX = node.x - x;
@@ -111,8 +121,7 @@ function FloatingNode({ node, mouseX, mouseY, reduceMotion }: FloatingNodeProps)
   return (
     <motion.div
       className={node.className}
-      animate={reduceMotion ? undefined : drift}
-      initial={false}
+      style={{ x: driftX, y: driftY }}
     >
       <motion.div
         className="absolute inset-0"
