@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router';
 import { motion } from 'motion/react';
 import { X, ArrowLeft, ArrowRight } from 'lucide-react';
 import PageTransition from './PageTransition';
-import NetworkVisualization from './NetworkVisualization';
 import { useNetworkState } from '../context/NetworkStateContext';
 import { projects } from '../data/projects';
 import { caseStudies } from '../data/caseStudies';
@@ -37,11 +36,6 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
     <PageTransition>
       {/* Solid background — same color everywhere, no cut */}
       <div className="absolute inset-0" style={{ background: item.accentColor }}>
-
-        {/* Network rendered inside the detail view, above the solid bg, below content */}
-        <div className="fixed inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 5 }}>
-          <NetworkVisualization />
-        </div>
 
         {/* Scrollable content layer */}
         <div className="absolute inset-0 overflow-y-auto" style={{ zIndex: 10 }}>

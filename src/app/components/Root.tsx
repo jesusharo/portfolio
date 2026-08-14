@@ -9,15 +9,15 @@ export default function Root() {
   return (
     <NetworkStateProvider>
       <div className="relative w-full h-full overflow-hidden bg-[#1c1c1c]">
-        {/* Persistent network — never unmounts, animates between states */}
-        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-          <NetworkVisualization />
-        </div>
-
-        {/* Pages fade in/out on top */}
+        {/* Pages fade in/out */}
         <AnimatePresence mode="sync">
           <Outlet key={location.pathname} />
         </AnimatePresence>
+
+        {/* Persistent network — above page content, below menu */}
+        <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+          <NetworkVisualization />
+        </div>
 
         {/* Persistent menu — no remount on navigation */}
         <MainMenu />
