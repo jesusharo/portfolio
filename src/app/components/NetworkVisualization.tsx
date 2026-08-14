@@ -143,8 +143,11 @@ export default function NetworkVisualization() {
   const containerRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion() ?? false;
   const mouseX = useMotionValue(CANVAS_WIDTH / 2);
-  // Stable random opacities per node — range 0.05 (very faint) → 0.22 (visible)
-  const nodeOpacities = useMemo(() => nodes.map(() => 0.05 + Math.random() * 0.17), []);
+  // Deterministic opacities seeded by node index — identical across all instances
+  const nodeOpacities = useMemo(() => nodes.map((n) => {
+    const t = Math.abs(Math.sin(n.index * 127.1 + 311.7));
+    return 0.05 + t * 0.17;
+  }), []);
   const mouseY = useMotionValue(CANVAS_HEIGHT / 2);
 
   useEffect(() => {
@@ -164,6 +167,7 @@ export default function NetworkVisualization() {
       className="absolute h-[961.324px] left-[50%] -translate-x-1/2 top-[50%] -translate-y-1/2 w-[965px] pointer-events-none origin-center"
       animate={{ scale }}
       transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+      style={{ filter: 'blur(30px)' }}
     >
       <div className="absolute inset-[0.57%_1.43%_1.05%_0.57%]">
         <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 946.709 946.663">

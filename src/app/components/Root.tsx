@@ -14,8 +14,8 @@ export default function Root() {
           <Outlet key={location.pathname} />
         </AnimatePresence>
 
-        {/* Persistent network — above page content, below menu */}
-        <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+        {/* Persistent network — behind all page content */}
+        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
           <NetworkVisualization />
         </div>
 
