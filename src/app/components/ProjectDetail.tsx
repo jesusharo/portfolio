@@ -18,7 +18,16 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   const currentIndex = items.findIndex(p => p.id === id);
   const item = items[currentIndex];
 
+  const listPath = mode === 'projects' ? '/projects' : '/cases';
+  const detailPath = listPath;
+  const prevItem = currentIndex > 0 ? items[currentIndex - 1] : null;
+  const nextItem = currentIndex < items.length - 1 ? items[currentIndex + 1] : null;
+
   useEffect(() => { setNetworkState('conversation'); }, []);
+
+  useEffect(() => {
+    if (!item) navigate(listPath);
+  }, [item, navigate, listPath]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -32,16 +41,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
     return () => window.removeEventListener('keydown', handleKey);
   }, [prevItem, nextItem, navigate, detailPath]);
 
-  if (!item) {
-    navigate(mode === 'projects' ? '/projects' : '/cases');
-    return null;
-  }
-
-  const listPath = mode === 'projects' ? '/projects' : '/cases';
-  const detailPath = listPath;
-
-  const prevItem = currentIndex > 0 ? items[currentIndex - 1] : null;
-  const nextItem = currentIndex < items.length - 1 ? items[currentIndex + 1] : null;
+  if (!item) return null;
   const paragraphs = (item.description ?? '').split('\n\n').filter(Boolean);
 
   return (
