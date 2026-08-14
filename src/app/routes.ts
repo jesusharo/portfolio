@@ -3,6 +3,8 @@ import Root from "./components/Root";
 import ChatView from "./components/ChatView";
 import ProjectsView from "./components/ProjectsView";
 import CaseStudiesView from "./components/CaseStudiesView";
+import ProjectDetailProjects from "./components/ProjectDetailProjects";
+import ProjectDetailCases from "./components/ProjectDetailCases";
 
 export const router = createBrowserRouter([
   {
@@ -12,7 +14,9 @@ export const router = createBrowserRouter([
       { index: true, Component: ChatView },
       { path: "chat/:conversationId", Component: ChatView },
       { path: "projects", Component: ProjectsView },
+      { path: "projects/:id", Component: ProjectDetailProjects },
       { path: "cases", Component: CaseStudiesView },
+      { path: "cases/:id", Component: ProjectDetailCases },
     ],
   },
 ]);
