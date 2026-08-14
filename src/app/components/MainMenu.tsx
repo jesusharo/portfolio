@@ -58,7 +58,7 @@ export default function MainMenu() {
           >
             <Icon
               className="size-[22px]"
-              strokeWidth={1}
+              strokeWidth={1.5}
             />
 
             {/* Tooltip */}
