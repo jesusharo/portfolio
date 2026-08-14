@@ -4,9 +4,9 @@ import { useEffect, useMemo, useRef } from 'react';
 type NetworkState = 'idle' | 'focused' | 'conversation';
 
 const SCALE_BY_STATE: Record<NetworkState, number> = {
-  idle: 1,
-  focused: 1.38,
-  conversation: 1.78,
+  idle: 0.68,
+  focused: 1.0,
+  conversation: 1.3,
 };
 import svgPaths from '../../imports/svg-qeyvz6rlpu';
 

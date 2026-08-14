@@ -12,10 +12,14 @@ export default function ChatView() {
   } = useChat();
 
   const [inputFocused, setInputFocused] = useState(false);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
   };
 
   useEffect(() => {
@@ -53,9 +57,13 @@ export default function ChatView() {
       <MainMenu />
 
       {/* Main Content */}
-      <main className="absolute inset-0 overflow-hidden z-10 flex flex-col items-center pointer-events-none">
+      <main className="absolute inset-0 z-10 flex flex-col items-center pointer-events-none">
         {hasMessages && (
-          <div className="w-full max-w-[800px] h-[calc(100vh-140px)] overflow-y-auto mt-[40px] px-8 pb-[80px] pointer-events-auto">
+          <div
+            ref={messagesContainerRef}
+            className="w-full max-w-[800px] flex-1 overflow-y-auto mt-[40px] px-8 pb-[140px] pointer-events-auto"
+            style={{ maxHeight: 'calc(100vh - 40px)' }}
+          >
             <div className="space-y-4">
               {activeConversation.messages.map((message) => (
                 <MessageBubble key={message.id} message={message} />
