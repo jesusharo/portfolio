@@ -128,7 +128,7 @@ function FloatingNode({ node, mouseX, mouseY, reduceMotion }: FloatingNodeProps)
     <motion.div className={node.className} style={{ x: driftX, y: driftY }}>
       <motion.div className="absolute inset-0" style={{ x: mouseReactionX, y: mouseReactionY }}>
         <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox={node.viewBox}>
-          <circle cx={node.radius} cy={node.radius} fill={node.color} r={node.radius} />
+          <circle cx={node.radius} cy={node.radius} fill={node.color} fillOpacity={0.5} r={node.radius} />
         </svg>
       </motion.div>
     </motion.div>
