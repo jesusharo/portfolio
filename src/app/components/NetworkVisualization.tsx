@@ -1,19 +1,18 @@
 import { motion, useAnimationFrame, useMotionValue, useReducedMotion, useTransform } from 'motion/react';
 import { useEffect, useMemo, useRef } from 'react';
-
-type NetworkState = 'idle' | 'focused' | 'conversation';
-
-const SCALE_BY_STATE: Record<NetworkState, number> = {
-  idle: 0.68,
-  focused: 1.0,
-  conversation: 1.3,
-};
 import svgPaths from '../../imports/svg-qeyvz6rlpu';
+import { useNetworkState } from '../context/NetworkStateContext';
 
 const CANVAS_WIDTH = 965;
 const CANVAS_HEIGHT = 961.324;
 const MOUSE_RADIUS = 250;
 const MOUSE_FORCE = 28;
+
+const SCALE_BY_STATE = {
+  idle: 0.68,
+  focused: 1.0,
+  conversation: 1.3,
+};
 
 type Node = {
   className: string;
@@ -86,7 +85,6 @@ function FloatingNode({ node, mouseX, mouseY, reduceMotion }: FloatingNodeProps)
   const driftY = useMotionValue(0);
   const movement = useMemo(() => {
     const amplitude = reduceMotion ? 4 : 14 + Math.random() * 22;
-
     return {
       amplitudeX: amplitude * (0.8 + Math.random() * 0.4),
       amplitudeY: amplitude * (0.8 + Math.random() * 0.4),
@@ -127,48 +125,32 @@ function FloatingNode({ node, mouseX, mouseY, reduceMotion }: FloatingNodeProps)
   });
 
   return (
-    <motion.div
-      className={node.className}
-      style={{ x: driftX, y: driftY }}
-    >
-      <motion.div
-        className="absolute inset-0"
-        style={{ x: mouseReactionX, y: mouseReactionY }}
-      >
+    <motion.div className={node.className} style={{ x: driftX, y: driftY }}>
+      <motion.div className="absolute inset-0" style={{ x: mouseReactionX, y: mouseReactionY }}>
         <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox={node.viewBox}>
-          <circle
-            cx={node.radius}
-            cy={node.radius}
-            fill={node.color}
-            r={node.radius}
-          />
+          <circle cx={node.radius} cy={node.radius} fill={node.color} r={node.radius} />
         </svg>
       </motion.div>
     </motion.div>
   );
 }
 
-type NetworkVisualizationProps = {
-  networkState?: NetworkState;
-};
+export default function NetworkVisualization() {
+  const { networkState } = useNetworkState();
+  const scale = SCALE_BY_STATE[networkState];
 
-export default function NetworkVisualization({ networkState = 'idle' }: NetworkVisualizationProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion() ?? false;
   const mouseX = useMotionValue(CANVAS_WIDTH / 2);
   const mouseY = useMotionValue(CANVAS_HEIGHT / 2);
 
-  const scale = SCALE_BY_STATE[networkState];
-
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
       const bounds = containerRef.current?.getBoundingClientRect();
       if (!bounds) return;
-
       mouseX.set(((event.clientX - bounds.left) / bounds.width) * CANVAS_WIDTH);
       mouseY.set(((event.clientY - bounds.top) / bounds.height) * CANVAS_HEIGHT);
     };
-
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [mouseX, mouseY]);
@@ -176,8 +158,7 @@ export default function NetworkVisualization({ networkState = 'idle' }: NetworkV
   return (
     <motion.div
       ref={containerRef}
-      className="absolute h-[961.324px] left-[50%] -translate-x-1/2 top-[50%] -translate-y-1/2 w-[965px] opacity-100 pointer-events-none origin-center"
-      data-name="animation"
+      className="absolute h-[961.324px] left-[50%] -translate-x-1/2 top-[50%] -translate-y-1/2 w-[965px] pointer-events-none origin-center"
       animate={{ scale }}
       transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
@@ -186,15 +167,8 @@ export default function NetworkVisualization({ networkState = 'idle' }: NetworkV
           <path d={svgPaths.p11e15a00} stroke="#5F5F5F" strokeOpacity="0.5" strokeWidth="0.5" />
         </svg>
       </div>
-
       {nodes.map((node) => (
-        <FloatingNode
-          key={node.index}
-          node={node}
-          mouseX={mouseX}
-          mouseY={mouseY}
-          reduceMotion={reduceMotion}
-        />
+        <FloatingNode key={node.index} node={node} mouseX={mouseX} mouseY={mouseY} reduceMotion={reduceMotion} />
       ))}
     </motion.div>
   );
