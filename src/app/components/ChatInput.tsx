@@ -5,6 +5,7 @@ interface ChatInputProps {
   onSendMessage: (message: string) => void;
   disabled?: boolean;
   centered?: boolean;
+  onFocusChange?: (focused: boolean) => void;
 }
 
 const CATEGORIZED_SUGGESTIONS = [
@@ -42,7 +43,7 @@ const CATEGORIZED_SUGGESTIONS = [
   }
 ];
 
-export default function ChatInput({ onSendMessage, disabled, centered = false }: ChatInputProps) {
+export default function ChatInput({ onSendMessage, disabled, centered = false, onFocusChange }: ChatInputProps) {
   const [input, setInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -104,7 +105,8 @@ export default function ChatInput({ onSendMessage, disabled, centered = false }:
               setInput(e.target.value);
               setShowSuggestions(true);
             }}
-            onFocus={() => setShowSuggestions(true)}
+            onFocus={() => { setShowSuggestions(true); onFocusChange?.(true); }}
+            onBlur={() => onFocusChange?.(false)}
             placeholder="Do you want to know anything in particular?"
             disabled={disabled}
             className="font-['Source_Sans_3',sans-serif] font-normal leading-[1.4] relative flex-1 text-[16px] text-white bg-transparent outline-none placeholder:text-[rgba(255,255,255,0.3)] disabled:opacity-50"

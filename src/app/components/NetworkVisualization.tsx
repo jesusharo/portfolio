@@ -1,5 +1,13 @@
 import { motion, useAnimationFrame, useMotionValue, useReducedMotion, useTransform } from 'motion/react';
 import { useEffect, useMemo, useRef } from 'react';
+
+type NetworkState = 'idle' | 'focused' | 'conversation';
+
+const SCALE_BY_STATE: Record<NetworkState, number> = {
+  idle: 1,
+  focused: 1.38,
+  conversation: 1.78,
+};
 import svgPaths from '../../imports/svg-qeyvz6rlpu';
 
 const CANVAS_WIDTH = 965;
@@ -140,11 +148,17 @@ function FloatingNode({ node, mouseX, mouseY, reduceMotion }: FloatingNodeProps)
   );
 }
 
-export default function NetworkVisualization() {
+type NetworkVisualizationProps = {
+  networkState?: NetworkState;
+};
+
+export default function NetworkVisualization({ networkState = 'idle' }: NetworkVisualizationProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion() ?? false;
   const mouseX = useMotionValue(CANVAS_WIDTH / 2);
   const mouseY = useMotionValue(CANVAS_HEIGHT / 2);
+
+  const scale = SCALE_BY_STATE[networkState];
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
@@ -160,10 +174,12 @@ export default function NetworkVisualization() {
   }, [mouseX, mouseY]);
 
   return (
-    <div
+    <motion.div
       ref={containerRef}
-      className="absolute h-[961.324px] left-[50%] -translate-x-1/2 top-[50%] -translate-y-1/2 w-[965px] opacity-100 pointer-events-none"
+      className="absolute h-[961.324px] left-[50%] -translate-x-1/2 top-[50%] -translate-y-1/2 w-[965px] opacity-100 pointer-events-none origin-center"
       data-name="animation"
+      animate={{ scale }}
+      transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       <div className="absolute inset-[0.57%_1.43%_1.05%_0.57%]">
         <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 946.709 946.663">
@@ -180,6 +196,6 @@ export default function NetworkVisualization() {
           reduceMotion={reduceMotion}
         />
       ))}
-    </div>
+    </motion.div>
   );
 }

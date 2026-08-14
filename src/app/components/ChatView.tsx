@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useChat } from '../hooks/useChat';
 import MessageBubble from './MessageBubble';
 import ChatInput from './ChatInput';
@@ -11,6 +11,7 @@ export default function ChatView() {
     sendMessage,
   } = useChat();
 
+  const [inputFocused, setInputFocused] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -21,7 +22,14 @@ export default function ChatView() {
     scrollToBottom();
   }, [activeConversation?.messages]);
 
-  const hasMessages = activeConversation && activeConversation.messages.length > 0;
+  const hasMessages = !!(activeConversation && activeConversation.messages.length > 0);
+
+  // Derive network scale state: idle → focused → conversation
+  const networkState: 'idle' | 'focused' | 'conversation' = hasMessages
+    ? 'conversation'
+    : inputFocused
+      ? 'focused'
+      : 'idle';
 
   return (
     <div className="bg-[#1c1c1c] relative size-full overflow-hidden">
@@ -39,7 +47,7 @@ export default function ChatView() {
 
       {/* Persistent Network Visualization Background */}
       <div className="absolute inset-0 z-0 flex flex-col items-center justify-center pointer-events-none">
-        <NetworkVisualization />
+        <NetworkVisualization networkState={networkState} />
       </div>
       
       <MainMenu />
@@ -58,7 +66,11 @@ export default function ChatView() {
         )}
       </main>
 
-      <ChatInput onSendMessage={sendMessage} centered={!hasMessages} />
+      <ChatInput
+        onSendMessage={sendMessage}
+        centered={!hasMessages}
+        onFocusChange={setInputFocused}
+      />
     </div>
   );
 }
