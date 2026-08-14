@@ -75,12 +75,13 @@ const nodes: Node[] = [
 
 type FloatingNodeProps = {
   node: Node;
+  fillOpacity: number;
   mouseX: ReturnType<typeof useMotionValue<number>>;
   mouseY: ReturnType<typeof useMotionValue<number>>;
   reduceMotion: boolean;
 };
 
-function FloatingNode({ node, mouseX, mouseY, reduceMotion }: FloatingNodeProps) {
+function FloatingNode({ node, fillOpacity, mouseX, mouseY, reduceMotion }: FloatingNodeProps) {
   const driftX = useMotionValue(0);
   const driftY = useMotionValue(0);
   const movement = useMemo(() => {
@@ -128,7 +129,7 @@ function FloatingNode({ node, mouseX, mouseY, reduceMotion }: FloatingNodeProps)
     <motion.div className={node.className} style={{ x: driftX, y: driftY }}>
       <motion.div className="absolute inset-0" style={{ x: mouseReactionX, y: mouseReactionY }}>
         <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox={node.viewBox}>
-          <circle cx={node.radius} cy={node.radius} fill="white" fillOpacity={0.12} r={node.radius} />
+          <circle cx={node.radius} cy={node.radius} fill="white" fillOpacity={fillOpacity} r={node.radius} />
         </svg>
       </motion.div>
     </motion.div>
@@ -142,6 +143,8 @@ export default function NetworkVisualization() {
   const containerRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion() ?? false;
   const mouseX = useMotionValue(CANVAS_WIDTH / 2);
+  // Stable random opacities per node — range 0.05 (very faint) → 0.22 (visible)
+  const nodeOpacities = useMemo(() => nodes.map(() => 0.05 + Math.random() * 0.17), []);
   const mouseY = useMotionValue(CANVAS_HEIGHT / 2);
 
   useEffect(() => {
@@ -168,7 +171,7 @@ export default function NetworkVisualization() {
         </svg>
       </div>
       {nodes.map((node) => (
-        <FloatingNode key={node.index} node={node} mouseX={mouseX} mouseY={mouseY} reduceMotion={reduceMotion} />
+        <FloatingNode key={node.index} node={node} fillOpacity={nodeOpacities[node.index]} mouseX={mouseX} mouseY={mouseY} reduceMotion={reduceMotion} />
       ))}
     </motion.div>
   );
