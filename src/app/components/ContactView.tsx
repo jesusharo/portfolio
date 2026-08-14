@@ -51,7 +51,8 @@ export default function ContactView() {
 
   return (
     <PageTransition>
-      <div className="absolute inset-0 flex items-center justify-center px-8">
+      <div className="absolute inset-0 overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center px-8 py-16">
         <div className="w-full max-w-[480px]">
 
           {/* Title */}
@@ -123,7 +124,7 @@ export default function ContactView() {
                   placeholder="Your Message..."
                   value={form.message}
                   onChange={handleChange}
-                  style={{ ...FIELD_STYLE, resize: 'vertical' }}
+                  style={{ ...FIELD_STYLE, resize: 'none' }}
                   className="placeholder:text-[rgba(255,255,255,0.25)]"
                 />
               </div>
@@ -146,6 +147,7 @@ export default function ContactView() {
 
             </form>
           )}
+        </div>
         </div>
       </div>
     </PageTransition>
