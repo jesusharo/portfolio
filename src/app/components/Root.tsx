@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useLocation, Outlet } from 'react-router';
 import { AnimatePresence, motion } from 'motion/react';
 import NetworkVisualization from './NetworkVisualization';
@@ -6,7 +7,13 @@ import { NetworkStateProvider, useNetworkState } from '../context/NetworkStateCo
 
 function RootInner() {
   const location = useLocation();
-  const { pageBackground } = useNetworkState();
+  const { pageBackground, setPageBackground } = useNetworkState();
+
+  // Clear background when leaving detail pages (not when switching between them)
+  useEffect(() => {
+    const isDetailRoute = /^\/(projects|cases)\/.+/.test(location.pathname);
+    if (!isDetailRoute) setPageBackground(null);
+  }, [location.pathname]);
 
   return (
     <div className="relative w-full h-full overflow-hidden bg-[#1c1c1c]">

@@ -27,10 +27,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   useEffect(() => {
     setNetworkState('conversation');
     if (item) setPageBackground(item.accentColor);
-    return () => {
-      setNetworkState('idle');
-      setPageBackground(null);
-    };
+    return () => { setNetworkState('idle'); };
   }, [item?.accentColor]);
 
   useEffect(() => {
