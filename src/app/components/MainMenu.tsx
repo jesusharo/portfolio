@@ -41,33 +41,52 @@ export default function MainMenu() {
   };
 
   return (
-    <div className="absolute flex flex-col gap-[16px] items-center left-[24px] top-1/2 -translate-y-1/2 w-[64px] z-30">
-      {links.map((link) => {
-        const Icon = link.icon;
-        const active = isActive(link.path);
+    <>
+      {/* Mobile: bottom horizontal bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 flex flex-row justify-around items-center px-4 pt-3 pb-6 z-30 bg-[rgba(0,0,0,0.2)] backdrop-blur-md">
+        {links.map((link) => {
+          const Icon = link.icon;
+          const active = isActive(link.path);
+          return (
+            <button
+              key={link.id}
+              onClick={() => navigate(link.path)}
+              className={`cursor-pointer flex items-center justify-center rounded-full transition-all duration-200 ${
+                active
+                  ? 'size-[52px] bg-[#d25d5f] text-white'
+                  : 'size-[44px] bg-[rgba(255,255,255,0.15)] text-white'
+              }`}
+            >
+              <Icon className="size-[22px]" strokeWidth={1.5} />
+            </button>
+          );
+        })}
+      </div>
 
-        return (
-          <button
-            key={link.id}
-            onClick={() => navigate(link.path)}
-            className={`group relative cursor-pointer flex items-center justify-center rounded-full transition-all duration-200 ${
-              active
-                ? 'size-[52px] bg-[#d25d5f] text-white'
-                : 'size-[44px] bg-[rgba(255,255,255,0.15)] text-white hover:bg-[rgba(255,255,255,0.25)]'
-            }`}
-          >
-            <Icon
-              className="size-[22px]"
-              strokeWidth={1.5}
-            />
-
-            {/* Tooltip */}
-            <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              <p className="text-white/70 text-sm whitespace-nowrap font-['Source_Sans_3',sans-serif]">{link.label}</p>
-            </div>
-          </button>
-        );
-      })}
-    </div>
+      {/* Desktop: left vertical bar */}
+      <div className="hidden md:flex absolute flex-col gap-[16px] items-center left-[24px] top-1/2 -translate-y-1/2 w-[64px] z-30">
+        {links.map((link) => {
+          const Icon = link.icon;
+          const active = isActive(link.path);
+          return (
+            <button
+              key={link.id}
+              onClick={() => navigate(link.path)}
+              className={`group relative cursor-pointer flex items-center justify-center rounded-full transition-all duration-200 ${
+                active
+                  ? 'size-[52px] bg-[#d25d5f] text-white'
+                  : 'size-[44px] bg-[rgba(255,255,255,0.15)] text-white hover:bg-[rgba(255,255,255,0.25)]'
+              }`}
+            >
+              <Icon className="size-[22px]" strokeWidth={1.5} />
+              {/* Tooltip */}
+              <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                <p className="text-white/70 text-sm whitespace-nowrap font-['Source_Sans_3',sans-serif]">{link.label}</p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </>
   );
 }
