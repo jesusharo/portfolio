@@ -53,7 +53,7 @@ export default function MainMenu() {
             className={`group relative cursor-pointer flex items-center justify-center rounded-full transition-all duration-200 ${
               active
                 ? 'size-[52px] bg-[#d25d5f] text-white'
-                : 'size-[44px] bg-[rgba(255,255,255,0.6)] text-white hover:bg-[rgba(255,255,255,0.75)]'
+                : 'size-[44px] bg-[rgba(255,255,255,0.15)] text-white hover:bg-[rgba(255,255,255,0.25)]'
             }`}
           >
             <Icon
