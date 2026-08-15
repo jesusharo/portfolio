@@ -35,6 +35,12 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   }, [item, navigate, listPath]);
 
   useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') navigate(listPath); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [navigate, listPath]);
+
+  useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') {
         if (prevItem) navigate(`${detailPath}/${prevItem.id}`);
