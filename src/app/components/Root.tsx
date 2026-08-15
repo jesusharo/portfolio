@@ -30,7 +30,7 @@ function RootInner() {
       </div>
 
       {/* Pages fade in/out — transparent, background handled above */}
-      <AnimatePresence mode="sync">
+      <AnimatePresence mode="wait">
         <Outlet key={location.pathname} />
       </AnimatePresence>
 
