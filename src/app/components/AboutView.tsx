@@ -239,7 +239,7 @@ export default function AboutView() {
                   {job.roles.map((role) => (
                     <div key={role.title} style={{ marginBottom: '16px', paddingLeft: '12px', borderLeft: '1px solid rgba(255,255,255,0.08)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px', flexWrap: 'wrap', gap: '4px' }}>
-                        <span style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '0.9rem', fontWeight: 600, color: 'rgba(255,255,255,0.75)' }}>
+                        <span style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '0.9rem', fontWeight: 600, color: '#d25d5f' }}>
                           {role.title}
                         </span>
                         <span style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '0.78rem', color: 'rgba(255,255,255,0.3)' }}>
