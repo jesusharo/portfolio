@@ -87,13 +87,13 @@ export default function ChatInput({ onSendMessage, disabled, centered = false, o
 
   return (
     <div 
-      className={`-translate-x-1/2 absolute left-1/2 z-20 flex flex-col items-center w-full max-w-[600px] transition-all duration-500 ease-in-out ${
-        centered ? 'top-1/2 -translate-y-1/2' : 'bottom-[80px]'
+      className={`-translate-x-1/2 absolute left-1/2 z-20 flex flex-col items-center w-full max-w-[600px] px-4 md:px-0 transition-all duration-500 ease-in-out ${
+        centered ? 'top-1/2 -translate-y-1/2' : 'bottom-[160px] md:bottom-[80px]'
       }`}
     >
       
       <form onSubmit={handleSubmit} className="w-full relative z-30">
-        <div className="bg-[rgba(60,60,60,0.5)] backdrop-blur-xl content-stretch flex gap-[24px] items-center pl-[24px] pr-[8px] rounded-[32px] w-[480px] mx-auto pt-[8px] pb-[8px]" style={{ boxShadow: '0px 4px 36px rgba(0,0,0,0.05), inset 0px 1px 0px rgba(255,255,255,0.10), inset 0px -1px 0px rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="bg-[rgba(60,60,60,0.5)] backdrop-blur-xl content-stretch flex gap-[24px] items-center pl-[24px] pr-[8px] rounded-[32px] w-full mx-auto pt-[8px] pb-[8px]" style={{ boxShadow: '0px 4px 36px rgba(0,0,0,0.05), inset 0px 1px 0px rgba(255,255,255,0.10), inset 0px -1px 0px rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.08)' }}>
           <input
             ref={inputRef}
             type="text"
@@ -126,7 +126,7 @@ export default function ChatInput({ onSendMessage, disabled, centered = false, o
       {showSuggestions && filteredSuggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className={`absolute left-1/2 -translate-x-1/2 w-[480px] flex flex-col items-start gap-[6px] z-20 ${
+          className={`absolute left-1/2 -translate-x-1/2 w-full flex flex-col items-start gap-[6px] z-20 ${
             centered
               ? 'top-[calc(100%+8px)]'
               : 'bottom-[calc(100%+8px)] flex-col-reverse'
