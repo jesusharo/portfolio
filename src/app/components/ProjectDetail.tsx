@@ -55,9 +55,11 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
       <div className="absolute inset-0 overflow-y-auto">
 
         {/* Sticky header */}
-        <div
+        <motion.div
           className="sticky top-0 flex items-center px-6 py-5"
-          style={{ background: item.accentColor, zIndex: 20 }}
+          animate={{ backgroundColor: item.accentColor }}
+          transition={{ duration: 0.4, ease: 'easeInOut' }}
+          style={{ zIndex: 20 }}
         >
           <div className="w-[36px] shrink-0" />
 
@@ -93,7 +95,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           >
             <X size={16} strokeWidth={1.5} />
           </motion.button>
-        </div>
+        </motion.div>
 
         {/* Preview area */}
         <div className="px-8 pb-4">
