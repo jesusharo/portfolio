@@ -33,14 +33,6 @@ export default function LeaveAgentModal({ open, onConfirm, onCancel }: Props) {
               className="pointer-events-auto w-full max-w-[340px] rounded-[20px] bg-[rgba(30,30,30,0.95)] border border-white/10 p-6 flex flex-col gap-5"
               style={{ boxShadow: '0 24px 60px rgba(0,0,0,0.5)' }}
             >
-              {/* Icon */}
-              <div className="size-[44px] rounded-full bg-[rgba(210,93,95,0.15)] border border-[rgba(210,93,95,0.3)] flex items-center justify-center">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
-                    stroke="#d25d5f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-
               {/* Text */}
               <div className="flex flex-col gap-1">
                 <h2 className="text-white text-[1rem] font-semibold font-['Source_Sans_3',sans-serif]">
