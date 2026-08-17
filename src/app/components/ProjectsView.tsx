@@ -25,6 +25,13 @@ export default function ProjectsView() {
   return (
     <PageTransition>
       <div className="absolute inset-0 flex items-center justify-center p-8 md:pl-24">
+        <div className="flex flex-col items-center gap-5">
+        <h2
+          className="text-white/50 text-[0.72rem] font-semibold tracking-[0.22em] uppercase select-none"
+          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+        >
+          UI Projects
+        </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full max-w-[320px]">
           {projects.map((project, i) => (
             <motion.button
@@ -49,6 +56,7 @@ export default function ProjectsView() {
               )}
             </motion.button>
           ))}
+        </div>
         </div>
       </div>
     </PageTransition>
