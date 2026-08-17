@@ -23,7 +23,8 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev"
+args = "fuser -k 5000/tcp 2>/dev/null; sleep 0.5 && concurrently \"node server/index.mjs\" \"vite --port 5000 --strictPort\" --names \"api,vite\" --prefix-colors \"cyan,magenta\""
+waitForPort = 5000
 
 [[ports]]
 localPort = 3001
