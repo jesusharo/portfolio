@@ -1,22 +1,29 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, ArrowRight, Plus, AlignLeft, Image as ImageIcon, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Plus, AlignLeft, Image as ImageIcon, X, LayoutGrid, GalleryHorizontal } from 'lucide-react';
 import PageTransition from './PageTransition';
 import { useNetworkState } from '../context/NetworkStateContext';
 import { getProjects, getEditorProjects, updateProject } from '../lib/api';
 import RichTextEditor from './editor/RichTextEditor';
 import ImageDropZone from './editor/ImageDropZone';
+import ImageGridBlock, { type GridImageItem } from './editor/ImageGridBlock';
+import CarouselBlock, { type CarouselImageItem } from './editor/CarouselBlock';
 
 type Mode = 'projects' | 'cases';
 type SaveStatus = 'idle' | 'unsaved' | 'saving' | 'saved' | 'error';
 
 interface ContentBlock {
   id: string;
-  type: 'richtext' | 'image';
+  type: 'richtext' | 'image' | 'imagegrid' | 'carousel';
+  // richtext
   html?: string;
+  // image (single)
   url?: string;
   caption?: string;
+  // imagegrid & carousel
+  images?: GridImageItem[];
+  columns?: 2 | 3;
 }
 
 interface Project {
@@ -37,7 +44,16 @@ function parseBlocks(raw: ContentBlock[] | string | undefined): ContentBlock[] {
 
 // ─── Add-block button ────────────────────────────────────────────────────────
 
-function AddBlockButton({ onAdd }: { onAdd: (type: 'richtext' | 'image') => void }) {
+type BlockType = ContentBlock['type'];
+
+const BLOCK_OPTIONS: { type: BlockType; label: string; Icon: React.ElementType }[] = [
+  { type: 'richtext',   label: 'Text',       Icon: AlignLeft },
+  { type: 'image',      label: 'Image',      Icon: ImageIcon },
+  { type: 'imagegrid',  label: 'Grid',       Icon: LayoutGrid },
+  { type: 'carousel',   label: 'Carousel',   Icon: GalleryHorizontal },
+];
+
+function AddBlockButton({ onAdd }: { onAdd: (type: BlockType) => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -52,7 +68,7 @@ function AddBlockButton({ onAdd }: { onAdd: (type: 'richtext' | 'image') => void
         <Plus size={14} strokeWidth={2} />
       </button>
 
-      {/* Dropdown */}
+      {/* Dropdown — 2×2 grid of block types */}
       <AnimatePresence>
         {menuOpen && (
           <>
@@ -62,22 +78,18 @@ function AddBlockButton({ onAdd }: { onAdd: (type: 'richtext' | 'image') => void
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -4 }}
               transition={{ duration: 0.12 }}
-              className="absolute top-full left-1/2 -translate-x-1/2 mt-1 z-30 flex gap-1 bg-[rgba(14,14,14,0.98)] border border-white/15 rounded-xl p-1.5 shadow-2xl"
+              className="absolute top-full left-1/2 -translate-x-1/2 mt-1 z-30 grid grid-cols-2 gap-1 bg-[rgba(14,14,14,0.98)] border border-white/15 rounded-xl p-1.5 shadow-2xl"
             >
-              <button
-                onClick={() => { onAdd('richtext'); setMenuOpen(false); }}
-                className="flex items-center gap-2 px-3 py-2 rounded-[8px] hover:bg-white/10 text-white/60 hover:text-white text-[0.8rem] transition-colors whitespace-nowrap"
-                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
-              >
-                <AlignLeft size={13} strokeWidth={1.5} /> Text block
-              </button>
-              <button
-                onClick={() => { onAdd('image'); setMenuOpen(false); }}
-                className="flex items-center gap-2 px-3 py-2 rounded-[8px] hover:bg-white/10 text-white/60 hover:text-white text-[0.8rem] transition-colors whitespace-nowrap"
-                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
-              >
-                <ImageIcon size={13} strokeWidth={1.5} /> Image block
-              </button>
+              {BLOCK_OPTIONS.map(({ type, label, Icon }) => (
+                <button
+                  key={type}
+                  onClick={() => { onAdd(type); setMenuOpen(false); }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-[8px] hover:bg-white/10 text-white/60 hover:text-white text-[0.8rem] transition-colors whitespace-nowrap"
+                  style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                >
+                  <Icon size={13} strokeWidth={1.5} /> {label}
+                </button>
+              ))}
             </motion.div>
           </>
         )}
@@ -171,9 +183,11 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
     }
   }
 
-  function insertBlock(type: 'richtext' | 'image', atIndex: number) {
+  function insertBlock(type: BlockType, atIndex: number) {
     const blockId = Date.now().toString(36) + Math.random().toString(36).slice(2);
-    const newBlock: ContentBlock = { id: blockId, type };
+    let newBlock: ContentBlock = { id: blockId, type };
+    if (type === 'imagegrid') newBlock = { ...newBlock, images: [], columns: 2 };
+    if (type === 'carousel')  newBlock = { ...newBlock, images: [] };
     const next = [
       ...contentBlocks.slice(0, atIndex),
       newBlock,
@@ -344,18 +358,34 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
 
                   {/* Block content */}
                   <div className="mb-1">
-                    {block.type === 'richtext' ? (
+                    {block.type === 'richtext' && (
                       <RichTextEditor
                         content={block.html || ''}
                         onChange={html => updateBlock(block.id, { html })}
                         placeholder="Write something…"
                       />
-                    ) : (
+                    )}
+                    {block.type === 'image' && (
                       <ImageDropZone
                         value={block.url || ''}
                         onChange={url => updateBlock(block.id, { url })}
                         caption={block.caption}
                         onCaptionChange={caption => updateBlock(block.id, { caption })}
+                      />
+                    )}
+                    {block.type === 'imagegrid' && (
+                      <ImageGridBlock
+                        images={block.images || []}
+                        columns={block.columns ?? 2}
+                        editorMode
+                        onChange={(images, columns) => updateBlock(block.id, { images, columns })}
+                      />
+                    )}
+                    {block.type === 'carousel' && (
+                      <CarouselBlock
+                        images={(block.images || []) as CarouselImageItem[]}
+                        editorMode
+                        onChange={images => updateBlock(block.id, { images })}
                       />
                     )}
                   </div>
@@ -389,6 +419,17 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
                         </figcaption>
                       )}
                     </figure>
+                  )}
+                  {block.type === 'imagegrid' && (block.images?.length ?? 0) > 0 && (
+                    <ImageGridBlock
+                      images={block.images || []}
+                      columns={block.columns ?? 2}
+                    />
+                  )}
+                  {block.type === 'carousel' && (block.images?.length ?? 0) > 0 && (
+                    <CarouselBlock
+                      images={(block.images || []) as CarouselImageItem[]}
+                    />
                   )}
                 </div>
               ))}
