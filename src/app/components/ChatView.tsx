@@ -76,11 +76,11 @@ export default function ChatView() {
           )}
         </main>
 
-        {/* AI Agent title — shown when no messages */}
+        {/* AI Agent title — shown when no messages, sits just above the centered input */}
         {!hasMessages && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none" style={{ paddingBottom: '80px' }}>
+          <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none" style={{ top: 'calc(50% - 52px)' }}>
             <h2
-              className="text-white/40 text-[0.72rem] font-semibold tracking-[0.22em] uppercase select-none"
+              className="text-white/40 text-[0.72rem] font-semibold tracking-[0.22em] uppercase select-none text-center"
               style={{ fontFamily: "'Source Sans 3', sans-serif" }}
             >
               AI Agent
