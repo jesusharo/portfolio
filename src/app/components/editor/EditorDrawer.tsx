@@ -7,6 +7,7 @@ import ProjectList from './ProjectList';
 import ProjectEditor from './ProjectEditor';
 import AboutEditor from './AboutEditor';
 import { getEditorProjects } from '../../lib/api';
+import { useNetworkState } from '../../context/NetworkStateContext';
 
 type Tab = 'ui' | 'cases' | 'about';
 type View = 'list' | 'detail';
@@ -33,6 +34,7 @@ export default function EditorDrawer({ open, onClose }: Props) {
   const [uiProjects, setUiProjects] = useState<Project[]>([]);
   const [caseProjects, setCaseProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
+  const { bumpDataVersion } = useNetworkState();
 
   // Verify token when drawer opens
   useEffect(() => {
@@ -84,11 +86,13 @@ export default function EditorDrawer({ open, onClose }: Props) {
     if (tab === 'ui') setUiProjects(list => list.map(p => p.id === updated.id ? updated : p));
     else setCaseProjects(list => list.map(p => p.id === updated.id ? updated : p));
     setSelectedProject(updated);
+    bumpDataVersion();
   }
 
   function handleDeleted() {
     if (tab === 'ui') setUiProjects(list => list.filter(p => p.id !== selectedProject?.id));
     else setCaseProjects(list => list.filter(p => p.id !== selectedProject?.id));
+    bumpDataVersion();
     handleBack();
   }
 
