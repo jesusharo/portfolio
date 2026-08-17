@@ -23,7 +23,7 @@ function UserAvatar() {
 
 function SparkleIcon() {
   return (
-    <div className="size-[28px] rounded-[8px] bg-[rgba(50,50,50,0.8)] flex items-center justify-center shrink-0">
+    <div className="size-[32px] rounded-full bg-[rgba(50,50,50,0.8)] flex items-center justify-center shrink-0">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
         <path
           d="M12 2L13.09 8.26L19 6L14.74 10.91L21 12L14.74 13.09L19 18L13.09 15.74L12 22L10.91 15.74L5 18L9.26 13.09L3 12L9.26 10.91L5 6L10.91 8.26L12 2Z"
