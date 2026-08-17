@@ -97,7 +97,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           <motion.button
             whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
             onClick={() => navigate(listPath)}
-            className="size-[36px] shrink-0 flex items-center justify-center rounded-full bg-[rgba(0,0,0,0.25)] text-white/60 hover:text-white hover:bg-[rgba(0,0,0,0.4)] transition-colors"
+            className="size-[36px] shrink-0 flex items-center justify-center rounded-full bg-[rgba(255,255,255,0.2)] text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.35)] transition-colors"
           >
             <X size={16} strokeWidth={1.5} />
           </motion.button>
