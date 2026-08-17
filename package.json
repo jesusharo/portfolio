@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "concurrently \"node server/index.mjs\" \"vite --port 5000 --strictPort\" --names \"api,vite\" --prefix-colors \"cyan,magenta\"",
+    "dev": "fuser -k 5000/tcp 2>/dev/null; sleep 0.5 && concurrently \"node server/index.mjs\" \"vite --port 5000 --strictPort\" --names \"api,vite\" --prefix-colors \"cyan,magenta\"",
     "dev:vite": "vite",
     "dev:api": "node server/index.mjs"
   },
