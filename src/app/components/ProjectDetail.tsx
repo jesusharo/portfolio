@@ -73,7 +73,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
             <motion.button
               whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
               onClick={() => prevItem ? navigate(`${detailPath}/${prevItem.id}`) : navigate(listPath)}
-              className="size-[36px] flex items-center justify-center rounded-full bg-[rgba(255,255,255,0.2)] text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.35)] transition-colors"
+              className="size-[36px] flex items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
             >
               <ArrowLeft size={20} strokeWidth={1.5} />
             </motion.button>
@@ -88,7 +88,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
             <motion.button
               whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
               onClick={() => nextItem ? navigate(`${detailPath}/${nextItem.id}`) : navigate(listPath)}
-              className="size-[36px] flex items-center justify-center rounded-full bg-[rgba(255,255,255,0.2)] text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.35)] transition-colors"
+              className="size-[36px] flex items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
             >
               <ArrowRight size={20} strokeWidth={1.5} />
             </motion.button>
@@ -97,7 +97,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           <motion.button
             whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
             onClick={() => navigate(listPath)}
-            className="size-[36px] shrink-0 flex items-center justify-center rounded-full bg-[rgba(255,255,255,0.2)] text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.35)] transition-colors"
+            className="size-[36px] shrink-0 flex items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
           >
             <X size={16} strokeWidth={1.5} />
           </motion.button>
