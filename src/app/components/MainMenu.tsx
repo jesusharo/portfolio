@@ -30,13 +30,13 @@ export default function MainMenu() {
   const links = [
     { id: 'projects', label: 'UI projects',    icon: PenTool,     path: '/projects' },
     { id: 'cases',    label: 'Case studies',   icon: BookMarked,  path: '/cases' },
-    { id: 'agent',    label: 'Agent',          icon: Sparkles,    path: '/' },
+    { id: 'agent',    label: 'Agent',          icon: Sparkles,    path: '/agent' },
     { id: 'about',    label: 'About me',       icon: AboutMeIcon, path: '/about' },
     { id: 'contact',  label: 'Contact',        icon: Mail,        path: '/contact' },
   ];
 
   const isActive = (path: string) => {
-    if (path === '/') return location.pathname === '/' || location.pathname.startsWith('/chat');
+    if (path === '/agent') return location.pathname === '/agent' || location.pathname.startsWith('/chat');
     return location.pathname === path;
   };
 
