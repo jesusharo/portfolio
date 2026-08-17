@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, Outlet } from 'react-router';
 import { AnimatePresence, motion } from 'motion/react';
+import { SquarePen } from 'lucide-react';
 import NetworkVisualization from './NetworkVisualization';
 import MainMenu from './MainMenu';
 import EditorDrawer from './editor/EditorDrawer';
@@ -11,7 +12,6 @@ function RootInner() {
   const { pageBackground, setPageBackground } = useNetworkState();
   const [editorOpen, setEditorOpen] = useState(false);
 
-  // Clear background when leaving detail pages (not when switching between them)
   useEffect(() => {
     const isDetailRoute = /^\/(projects|cases)\/.+/.test(location.pathname);
     if (!isDetailRoute) setPageBackground(null);
@@ -19,25 +19,37 @@ function RootInner() {
 
   return (
     <div className="relative w-full h-full overflow-hidden bg-[#1c1c1c]">
-      {/* Persistent animated background — smoothly transitions to project color */}
+      {/* Persistent animated background */}
       <motion.div
         className="absolute inset-0"
         animate={{ backgroundColor: pageBackground ?? '#1c1c1c' }}
         transition={{ duration: 0.4, ease: 'easeInOut' }}
       />
 
-      {/* Single persistent network — always behind page content */}
+      {/* Network visualization */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <NetworkVisualization />
       </div>
 
-      {/* Pages fade in/out — transparent, background handled above */}
+      {/* Pages */}
       <AnimatePresence mode="wait">
         <Outlet key={location.pathname} />
       </AnimatePresence>
 
-      {/* Persistent menu */}
-      <MainMenu onOpenEditor={() => setEditorOpen(true)} />
+      {/* Navigation */}
+      <MainMenu />
+
+      {/* Editor button — top-right, always floating */}
+      <motion.button
+        onClick={() => setEditorOpen(true)}
+        className="fixed top-5 right-5 z-30 flex items-center gap-2 px-3 py-2 rounded-full bg-[rgba(255,255,255,0.12)] hover:bg-[rgba(255,255,255,0.22)] border border-white/15 text-white/60 hover:text-white transition-all backdrop-blur-sm"
+        whileHover={{ scale: 1.04 }}
+        whileTap={{ scale: 0.96 }}
+        title="Open content editor"
+      >
+        <SquarePen size={15} strokeWidth={1.5} />
+        <span className="text-[0.78rem] font-['Source_Sans_3',sans-serif] hidden sm:block">Edit</span>
+      </motion.button>
 
       {/* Content editor drawer */}
       <EditorDrawer open={editorOpen} onClose={() => setEditorOpen(false)} />

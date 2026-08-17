@@ -66,6 +66,7 @@ function SortableItem({ project, onSelect, onToggleHide }: {
 export default function ProjectList({ projects, type, onSelect, onListChange }: Props) {
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState('');
+  const [createError, setCreateError] = useState('');
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -90,11 +91,16 @@ export default function ProjectList({ projects, type, onSelect, onListChange }: 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     if (!newName.trim()) return;
-    setAdding(false);
-    const p = await createProject(type, newName.trim());
-    onListChange([...projects, p]);
-    setNewName('');
-    onSelect(p);
+    setCreateError('');
+    try {
+      const p = await createProject(type, newName.trim());
+      setAdding(false);
+      setNewName('');
+      onListChange([...projects, p]);
+      onSelect(p);
+    } catch {
+      setCreateError('No se pudo crear el proyecto. Intenta de nuevo.');
+    }
   }
 
   return (
@@ -116,17 +122,22 @@ export default function ProjectList({ projects, type, onSelect, onListChange }: 
 
       {/* Add new */}
       {adding ? (
-        <form onSubmit={handleAdd} className="flex gap-2 mt-2">
-          <input
-            autoFocus
-            value={newName}
-            onChange={e => setNewName(e.target.value)}
-            placeholder="Project name"
-            className="flex-1 bg-white/5 border border-white/15 rounded-[10px] px-3 py-2 text-white text-[0.85rem] outline-none focus:border-white/30 placeholder:text-white/25 font-['Source_Sans_3',sans-serif]"
-          />
-          <button type="submit" className="px-4 py-2 rounded-[10px] bg-[#d25d5f] text-white text-[0.8rem] font-['Source_Sans_3',sans-serif] hover:bg-[#c25052] transition-colors">Add</button>
-          <button type="button" onClick={() => { setAdding(false); setNewName(''); }} className="px-3 py-2 rounded-[10px] border border-white/10 text-white/40 text-[0.8rem] hover:text-white transition-colors">✕</button>
-        </form>
+        <div className="flex flex-col gap-1.5 mt-2">
+          <form onSubmit={handleAdd} className="flex gap-2">
+            <input
+              autoFocus
+              value={newName}
+              onChange={e => { setNewName(e.target.value); setCreateError(''); }}
+              placeholder="Project name"
+              className="flex-1 bg-white/5 border border-white/15 rounded-[10px] px-3 py-2 text-white text-[0.85rem] outline-none focus:border-white/30 placeholder:text-white/25 font-['Source_Sans_3',sans-serif]"
+            />
+            <button type="submit" className="px-4 py-2 rounded-[10px] bg-[#d25d5f] text-white text-[0.8rem] font-['Source_Sans_3',sans-serif] hover:bg-[#c25052] transition-colors">Add</button>
+            <button type="button" onClick={() => { setAdding(false); setNewName(''); setCreateError(''); }} className="px-3 py-2 rounded-[10px] border border-white/10 text-white/40 text-[0.8rem] hover:text-white transition-colors">✕</button>
+          </form>
+          {createError && (
+            <p className="text-[#d25d5f] text-[0.75rem] font-['Source_Sans_3',sans-serif]">{createError}</p>
+          )}
+        </div>
       ) : (
         <button
           onClick={() => setAdding(true)}

@@ -1,4 +1,4 @@
-import { BookMarked, Mail, Sparkles, PenTool, SquarePen } from 'lucide-react';
+import { BookMarked, Mail, Sparkles, PenTool } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router';
 
 function AboutMeIcon({ className }: { className?: string }) {
@@ -23,28 +23,24 @@ function AboutMeIcon({ className }: { className?: string }) {
   );
 }
 
-interface Props {
-  onOpenEditor?: () => void;
-}
-
-export default function MainMenu({ onOpenEditor }: Props) {
+export default function MainMenu() {
   const navigate = useNavigate();
   const location = useLocation();
 
   const links = [
-    { id: 'projects', label: 'UI projects',    icon: PenTool,     path: '/projects' },
-    { id: 'cases',    label: 'Case studies',   icon: BookMarked,  path: '/cases' },
-    { id: 'agent',    label: 'Agent',          icon: Sparkles,    path: '/agent' },
-    { id: 'about',    label: 'About me',       icon: AboutMeIcon, path: '/about' },
-    { id: 'contact',  label: 'Contact',        icon: Mail,        path: '/contact' },
+    { id: 'projects', label: 'UI projects',  icon: PenTool,     path: '/projects' },
+    { id: 'cases',    label: 'Case studies', icon: BookMarked,  path: '/cases' },
+    { id: 'agent',    label: 'Agent',        icon: Sparkles,    path: '/agent' },
+    { id: 'about',    label: 'About me',     icon: AboutMeIcon, path: '/about' },
+    { id: 'contact',  label: 'Contact',      icon: Mail,        path: '/contact' },
   ];
 
-  const isActive = (path: string) => {
-    if (path === '/agent') return location.pathname === '/agent' || location.pathname.startsWith('/chat');
-    return location.pathname === path;
-  };
+  const isActive = (path: string) =>
+    path === '/agent'
+      ? location.pathname === '/agent' || location.pathname.startsWith('/chat')
+      : location.pathname === path;
 
-  function renderButton(link: typeof links[0], desktop: boolean) {
+  function renderBtn(link: typeof links[0], desktop: boolean) {
     const Icon = link.icon;
     const active = isActive(link.path);
     return (
@@ -67,32 +63,16 @@ export default function MainMenu({ onOpenEditor }: Props) {
     );
   }
 
-  const editorBtn = (desktop: boolean) => (
-    <button
-      onClick={onOpenEditor}
-      className={`${desktop ? 'group relative' : ''} cursor-pointer flex items-center justify-center rounded-full transition-all duration-200 size-[44px] bg-[rgba(255,255,255,0.15)] text-white hover:bg-[rgba(255,255,255,0.25)]`}
-    >
-      <SquarePen className="size-[20px]" strokeWidth={1.5} />
-      {desktop && (
-        <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-          <p className="text-white/70 text-sm whitespace-nowrap font-['Source_Sans_3',sans-serif]">Editor</p>
-        </div>
-      )}
-    </button>
-  );
-
   return (
     <>
-      {/* Mobile: bottom horizontal bar */}
+      {/* Mobile bottom bar */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 flex flex-row justify-around items-center px-4 pt-3 pb-6 z-30 bg-[rgba(0,0,0,0.2)] backdrop-blur-md">
-        {links.map(link => renderButton(link, false))}
-        {editorBtn(false)}
+        {links.map(link => renderBtn(link, false))}
       </div>
 
-      {/* Desktop: left vertical bar */}
+      {/* Desktop left vertical bar */}
       <div className="hidden md:flex absolute flex-col gap-[16px] items-center left-[24px] top-1/2 -translate-y-1/2 w-[64px] z-30">
-        {links.map(link => renderButton(link, true))}
-        {editorBtn(true)}
+        {links.map(link => renderBtn(link, true))}
       </div>
     </>
   );
