@@ -1,4 +1,4 @@
-import { BookMarked, Mail, Sparkles, PenTool } from 'lucide-react';
+import { BookMarked, Mail, Sparkles, PenTool, SquarePen } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router';
 
 function AboutMeIcon({ className }: { className?: string }) {
