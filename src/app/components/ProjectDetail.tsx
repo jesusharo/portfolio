@@ -68,46 +68,43 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
 
         {/* Sticky header */}
         <motion.div
-          className="sticky top-0 flex items-center px-6 py-5"
+          className="sticky top-0 flex items-center justify-center px-6 py-5 gap-6"
           animate={{ backgroundColor: accentColor }}
           transition={{ duration: 0.4, ease: 'easeInOut' }}
           style={{ zIndex: 20 }}
         >
-          <div className="w-[36px] shrink-0" />
+          <motion.button
+            whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
+            onClick={() => prevItem ? navigate(`${detailPath}/${prevItem.id}`) : navigate(listPath)}
+            className="size-[36px] flex items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
+          >
+            <ArrowLeft size={20} strokeWidth={1.5} />
+          </motion.button>
 
-          <div className="flex-1 flex items-center justify-center gap-6">
-            <motion.button
-              whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
-              onClick={() => prevItem ? navigate(`${detailPath}/${prevItem.id}`) : navigate(listPath)}
-              className="size-[36px] flex items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
-            >
-              <ArrowLeft size={20} strokeWidth={1.5} />
-            </motion.button>
-
-            <h1
-              className="text-white text-[1.25rem] font-semibold uppercase"
-              style={{ fontFamily: "'Source Sans 3', sans-serif", letterSpacing: '0.2em' }}
-            >
-              {item.name}
-            </h1>
-
-            <motion.button
-              whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
-              onClick={() => nextItem ? navigate(`${detailPath}/${nextItem.id}`) : navigate(listPath)}
-              className="size-[36px] flex items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
-            >
-              <ArrowRight size={20} strokeWidth={1.5} />
-            </motion.button>
-          </div>
+          <h1
+            className="text-white text-[1.25rem] font-semibold uppercase"
+            style={{ fontFamily: "'Source Sans 3', sans-serif", letterSpacing: '0.2em' }}
+          >
+            {item.name}
+          </h1>
 
           <motion.button
             whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
-            onClick={() => navigate(listPath)}
-            className="size-[36px] shrink-0 flex items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
+            onClick={() => nextItem ? navigate(`${detailPath}/${nextItem.id}`) : navigate(listPath)}
+            className="size-[36px] flex items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
           >
-            <X size={16} strokeWidth={1.5} />
+            <ArrowRight size={20} strokeWidth={1.5} />
           </motion.button>
         </motion.div>
+
+        {/* Close button — fixed top-right, next to Edit */}
+        <motion.button
+          whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+          onClick={() => navigate(listPath)}
+          className="fixed top-5 right-5 z-40 size-[36px] flex items-center justify-center rounded-full bg-[rgba(255,255,255,0.12)] hover:bg-[rgba(255,255,255,0.22)] border border-white/15 text-white/60 hover:text-white transition-all backdrop-blur-sm"
+        >
+          <X size={16} strokeWidth={1.5} />
+        </motion.button>
 
         {/* Hero image or placeholder */}
         <div className="px-8 pb-4">

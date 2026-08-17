@@ -11,9 +11,9 @@ function RootInner() {
   const location = useLocation();
   const { pageBackground, setPageBackground } = useNetworkState();
   const [editorOpen, setEditorOpen] = useState(false);
+  const isDetailRoute = /^\/(projects|cases)\/.+/.test(location.pathname);
 
   useEffect(() => {
-    const isDetailRoute = /^\/(projects|cases)\/.+/.test(location.pathname);
     if (!isDetailRoute) setPageBackground(null);
   }, [location.pathname]);
 
@@ -39,10 +39,10 @@ function RootInner() {
       {/* Navigation */}
       <MainMenu />
 
-      {/* Editor button — top-right, always floating */}
+      {/* Editor button — top-right, shifts left on detail pages to make room for X */}
       <motion.button
         onClick={() => setEditorOpen(true)}
-        className="fixed top-5 right-5 z-30 flex items-center gap-2 px-3 py-2 rounded-full bg-[rgba(255,255,255,0.12)] hover:bg-[rgba(255,255,255,0.22)] border border-white/15 text-white/60 hover:text-white transition-all backdrop-blur-sm"
+        className={`fixed top-5 z-30 flex items-center gap-2 px-3 py-2 rounded-full bg-[rgba(255,255,255,0.12)] hover:bg-[rgba(255,255,255,0.22)] border border-white/15 text-white/60 hover:text-white transition-all backdrop-blur-sm ${isDetailRoute ? 'right-[60px]' : 'right-5'}`}
         whileHover={{ scale: 1.04 }}
         whileTap={{ scale: 0.96 }}
         title="Open content editor"
