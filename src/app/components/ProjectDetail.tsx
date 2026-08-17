@@ -69,7 +69,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
         >
           <div className="w-[36px] shrink-0" />
 
-          <div className="flex-1 flex items-center justify-center gap-3">
+          <div className="flex-1 flex items-center justify-center gap-6">
             <motion.button
               whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
               onClick={() => prevItem ? navigate(`${detailPath}/${prevItem.id}`) : navigate(listPath)}
