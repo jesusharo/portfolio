@@ -1,13 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, Outlet } from 'react-router';
 import { AnimatePresence, motion } from 'motion/react';
 import NetworkVisualization from './NetworkVisualization';
 import MainMenu from './MainMenu';
+import EditorDrawer from './editor/EditorDrawer';
 import { NetworkStateProvider, useNetworkState } from '../context/NetworkStateContext';
 
 function RootInner() {
   const location = useLocation();
   const { pageBackground, setPageBackground } = useNetworkState();
+  const [editorOpen, setEditorOpen] = useState(false);
 
   // Clear background when leaving detail pages (not when switching between them)
   useEffect(() => {
@@ -35,7 +37,10 @@ function RootInner() {
       </AnimatePresence>
 
       {/* Persistent menu */}
-      <MainMenu />
+      <MainMenu onOpenEditor={() => setEditorOpen(true)} />
+
+      {/* Content editor drawer */}
+      <EditorDrawer open={editorOpen} onClose={() => setEditorOpen(false)} />
     </div>
   );
 }

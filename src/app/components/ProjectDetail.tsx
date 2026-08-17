@@ -1,69 +1,75 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { motion } from 'motion/react';
 import { X, ArrowLeft, ArrowRight } from 'lucide-react';
 import PageTransition from './PageTransition';
 import { useNetworkState } from '../context/NetworkStateContext';
-import { projects } from '../data/projects';
-import { caseStudies } from '../data/caseStudies';
+import { getProjects } from '../lib/api';
 
 type Mode = 'projects' | 'cases';
+
+interface Project {
+  id: string;
+  name: string;
+  background_color: string;
+  accent_color: string;
+  description: string;
+  hero_image: string;
+  content_blocks: Array<{ id: string; type: string; html?: string; url?: string; caption?: string }>;
+}
 
 export default function ProjectDetail({ mode }: { mode: Mode }) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { setNetworkState, setPageBackground } = useNetworkState();
+  const [items, setItems] = useState<Project[]>([]);
 
-  const items = mode === 'projects' ? projects : caseStudies;
-  const currentIndex = items.findIndex(p => p.id === id);
-  const item = items[currentIndex];
-
+  const apiType = mode === 'projects' ? 'ui_project' : 'case_study';
   const listPath = mode === 'projects' ? '/projects' : '/cases';
   const detailPath = listPath;
+
+  useEffect(() => {
+    getProjects(apiType).then(setItems).catch(() => {});
+  }, [apiType]);
+
+  const currentIndex = items.findIndex(p => p.id === id);
+  const item = items[currentIndex] ?? null;
   const prevItem = currentIndex > 0 ? items[currentIndex - 1] : null;
   const nextItem = currentIndex < items.length - 1 ? items[currentIndex + 1] : null;
 
-  // Set network state and page background — Root handles both persistently
   useEffect(() => {
     setNetworkState('conversation');
-    if (item) setPageBackground(item.accentColor);
+    if (item) setPageBackground(item.accent_color || item.background_color);
     return () => { setNetworkState('idle'); };
-  }, [item?.accentColor]);
+  }, [item?.accent_color]);
 
   useEffect(() => {
-    if (!item) navigate(listPath);
-  }, [item, navigate, listPath]);
+    if (items.length > 0 && !item) navigate(listPath);
+  }, [item, items.length]);
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') navigate(listPath); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') navigate(listPath);
+      if (e.key === 'ArrowLeft' && prevItem) navigate(`${detailPath}/${prevItem.id}`);
+      if (e.key === 'ArrowRight' && nextItem) navigate(`${detailPath}/${nextItem.id}`);
+    };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [navigate, listPath]);
-
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') {
-        if (prevItem) navigate(`${detailPath}/${prevItem.id}`);
-      } else if (e.key === 'ArrowRight') {
-        if (nextItem) navigate(`${detailPath}/${nextItem.id}`);
-      }
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [prevItem, nextItem, navigate, detailPath]);
+  }, [prevItem, nextItem, navigate, listPath, detailPath]);
 
   if (!item) return null;
+
   const paragraphs = (item.description ?? '').split('\n\n').filter(Boolean);
+  const accentColor = item.accent_color || item.background_color || '#1c1c1c';
 
   return (
     <PageTransition>
-      {/* No background here — Root's persistent layer handles it */}
       <div className="absolute inset-0 overflow-y-auto">
 
         {/* Sticky header */}
         <motion.div
           className="sticky top-0 flex items-center px-6 py-5"
-          animate={{ backgroundColor: item.accentColor }}
+          animate={{ backgroundColor: accentColor }}
           transition={{ duration: 0.4, ease: 'easeInOut' }}
           style={{ zIndex: 20 }}
         >
@@ -103,7 +109,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           </motion.button>
         </motion.div>
 
-        {/* Preview area */}
+        {/* Hero image or placeholder */}
         <div className="px-8 pb-4">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
@@ -111,42 +117,28 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
             transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="relative mx-auto max-w-[760px]"
           >
-            {/* Desktop mockup */}
-            <div
-              className="w-full rounded-[12px] overflow-hidden"
-              style={{ aspectRatio: '16/10', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
-            >
-              <div className="flex items-center gap-[6px] px-4 py-3 border-b border-white/10">
-                <div className="size-[10px] rounded-full bg-white/20" />
-                <div className="size-[10px] rounded-full bg-white/20" />
-                <div className="size-[10px] rounded-full bg-white/20" />
-                <div className="flex-1 mx-4 h-[20px] rounded-full bg-white/10" />
+            {item.hero_image ? (
+              <img src={item.hero_image} alt={item.name}
+                className="w-full rounded-[12px] object-cover" style={{ maxHeight: 420 }} />
+            ) : (
+              <div
+                className="w-full rounded-[12px] overflow-hidden"
+                style={{ aspectRatio: '16/10', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+              >
+                <div className="flex items-center gap-[6px] px-4 py-3 border-b border-white/10">
+                  <div className="size-[10px] rounded-full bg-white/20" />
+                  <div className="size-[10px] rounded-full bg-white/20" />
+                  <div className="size-[10px] rounded-full bg-white/20" />
+                  <div className="flex-1 mx-4 h-[20px] rounded-full bg-white/10" />
+                </div>
+                <div className="flex items-center justify-center h-[calc(100%-41px)]">
+                  <span className="text-[4rem] font-bold select-none opacity-30 text-white"
+                    style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                    {item.name[0]}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center justify-center h-[calc(100%-41px)]">
-                <span
-                  className="text-[4rem] font-bold select-none"
-                  style={{ color: item.color, fontFamily: "'Source Sans 3', sans-serif", opacity: 0.4 }}
-                >
-                  {item.icon}
-                </span>
-              </div>
-            </div>
-
-            {/* Mobile mockup */}
-            <div
-              className="absolute right-[-60px] bottom-[-20px] w-[120px] rounded-[16px] overflow-hidden shadow-2xl"
-              style={{ aspectRatio: '9/16', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
-            >
-              <div className="w-full h-[8px] bg-white/10 rounded-t-[16px]" />
-              <div className="flex items-center justify-center h-[calc(100%-8px)]">
-                <span
-                  className="text-[1.5rem] font-bold select-none"
-                  style={{ color: item.color, fontFamily: "'Source Sans 3', sans-serif", opacity: 0.4 }}
-                >
-                  {item.icon}
-                </span>
-              </div>
-            </div>
+            )}
           </motion.div>
         </div>
 
@@ -155,19 +147,44 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.15, ease: [0.25, 0.46, 0.45, 0.94] }}
+            transition={{ duration: 0.5, delay: 0.15 }}
             className="px-8 py-8 max-w-[760px] mx-auto"
           >
             {paragraphs.map((p, i) => (
-              <p
-                key={i}
-                className="text-white/65 text-[0.9375rem] leading-[1.7] mb-4 last:mb-0"
-                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
-              >
+              <p key={i} className="text-white/65 text-[0.9375rem] leading-[1.7] mb-4 last:mb-0"
+                style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
                 {p}
               </p>
             ))}
           </motion.div>
+        )}
+
+        {/* Content blocks */}
+        {item.content_blocks?.length > 0 && (
+          <div className="px-8 pb-16 max-w-[760px] mx-auto">
+            {item.content_blocks.map((block) => (
+              <div key={block.id} className="mb-8">
+                {block.type === 'richtext' && block.html && (
+                  <div
+                    className="prose prose-invert prose-lg max-w-none text-white/70"
+                    style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                    dangerouslySetInnerHTML={{ __html: block.html }}
+                  />
+                )}
+                {block.type === 'image' && block.url && (
+                  <figure>
+                    <img src={block.url} alt={block.caption || ''} className="w-full rounded-[12px]" />
+                    {block.caption && (
+                      <figcaption className="text-white/35 text-[0.8rem] mt-2 text-center"
+                        style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                        {block.caption}
+                      </figcaption>
+                    )}
+                  </figure>
+                )}
+              </div>
+            ))}
+          </div>
         )}
 
       </div>

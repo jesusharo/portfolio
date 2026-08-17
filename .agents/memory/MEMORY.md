@@ -1,0 +1,3 @@
+- [Architecture: API + Vite](api-vite-arch.md) — Express on 3001 + Vite on 5000; proxy /api in vite.config.ts; run with concurrently
+- [Editor Auth](editor-auth.md) — JWT passcode auth; EDITOR_PASSCODE + JWT_SECRET secrets required; token in localStorage
+- [DB Schema](db-schema.md) — projects table (ui_project|case_study) + about_content; DATABASE_URL is runtime-managed by Replit
