@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useLocation, Outlet } from 'react-router';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate, Outlet } from 'react-router';
 import { AnimatePresence, motion } from 'motion/react';
-import { SquarePen } from 'lucide-react';
+import { SquarePen, PenLine, Check, X } from 'lucide-react';
 import NetworkVisualization from './NetworkVisualization';
 import MainMenu from './MainMenu';
 import EditorDrawer from './editor/EditorDrawer';
@@ -9,24 +9,70 @@ import { NetworkStateProvider, useNetworkState } from '../context/NetworkStateCo
 
 function RootInner() {
   const location = useLocation();
-  const { pageBackground, setPageBackground, bumpDataVersion, setEditorMode } = useNetworkState();
-  const [editorOpen, setEditorOpen] = useState(false);
-  const isDetailRoute = /^\/(projects|cases)\/.+/.test(location.pathname);
+  const navigate = useNavigate();
+  const {
+    pageBackground, setPageBackground,
+    bumpDataVersion,
+    editorMode, setEditorMode,
+    editorAuthed,
+    requestSave,
+  } = useNetworkState();
 
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const pendingEditMode = useRef(false);
+
+  const isDetailRoute = /^\/(projects|cases)\/.+/.test(location.pathname);
+  const listPath = location.pathname.startsWith('/cases') ? '/cases' : '/projects';
+
+  // Clear background when leaving detail pages
   useEffect(() => {
     if (!isDetailRoute) setPageBackground(null);
   }, [location.pathname]);
 
-  function openEditor() {
-    setEditorOpen(true);
-    // editorMode is set only after the drawer confirms a valid token
+  // Reset editorMode when navigating away from a detail page
+  useEffect(() => {
+    if (!isDetailRoute) setEditorMode(false);
+  }, [isDetailRoute]);
+
+  // Auto-activate editorMode after auth completes (when "Edit" triggered the login)
+  useEffect(() => {
+    if (editorAuthed && pendingEditMode.current) {
+      pendingEditMode.current = false;
+      setDrawerOpen(false);
+      setEditorMode(true);
+    }
+  }, [editorAuthed]);
+
+  function openDrawer() {
+    setDrawerOpen(true);
   }
 
-  function closeEditor() {
-    setEditorOpen(false);
-    setEditorMode(false);
+  function closeDrawer() {
+    setDrawerOpen(false);
     bumpDataVersion();
   }
+
+  function handleEditToggle() {
+    if (!editorAuthed) {
+      // Not logged in yet — open the drawer for auth; remember to activate edit after
+      pendingEditMode.current = true;
+      setDrawerOpen(true);
+      return;
+    }
+    if (editorMode) {
+      // "Save changes" — flush pending saves, exit edit mode
+      requestSave();
+      setEditorMode(false);
+      bumpDataVersion();
+    } else {
+      setEditorMode(true);
+    }
+  }
+
+  const pillBase = 'flex items-center gap-1.5 px-3 py-2 rounded-full border text-[0.78rem] font-["Source_Sans_3",sans-serif] transition-all backdrop-blur-sm';
+  const pillDefault = 'bg-[rgba(255,255,255,0.12)] hover:bg-[rgba(255,255,255,0.22)] border-white/15 text-white/60 hover:text-white';
+  const pillActive = 'bg-[#d25d5f] hover:bg-[#c25052] border-[#d25d5f]/40 text-white';
+  const iconBtn = 'size-[36px] flex items-center justify-center rounded-full bg-[rgba(255,255,255,0.12)] hover:bg-[rgba(255,255,255,0.22)] border border-white/15 text-white/60 hover:text-white transition-all backdrop-blur-sm';
 
   return (
     <div className="relative w-full h-full overflow-hidden bg-[#1c1c1c]">
@@ -50,20 +96,52 @@ function RootInner() {
       {/* Navigation */}
       <MainMenu />
 
-      {/* Editor button — shifts left on detail pages to make room for X */}
-      <motion.button
-        onClick={openEditor}
-        className={`fixed top-5 z-30 flex items-center gap-2 px-3 py-2 rounded-full bg-[rgba(255,255,255,0.12)] hover:bg-[rgba(255,255,255,0.22)] border border-white/15 text-white/60 hover:text-white transition-all backdrop-blur-sm ${isDetailRoute ? 'right-[60px]' : 'right-5'}`}
-        whileHover={{ scale: 1.04 }}
-        whileTap={{ scale: 0.96 }}
-        title="Open content editor"
-      >
-        <SquarePen size={15} strokeWidth={1.5} />
-        <span className="text-[0.78rem] font-['Source_Sans_3',sans-serif] hidden sm:block">Edit</span>
-      </motion.button>
+      {/* ── Top-right button cluster ─────────────────────────────────────── */}
+      <div className="fixed top-5 right-5 z-40 flex items-center gap-2">
+
+        {/* Edit / Save changes — only on project detail pages */}
+        {isDetailRoute && (
+          <motion.button
+            onClick={handleEditToggle}
+            className={`${pillBase} ${editorMode ? pillActive : pillDefault}`}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+          >
+            {editorMode
+              ? <><Check size={14} strokeWidth={2} /> Save changes</>
+              : <><PenLine size={14} strokeWidth={1.5} /> Edit</>
+            }
+          </motion.button>
+        )}
+
+        {/* Content Editor — always visible; icon-only on detail pages */}
+        <motion.button
+          onClick={openDrawer}
+          className={`${pillBase} ${pillDefault}`}
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
+          title="Content Editor"
+        >
+          <SquarePen size={15} strokeWidth={1.5} />
+          {!isDetailRoute && <span>Content Editor</span>}
+        </motion.button>
+
+        {/* Close (X) — only on project detail pages */}
+        {isDetailRoute && (
+          <motion.button
+            onClick={() => navigate(listPath)}
+            className={iconBtn}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            title="Close"
+          >
+            <X size={16} strokeWidth={1.5} />
+          </motion.button>
+        )}
+      </div>
 
       {/* Content editor drawer */}
-      <EditorDrawer open={editorOpen} onClose={closeEditor} />
+      <EditorDrawer open={drawerOpen} onClose={closeDrawer} />
     </div>
   );
 }

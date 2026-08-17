@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ArrowLeft, ArrowRight, Plus, AlignLeft, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Plus, AlignLeft, Image as ImageIcon, X } from 'lucide-react';
 import PageTransition from './PageTransition';
 import { useNetworkState } from '../context/NetworkStateContext';
 import { getProjects, getEditorProjects, updateProject } from '../lib/api';
@@ -91,7 +91,7 @@ function AddBlockButton({ onAdd }: { onAdd: (type: 'richtext' | 'image') => void
 export default function ProjectDetail({ mode }: { mode: Mode }) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { setNetworkState, setPageBackground, editorMode, bumpDataVersion, dataVersion } = useNetworkState();
+  const { setNetworkState, setPageBackground, editorMode, bumpDataVersion, dataVersion, saveRequestVersion } = useNetworkState();
   const [items, setItems] = useState<Project[]>([]);
 
   const apiType = mode === 'projects' ? 'ui_project' : 'case_study';
@@ -121,6 +121,11 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Keep a ref to contentBlocks so the flush-save effect always has the latest value
+  const contentBlocksRef = useRef<ContentBlock[]>([]);
+  useEffect(() => { contentBlocksRef.current = contentBlocks; }, [contentBlocks]);
+  // Track previous saveRequestVersion so we only act on new increments
+  const prevSaveReqRef = useRef(saveRequestVersion);
 
   // Reset content blocks only when project ID changes (not on re-fetches)
   useEffect(() => {
@@ -134,6 +139,18 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   useEffect(() => {
     return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
   }, []);
+
+  // Flush pending save immediately when "Save changes" is clicked in Root
+  useEffect(() => {
+    if (saveRequestVersion === prevSaveReqRef.current) return;
+    prevSaveReqRef.current = saveRequestVersion;
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+    // Always flush so changes made right before "Save changes" are not lost
+    doSave(contentBlocksRef.current);
+  }, [saveRequestVersion]);
 
   function scheduleAutoSave(blocks: ContentBlock[]) {
     setSaveStatus('unsaved');
@@ -245,15 +262,6 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
             <ArrowRight size={20} strokeWidth={1.5} />
           </motion.button>
         </motion.div>
-
-        {/* ── Close button (fixed, next to Edit) ────────────────────────── */}
-        <motion.button
-          whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-          onClick={() => navigate(listPath)}
-          className="fixed top-5 right-5 z-40 size-[36px] flex items-center justify-center rounded-full bg-[rgba(255,255,255,0.12)] hover:bg-[rgba(255,255,255,0.22)] border border-white/15 text-white/60 hover:text-white transition-all backdrop-blur-sm"
-        >
-          <X size={16} strokeWidth={1.5} />
-        </motion.button>
 
         {/* ── Hero image ────────────────────────────────────────────────── */}
         <div className="px-8 pb-4 pt-6">

@@ -11,6 +11,10 @@ interface NetworkStateContextValue {
   bumpDataVersion: () => void;
   editorMode: boolean;
   setEditorMode: (m: boolean) => void;
+  editorAuthed: boolean;
+  setEditorAuthed: (v: boolean) => void;
+  saveRequestVersion: number;
+  requestSave: () => void;
 }
 
 const NetworkStateContext = createContext<NetworkStateContextValue>({
@@ -22,6 +26,10 @@ const NetworkStateContext = createContext<NetworkStateContextValue>({
   bumpDataVersion: () => {},
   editorMode: false,
   setEditorMode: () => {},
+  editorAuthed: false,
+  setEditorAuthed: () => {},
+  saveRequestVersion: 0,
+  requestSave: () => {},
 });
 
 export function NetworkStateProvider({ children }: { children: ReactNode }) {
@@ -29,13 +37,20 @@ export function NetworkStateProvider({ children }: { children: ReactNode }) {
   const [pageBackground, setPageBackground] = useState<string | null>(null);
   const [dataVersion, setDataVersion] = useState(0);
   const [editorMode, setEditorMode] = useState(false);
+  const [editorAuthed, setEditorAuthed] = useState(false);
+  const [saveRequestVersion, setSaveRequestVersion] = useState(0);
+
   const bumpDataVersion = () => setDataVersion(v => v + 1);
+  const requestSave = () => setSaveRequestVersion(v => v + 1);
+
   return (
     <NetworkStateContext.Provider value={{
       networkState, setNetworkState,
       pageBackground, setPageBackground,
       dataVersion, bumpDataVersion,
       editorMode, setEditorMode,
+      editorAuthed, setEditorAuthed,
+      saveRequestVersion, requestSave,
     }}>
       {children}
     </NetworkStateContext.Provider>

@@ -38,15 +38,15 @@ export default function EditorDrawer({ open, onClose }: Props) {
   const [uiProjects, setUiProjects] = useState<Project[]>([]);
   const [caseProjects, setCaseProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
-  const { bumpDataVersion, setEditorMode } = useNetworkState();
+  const { bumpDataVersion, setEditorAuthed } = useNetworkState();
 
-  // Verify token when drawer opens — editorMode is only enabled after auth confirmation
+  // Verify token when drawer opens — editorAuthed only set after confirmation
   useEffect(() => {
     if (!open) return;
     verifyToken().then(valid => {
       if (valid) {
         setAuthed(true);
-        setEditorMode(true);
+        setEditorAuthed(true);
         loadProjects();
       } else {
         setShowAuth(true);
@@ -54,13 +54,13 @@ export default function EditorDrawer({ open, onClose }: Props) {
     });
   }, [open]);
 
-  // Auto-detect current project from URL — syncs the drawer when navigating
+  // Auto-detect current project from URL — syncs drawer when navigating
   useEffect(() => {
     if (!open || !authed) return;
     if (!uiProjects.length && !caseProjects.length) return;
 
     const match = location.pathname.match(/^\/(projects|cases)\/(.+)/);
-    if (!match) return; // Not on a detail page — leave drawer as-is
+    if (!match) return;
 
     const [, section, projectId] = match;
     const isCase = section === 'cases';
@@ -80,15 +80,15 @@ export default function EditorDrawer({ open, onClose }: Props) {
       getEditorProjects('ui_project'),
       getEditorProjects('case_study'),
     ]);
-    setUiProjects(ui);
-    setCaseProjects(cases);
+    setUiProjects(ui as Project[]);
+    setCaseProjects(cases as Project[]);
     setLoading(false);
   }
 
   function handleAuthSuccess() {
     setShowAuth(false);
     setAuthed(true);
-    setEditorMode(true);
+    setEditorAuthed(true);
     loadProjects();
   }
 
@@ -101,7 +101,6 @@ export default function EditorDrawer({ open, onClose }: Props) {
   function handleSelectProject(p: Project) {
     setSelectedProject(p);
     setView('detail');
-    // Navigate to the project's detail page so content can be edited inline
     const urlSection = p.type === 'case_study' ? 'cases' : 'projects';
     navigate(`/${urlSection}/${p.id}`);
   }
