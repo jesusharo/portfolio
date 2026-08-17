@@ -67,7 +67,7 @@ export default function ContactView() {
 
           {/* Title */}
           <h1
-            className={`text-white/50 text-[0.72rem] font-semibold tracking-[0.22em] uppercase select-none ${status === 'sent' ? 'mb-3' : 'mb-10'}`}
+            className={`text-white/50 text-[0.72rem] font-semibold tracking-[0.22em] uppercase select-none text-center ${status === 'sent' ? 'mb-3' : 'mb-10'}`}
             style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
             {status === 'sent' ? 'Thanks for reaching out!' : 'Contact'}
