@@ -45,3 +45,8 @@ externalPort = 3002
 [postMerge]
 path = "scripts/post-merge.sh"
 timeoutMs = 60000
+
+[userenv]
+
+[userenv.shared]
+GMAIL_USER = "jharolozano@gmail.com"

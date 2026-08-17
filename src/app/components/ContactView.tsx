@@ -31,7 +31,7 @@ const LABEL_STYLE: React.CSSProperties = {
 
 export default function ContactView() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const { setNetworkState } = useNetworkState();
 
   useEffect(() => {
@@ -43,9 +43,20 @@ export default function ContactView() {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSent(true);
+    setStatus('sending');
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error('failed');
+      setStatus('sent');
+    } catch {
+      setStatus('error');
+    }
   }
 
   return (
@@ -67,7 +78,7 @@ export default function ContactView() {
             Contact
           </h1>
 
-          {sent ? (
+          {status === 'sent' ? (
             <motion.p
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -128,20 +139,28 @@ export default function ContactView() {
               </div>
 
               {/* Submit */}
-              <motion.button
-                type="submit"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.97 }}
-                className="self-start px-8 py-3 rounded-[32px] text-white font-semibold transition-colors"
-                style={{
-                  background: '#d25d5f',
-                  fontFamily: "'Source Sans 3', sans-serif",
-                  fontSize: '0.95rem',
-                  letterSpacing: '0.05em',
-                }}
-              >
-                Send Message
-              </motion.button>
+              <div className="flex flex-col gap-2 items-start">
+                <motion.button
+                  type="submit"
+                  disabled={status === 'sending'}
+                  whileHover={{ scale: status === 'sending' ? 1 : 1.02 }}
+                  whileTap={{ scale: status === 'sending' ? 1 : 0.97 }}
+                  className="self-start px-8 py-3 rounded-[32px] text-white font-semibold transition-all disabled:opacity-60"
+                  style={{
+                    background: '#d25d5f',
+                    fontFamily: "'Source Sans 3', sans-serif",
+                    fontSize: '0.95rem',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  {status === 'sending' ? 'Sending…' : 'Send Message'}
+                </motion.button>
+                {status === 'error' && (
+                  <p className="text-[#d25d5f] text-[0.82rem]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                    Something went wrong — please try again.
+                  </p>
+                )}
+              </div>
 
             </form>
           )}
