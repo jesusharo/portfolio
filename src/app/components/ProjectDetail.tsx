@@ -1,12 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { motion } from 'motion/react';
-import { X, ArrowLeft, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { X, ArrowLeft, ArrowRight, Plus, AlignLeft, Image as ImageIcon } from 'lucide-react';
 import PageTransition from './PageTransition';
 import { useNetworkState } from '../context/NetworkStateContext';
-import { getProjects } from '../lib/api';
+import { getProjects, getEditorProjects, updateProject } from '../lib/api';
+import RichTextEditor from './editor/RichTextEditor';
+import ImageDropZone from './editor/ImageDropZone';
 
 type Mode = 'projects' | 'cases';
+type SaveStatus = 'idle' | 'unsaved' | 'saving' | 'saved' | 'error';
+
+interface ContentBlock {
+  id: string;
+  type: 'richtext' | 'image';
+  html?: string;
+  url?: string;
+  caption?: string;
+}
 
 interface Project {
   id: string;
@@ -15,28 +26,159 @@ interface Project {
   accent_color: string;
   description: string;
   hero_image: string;
-  content_blocks: Array<{ id: string; type: string; html?: string; url?: string; caption?: string }>;
+  content_blocks: ContentBlock[] | string;
 }
+
+function parseBlocks(raw: ContentBlock[] | string | undefined): ContentBlock[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  try { return JSON.parse(raw as string); } catch { return []; }
+}
+
+// ─── Add-block button ────────────────────────────────────────────────────────
+
+function AddBlockButton({ onAdd }: { onAdd: (type: 'richtext' | 'image') => void }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  return (
+    <div className="relative flex items-center justify-center py-3 group/add">
+      {/* Divider line */}
+      <div className="absolute inset-x-0 top-1/2 h-px bg-white/0 group-hover/add:bg-white/12 transition-colors pointer-events-none" />
+      {/* + pill */}
+      <button
+        onClick={() => setMenuOpen(o => !o)}
+        className="relative z-10 flex items-center justify-center size-7 rounded-full border border-white/0 group-hover/add:border-white/25 bg-transparent group-hover/add:bg-[rgba(28,28,28,0.85)] text-white/0 group-hover/add:text-white/50 hover:!border-white/50 hover:!text-white hover:!bg-[rgba(28,28,28,0.98)] transition-all duration-150 backdrop-blur-sm"
+      >
+        <Plus size={14} strokeWidth={2} />
+      </button>
+
+      {/* Dropdown */}
+      <AnimatePresence>
+        {menuOpen && (
+          <>
+            <div className="fixed inset-0 z-20" onClick={() => setMenuOpen(false)} />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: -4 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -4 }}
+              transition={{ duration: 0.12 }}
+              className="absolute top-full left-1/2 -translate-x-1/2 mt-1 z-30 flex gap-1 bg-[rgba(14,14,14,0.98)] border border-white/15 rounded-xl p-1.5 shadow-2xl"
+            >
+              <button
+                onClick={() => { onAdd('richtext'); setMenuOpen(false); }}
+                className="flex items-center gap-2 px-3 py-2 rounded-[8px] hover:bg-white/10 text-white/60 hover:text-white text-[0.8rem] transition-colors whitespace-nowrap"
+                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+              >
+                <AlignLeft size={13} strokeWidth={1.5} /> Text block
+              </button>
+              <button
+                onClick={() => { onAdd('image'); setMenuOpen(false); }}
+                className="flex items-center gap-2 px-3 py-2 rounded-[8px] hover:bg-white/10 text-white/60 hover:text-white text-[0.8rem] transition-colors whitespace-nowrap"
+                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+              >
+                <ImageIcon size={13} strokeWidth={1.5} /> Image block
+              </button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function ProjectDetail({ mode }: { mode: Mode }) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { setNetworkState, setPageBackground } = useNetworkState();
+  const { setNetworkState, setPageBackground, editorMode, bumpDataVersion, dataVersion } = useNetworkState();
   const [items, setItems] = useState<Project[]>([]);
 
   const apiType = mode === 'projects' ? 'ui_project' : 'case_study';
   const listPath = mode === 'projects' ? '/projects' : '/cases';
   const detailPath = listPath;
 
+  // Fetch items — use editor API when in editor mode (includes hidden projects).
+  // Guard against non-array responses (e.g. 401 error JSON) to prevent render crashes.
   useEffect(() => {
-    getProjects(apiType).then(setItems).catch(() => {});
-  }, [apiType]);
+    if (editorMode) {
+      getEditorProjects(apiType)
+        .then(data => { if (Array.isArray(data)) setItems(data as Project[]); })
+        .catch(() => {}); // auth failure: keep existing items list
+    } else {
+      getProjects(apiType)
+        .then(data => { if (Array.isArray(data)) setItems(data); })
+        .catch(() => {});
+    }
+  }, [apiType, editorMode, dataVersion]);
 
   const currentIndex = items.findIndex(p => p.id === id);
   const item = items[currentIndex] ?? null;
   const prevItem = currentIndex > 0 ? items[currentIndex - 1] : null;
   const nextItem = currentIndex < items.length - 1 ? items[currentIndex + 1] : null;
 
+  // ── Inline content editing state ──────────────────────────────────────────
+  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Reset content blocks only when project ID changes (not on re-fetches)
+  useEffect(() => {
+    if (!item) return;
+    setContentBlocks(parseBlocks(item.content_blocks));
+    setSaveStatus('idle');
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+  }, [item?.id]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
+  }, []);
+
+  function scheduleAutoSave(blocks: ContentBlock[]) {
+    setSaveStatus('unsaved');
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => doSave(blocks), 1500);
+  }
+
+  async function doSave(blocks: ContentBlock[]) {
+    if (!item) return;
+    setSaveStatus('saving');
+    try {
+      await updateProject(item.id, { content_blocks: blocks });
+      setSaveStatus('saved');
+      bumpDataVersion();
+      setTimeout(() => setSaveStatus('idle'), 2500);
+    } catch {
+      setSaveStatus('error');
+    }
+  }
+
+  function insertBlock(type: 'richtext' | 'image', atIndex: number) {
+    const blockId = Date.now().toString(36) + Math.random().toString(36).slice(2);
+    const newBlock: ContentBlock = { id: blockId, type };
+    const next = [
+      ...contentBlocks.slice(0, atIndex),
+      newBlock,
+      ...contentBlocks.slice(atIndex),
+    ];
+    setContentBlocks(next);
+    scheduleAutoSave(next);
+  }
+
+  function removeBlock(blockId: string) {
+    const next = contentBlocks.filter(b => b.id !== blockId);
+    setContentBlocks(next);
+    scheduleAutoSave(next);
+  }
+
+  function updateBlock(blockId: string, data: Partial<ContentBlock>) {
+    const next = contentBlocks.map(b => b.id === blockId ? { ...b, ...data } : b);
+    setContentBlocks(next);
+    scheduleAutoSave(next);
+  }
+
+  // ── Background / keyboard shortcuts ──────────────────────────────────────
   useEffect(() => {
     setNetworkState('conversation');
     if (item) setPageBackground(item.accent_color || item.background_color);
@@ -49,6 +191,13 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      // Don't hijack keyboard shortcuts when focus is inside an editable element
+      // (inputs, textareas, Tiptap contenteditable, etc.)
+      const el = document.activeElement as HTMLElement | null;
+      if (!el) return;
+      const tag = el.tagName.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || el.contentEditable === 'true') return;
+
       if (e.key === 'Escape') navigate(listPath);
       if (e.key === 'ArrowLeft' && prevItem) navigate(`${detailPath}/${prevItem.id}`);
       if (e.key === 'ArrowRight' && nextItem) navigate(`${detailPath}/${nextItem.id}`);
@@ -66,7 +215,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
     <PageTransition>
       <div className="absolute inset-0 overflow-y-auto">
 
-        {/* Sticky header */}
+        {/* ── Sticky header ─────────────────────────────────────────────── */}
         <motion.div
           className="sticky top-0 flex items-center justify-center px-6 py-5 gap-6"
           animate={{ backgroundColor: accentColor }}
@@ -97,7 +246,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           </motion.button>
         </motion.div>
 
-        {/* Close button — fixed top-right, next to Edit */}
+        {/* ── Close button (fixed, next to Edit) ────────────────────────── */}
         <motion.button
           whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
           onClick={() => navigate(listPath)}
@@ -106,8 +255,8 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           <X size={16} strokeWidth={1.5} />
         </motion.button>
 
-        {/* Hero image or placeholder */}
-        <div className="px-8 pb-4">
+        {/* ── Hero image ────────────────────────────────────────────────── */}
+        <div className="px-8 pb-4 pt-6">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -115,8 +264,12 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
             className="relative mx-auto max-w-[760px]"
           >
             {item.hero_image ? (
-              <img src={item.hero_image} alt={item.name}
-                className="w-full rounded-[12px] object-cover" style={{ maxHeight: 420 }} />
+              <img
+                src={item.hero_image}
+                alt={item.name}
+                className="w-full rounded-[12px] object-cover"
+                style={{ maxHeight: 420 }}
+              />
             ) : (
               <div
                 className="w-full rounded-[12px] overflow-hidden"
@@ -139,13 +292,13 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           </motion.div>
         </div>
 
-        {/* Description */}
+        {/* ── Description ───────────────────────────────────────────────── */}
         {paragraphs.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.15 }}
-            className="px-8 py-8 max-w-[760px] mx-auto"
+            className="px-8 py-6 max-w-[760px] mx-auto"
           >
             {paragraphs.map((p, i) => (
               <p key={i} className="text-white/65 text-[0.9375rem] leading-[1.7] mb-4 last:mb-0"
@@ -156,33 +309,104 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           </motion.div>
         )}
 
-        {/* Content blocks */}
-        {item.content_blocks?.length > 0 && (
-          <div className="px-8 pb-16 max-w-[760px] mx-auto">
-            {item.content_blocks.map((block) => (
-              <div key={block.id} className="mb-8">
-                {block.type === 'richtext' && block.html && (
-                  <div
-                    className="prose prose-invert prose-lg max-w-none text-white/70"
-                    style={{ fontFamily: "'Source Sans 3', sans-serif" }}
-                    dangerouslySetInnerHTML={{ __html: block.html }}
-                  />
-                )}
-                {block.type === 'image' && block.url && (
-                  <figure>
-                    <img src={block.url} alt={block.caption || ''} className="w-full rounded-[12px]" />
-                    {block.caption && (
-                      <figcaption className="text-white/35 text-[0.8rem] mt-2 text-center"
-                        style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
-                        {block.caption}
-                      </figcaption>
+        {/* ── Content blocks ────────────────────────────────────────────── */}
+        <div className="px-8 pb-20 max-w-[760px] mx-auto">
+          {editorMode ? (
+            /* ── Edit mode ── */
+            <>
+              <AddBlockButton onAdd={type => insertBlock(type, 0)} />
+
+              {contentBlocks.length === 0 && (
+                <p className="text-center text-white/20 text-[0.82rem] py-6 select-none"
+                  style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                  Hover the line above and click + to add content
+                </p>
+              )}
+
+              {contentBlocks.map((block, idx) => (
+                <div key={block.id} className="relative group/block mb-1">
+
+                  {/* Delete button */}
+                  <button
+                    onClick={() => removeBlock(block.id)}
+                    className="absolute top-2 right-2 z-10 size-[22px] flex items-center justify-center rounded-full bg-[rgba(10,10,10,0.7)] border border-white/10 text-white/30 hover:text-[#d25d5f] hover:border-[#d25d5f]/40 hover:bg-[rgba(10,10,10,0.9)] transition-all opacity-0 group-hover/block:opacity-100"
+                  >
+                    <X size={11} strokeWidth={2} />
+                  </button>
+
+                  {/* Block content */}
+                  <div className="mb-1">
+                    {block.type === 'richtext' ? (
+                      <RichTextEditor
+                        content={block.html || ''}
+                        onChange={html => updateBlock(block.id, { html })}
+                        placeholder="Write something…"
+                      />
+                    ) : (
+                      <ImageDropZone
+                        value={block.url || ''}
+                        onChange={url => updateBlock(block.id, { url })}
+                        caption={block.caption}
+                        onCaptionChange={caption => updateBlock(block.id, { caption })}
+                      />
                     )}
-                  </figure>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+                  </div>
+
+                  {/* Add-block button after this block */}
+                  <AddBlockButton onAdd={type => insertBlock(type, idx + 1)} />
+                </div>
+              ))}
+            </>
+          ) : (
+            /* ── Read-only mode ── */
+            <>
+              {contentBlocks.map(block => (
+                <div key={block.id} className="mb-8">
+                  {block.type === 'richtext' && block.html && (
+                    <div
+                      className="prose prose-invert prose-lg max-w-none text-white/70"
+                      style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                      dangerouslySetInnerHTML={{ __html: block.html }}
+                    />
+                  )}
+                  {block.type === 'image' && block.url && (
+                    <figure>
+                      <img src={block.url} alt={block.caption || ''} className="w-full rounded-[12px]" />
+                      {block.caption && (
+                        <figcaption
+                          className="text-white/35 text-[0.8rem] mt-2 text-center"
+                          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                        >
+                          {block.caption}
+                        </figcaption>
+                      )}
+                    </figure>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+
+        {/* ── Auto-save status toast ─────────────────────────────────────── */}
+        <AnimatePresence>
+          {editorMode && saveStatus !== 'idle' && (
+            <motion.div
+              key="save-status"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.2 }}
+              className="fixed bottom-7 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-[rgba(8,8,8,0.88)] backdrop-blur-sm border border-white/10 text-[0.75rem] pointer-events-none"
+              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+            >
+              {saveStatus === 'unsaved' && <span className="text-white/40">● Unsaved changes</span>}
+              {saveStatus === 'saving'  && <span className="text-white/50">↑ Saving…</span>}
+              {saveStatus === 'saved'   && <span className="text-white/60">✓ Saved</span>}
+              {saveStatus === 'error'   && <span className="text-[#d25d5f]">⚠ Save failed</span>}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
       </div>
     </PageTransition>

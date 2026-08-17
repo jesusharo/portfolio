@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router';
 import { verifyToken } from '../../lib/api';
 import AuthModal from './AuthModal';
 import ProjectList from './ProjectList';
@@ -15,6 +16,7 @@ type View = 'list' | 'detail';
 interface Project {
   id: string;
   name: string;
+  type: string;
   hidden: boolean;
   background_color: string;
   [key: string]: unknown;
@@ -26,6 +28,8 @@ interface Props {
 }
 
 export default function EditorDrawer({ open, onClose }: Props) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [authed, setAuthed] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [tab, setTab] = useState<Tab>('ui');
@@ -34,20 +38,41 @@ export default function EditorDrawer({ open, onClose }: Props) {
   const [uiProjects, setUiProjects] = useState<Project[]>([]);
   const [caseProjects, setCaseProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
-  const { bumpDataVersion } = useNetworkState();
+  const { bumpDataVersion, setEditorMode } = useNetworkState();
 
-  // Verify token when drawer opens
+  // Verify token when drawer opens — editorMode is only enabled after auth confirmation
   useEffect(() => {
     if (!open) return;
     verifyToken().then(valid => {
       if (valid) {
         setAuthed(true);
+        setEditorMode(true);
         loadProjects();
       } else {
         setShowAuth(true);
       }
     });
   }, [open]);
+
+  // Auto-detect current project from URL — syncs the drawer when navigating
+  useEffect(() => {
+    if (!open || !authed) return;
+    if (!uiProjects.length && !caseProjects.length) return;
+
+    const match = location.pathname.match(/^\/(projects|cases)\/(.+)/);
+    if (!match) return; // Not on a detail page — leave drawer as-is
+
+    const [, section, projectId] = match;
+    const isCase = section === 'cases';
+    const list = isCase ? caseProjects : uiProjects;
+    const found = list.find(p => p.id === projectId);
+
+    if (found) {
+      setTab(isCase ? 'cases' : 'ui');
+      setSelectedProject(found);
+      setView('detail');
+    }
+  }, [open, authed, location.pathname, uiProjects, caseProjects]);
 
   async function loadProjects() {
     setLoading(true);
@@ -63,6 +88,7 @@ export default function EditorDrawer({ open, onClose }: Props) {
   function handleAuthSuccess() {
     setShowAuth(false);
     setAuthed(true);
+    setEditorMode(true);
     loadProjects();
   }
 
@@ -75,6 +101,9 @@ export default function EditorDrawer({ open, onClose }: Props) {
   function handleSelectProject(p: Project) {
     setSelectedProject(p);
     setView('detail');
+    // Navigate to the project's detail page so content can be edited inline
+    const urlSection = p.type === 'case_study' ? 'cases' : 'projects';
+    navigate(`/${urlSection}/${p.id}`);
   }
 
   function handleBack() {
@@ -110,13 +139,15 @@ export default function EditorDrawer({ open, onClose }: Props) {
       <AnimatePresence>
         {open && authed && (
           <>
-            {/* Backdrop */}
-            <motion.div
-              className="fixed inset-0 z-[50] bg-black/30 backdrop-blur-[2px]"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              onClick={handleClose}
-            />
+            {/* Backdrop — only on list view; detail view leaves the page interactive */}
+            {view === 'list' && (
+              <motion.div
+                className="fixed inset-0 z-[49] bg-black/20 backdrop-blur-[1px]"
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                onClick={handleClose}
+              />
+            )}
 
             {/* Drawer */}
             <motion.div

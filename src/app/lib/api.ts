@@ -44,10 +44,12 @@ export async function getProject(id: string) {
 }
 
 // Projects (editor)
-export async function getEditorProjects(type?: string) {
+export async function getEditorProjects(type?: string): Promise<unknown[]> {
   const url = type ? `${BASE}/projects/editor/all?type=${type}` : `${BASE}/projects/editor/all`;
   const res = await fetch(url, { headers: authHeaders() });
-  return res.json();
+  if (!res.ok) throw new Error(`Editor fetch failed: ${res.status}`);
+  const data = await res.json();
+  return Array.isArray(data) ? data : [];
 }
 
 export async function createProject(type: string, name: string) {

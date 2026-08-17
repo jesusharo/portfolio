@@ -9,6 +9,8 @@ interface NetworkStateContextValue {
   setPageBackground: (color: string | null) => void;
   dataVersion: number;
   bumpDataVersion: () => void;
+  editorMode: boolean;
+  setEditorMode: (m: boolean) => void;
 }
 
 const NetworkStateContext = createContext<NetworkStateContextValue>({
@@ -18,15 +20,23 @@ const NetworkStateContext = createContext<NetworkStateContextValue>({
   setPageBackground: () => {},
   dataVersion: 0,
   bumpDataVersion: () => {},
+  editorMode: false,
+  setEditorMode: () => {},
 });
 
 export function NetworkStateProvider({ children }: { children: ReactNode }) {
   const [networkState, setNetworkState] = useState<NetworkState>('idle');
   const [pageBackground, setPageBackground] = useState<string | null>(null);
   const [dataVersion, setDataVersion] = useState(0);
+  const [editorMode, setEditorMode] = useState(false);
   const bumpDataVersion = () => setDataVersion(v => v + 1);
   return (
-    <NetworkStateContext.Provider value={{ networkState, setNetworkState, pageBackground, setPageBackground, dataVersion, bumpDataVersion }}>
+    <NetworkStateContext.Provider value={{
+      networkState, setNetworkState,
+      pageBackground, setPageBackground,
+      dataVersion, bumpDataVersion,
+      editorMode, setEditorMode,
+    }}>
       {children}
     </NetworkStateContext.Provider>
   );

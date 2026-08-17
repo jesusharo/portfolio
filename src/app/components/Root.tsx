@@ -9,13 +9,24 @@ import { NetworkStateProvider, useNetworkState } from '../context/NetworkStateCo
 
 function RootInner() {
   const location = useLocation();
-  const { pageBackground, setPageBackground, bumpDataVersion } = useNetworkState();
+  const { pageBackground, setPageBackground, bumpDataVersion, setEditorMode } = useNetworkState();
   const [editorOpen, setEditorOpen] = useState(false);
   const isDetailRoute = /^\/(projects|cases)\/.+/.test(location.pathname);
 
   useEffect(() => {
     if (!isDetailRoute) setPageBackground(null);
   }, [location.pathname]);
+
+  function openEditor() {
+    setEditorOpen(true);
+    // editorMode is set only after the drawer confirms a valid token
+  }
+
+  function closeEditor() {
+    setEditorOpen(false);
+    setEditorMode(false);
+    bumpDataVersion();
+  }
 
   return (
     <div className="relative w-full h-full overflow-hidden bg-[#1c1c1c]">
@@ -39,9 +50,9 @@ function RootInner() {
       {/* Navigation */}
       <MainMenu />
 
-      {/* Editor button — top-right, shifts left on detail pages to make room for X */}
+      {/* Editor button — shifts left on detail pages to make room for X */}
       <motion.button
-        onClick={() => setEditorOpen(true)}
+        onClick={openEditor}
         className={`fixed top-5 z-30 flex items-center gap-2 px-3 py-2 rounded-full bg-[rgba(255,255,255,0.12)] hover:bg-[rgba(255,255,255,0.22)] border border-white/15 text-white/60 hover:text-white transition-all backdrop-blur-sm ${isDetailRoute ? 'right-[60px]' : 'right-5'}`}
         whileHover={{ scale: 1.04 }}
         whileTap={{ scale: 0.96 }}
@@ -52,7 +63,7 @@ function RootInner() {
       </motion.button>
 
       {/* Content editor drawer */}
-      <EditorDrawer open={editorOpen} onClose={() => { setEditorOpen(false); bumpDataVersion(); }} />
+      <EditorDrawer open={editorOpen} onClose={closeEditor} />
     </div>
   );
 }
