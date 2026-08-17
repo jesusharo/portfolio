@@ -153,7 +153,7 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
   const labelCls = 'text-white/40 text-[0.72rem] uppercase tracking-wider font-["Source_Sans_3",sans-serif] mb-1 block';
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col flex-1 min-h-0">
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b border-white/10 shrink-0">
         <button onClick={onBack} className="text-white/40 hover:text-white transition-colors">
