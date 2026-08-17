@@ -56,16 +56,14 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
   }
 
   return (
-    <div className="flex flex-col items-start mb-4">
+    <div className="flex items-start gap-[10px] mb-4">
+      {/* Sparkle icon left of bubble */}
+      <SparkleIcon />
       {/* AI bubble */}
       <div className="bg-[rgba(38,38,38,0.88)] rounded-[20px] px-[20px] py-[14px] max-w-[65%]">
         <p className="text-[14px] text-white leading-[1.55] font-['Source_Sans_3',sans-serif]">
           {message.content}
         </p>
-      </div>
-      {/* Sparkle icon below-left */}
-      <div className="mt-[8px] ml-[6px]">
-        <SparkleIcon />
       </div>
     </div>
   );
