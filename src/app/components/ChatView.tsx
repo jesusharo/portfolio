@@ -76,6 +76,18 @@ export default function ChatView() {
           )}
         </main>
 
+        {/* AI Agent title — shown when no messages */}
+        {!hasMessages && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none" style={{ paddingBottom: '80px' }}>
+            <h2
+              className="text-white/40 text-[0.72rem] font-semibold tracking-[0.22em] uppercase select-none"
+              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+            >
+              AI Agent
+            </h2>
+          </div>
+        )}
+
         <ChatInput
           onSendMessage={sendMessage}
           centered={!hasMessages}
