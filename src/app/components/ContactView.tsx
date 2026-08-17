@@ -85,7 +85,7 @@ export default function ContactView() {
               className="text-white/60"
               style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '1rem' }}
             >
-              Message sent — I'll be in touch soon.
+              Thanks for reaching out!<br />Your message has been sent, and I'll get back to you as soon as possible.
             </motion.p>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
