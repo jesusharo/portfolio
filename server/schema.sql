@@ -31,3 +31,11 @@ CREATE TABLE IF NOT EXISTS about_content (
 );
 
 INSERT INTO about_content (id, content_html) VALUES (1, '') ON CONFLICT (id) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS images (
+  id UUID PRIMARY KEY,
+  filename TEXT NOT NULL DEFAULT '',
+  mime_type TEXT NOT NULL,
+  data BYTEA NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);

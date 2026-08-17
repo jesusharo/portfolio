@@ -15,7 +15,7 @@ function getToken() {
 export async function uploadImage(file: File): Promise<string> {
   const form = new FormData();
   form.append('file', file);
-  const res = await fetch('/api/upload', {
+  const res = await fetch('/api/images/editor/upload', {
     method: 'POST',
     headers: { Authorization: `Bearer ${getToken()}` },
     body: form,
