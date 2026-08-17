@@ -143,6 +143,11 @@ export default function ChatInput({ onSendMessage, disabled, centered = false, o
           ))}
         </div>
       )}
+
+      {/* Disclaimer */}
+      <p className="mt-3 text-center text-[0.72rem] leading-[1.5] font-['Source_Sans_3',sans-serif] text-[rgba(255,255,255,0.25)] px-2">
+        Este agente está aquí para ayudarte a explorar mis proyectos, no es un sustituto de una entrevista.
+      </p>
     </div>
   );
 }
