@@ -145,7 +145,7 @@ export default function ChatInput({ onSendMessage, disabled, centered = false, o
       )}
 
       {/* Disclaimer */}
-      <p className="mt-3 text-center text-[0.75rem] leading-[1.5] font-['Source_Sans_3',sans-serif] text-[rgba(255,255,255,0.25)] px-2">
+      <p className="mt-3 text-center text-[0.85rem] leading-[1.5] font-['Source_Sans_3',sans-serif] text-[rgba(255,255,255,0.25)] px-2">
         This agent is here to help you explore my projects — it's not a replacement for an interview.
       </p>
     </div>
