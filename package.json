@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "concurrently \"node server/index.mjs\" \"vite\" --names \"api,vite\" --prefix-colors \"cyan,magenta\"",
+    "dev": "concurrently \"node server/index.mjs\" \"vite --port 5000 --strictPort\" --names \"api,vite\" --prefix-colors \"cyan,magenta\"",
     "dev:vite": "vite",
     "dev:api": "node server/index.mjs"
   },
@@ -62,6 +62,7 @@
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "0.487.0",
     "motion": "12.23.24",
+    "multer": "^2.2.0",
     "next-themes": "0.4.6",
     "pg": "^8.23.0",
     "react-day-picker": "8.10.1",

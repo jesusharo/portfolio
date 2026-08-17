@@ -4,9 +4,11 @@ import { query } from './db.mjs';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import path from 'path';
 import authRoutes from './routes/auth.mjs';
 import projectRoutes from './routes/projects.mjs';
 import aboutRoutes from './routes/about.mjs';
+import uploadRoutes from './routes/upload.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -29,6 +31,10 @@ async function migrate() {
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/about', aboutRoutes);
+app.use('/api/upload', uploadRoutes);
+
+// Serve uploaded files as static
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 app.get('/api/health', (_, res) => res.json({ ok: true }));
 

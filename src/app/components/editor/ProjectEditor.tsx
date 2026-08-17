@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Trash2, Plus, GripVertical, X } from 'lucide-react';
 import { updateProject, deleteProject } from '../../lib/api';
 import RichTextEditor from './RichTextEditor';
+import ImageUploadInput, { uploadImage } from './ImageUploadInput';
 import {
   DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent,
 } from '@dnd-kit/core';
@@ -62,20 +63,17 @@ function SortableBlock({ block, onUpdate, onDelete }: {
           />
         ) : (
           <div className="rounded-[12px] border border-white/10 bg-white/5 p-3 flex flex-col gap-2">
-            <input
-              type="url"
+            <ImageUploadInput
               value={block.url || ''}
-              onChange={e => onUpdate(block.id, { url: e.target.value })}
-              placeholder="Image URL"
-              className="bg-transparent text-white/80 text-[0.85rem] outline-none placeholder:text-white/25 font-['Source_Sans_3',sans-serif] border-b border-white/10 pb-2"
+              onChange={url => onUpdate(block.id, { url })}
+              placeholder="Paste URL or upload…"
             />
-            {block.url && <img src={block.url} alt="" className="rounded-[8px] max-h-[200px] object-cover w-full" />}
             <input
               type="text"
               value={block.caption || ''}
               onChange={e => onUpdate(block.id, { caption: e.target.value })}
               placeholder="Caption (optional)"
-              className="bg-transparent text-white/40 text-[0.75rem] outline-none placeholder:text-white/20 font-['Source_Sans_3',sans-serif]"
+              className="bg-transparent text-white/40 text-[0.75rem] outline-none placeholder:text-white/20 font-['Source_Sans_3',sans-serif] border-t border-white/10 pt-2"
             />
           </div>
         )}
@@ -216,18 +214,22 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
         </div>
 
         {/* Images */}
-        <div className="flex flex-col gap-3">
-          {([
-            ['logo_grid_image', 'Grid logo URL'],
-            ['logo_header_image', 'Header logo URL'],
-            ['hero_image', 'Hero image URL'],
-          ] as const).map(([field, label]) => (
-            <div key={field}>
-              <label className={labelCls}>{label}</label>
-              <input className={inputCls} type="url" value={(draft as any)[field]}
-                onChange={e => set({ [field]: e.target.value } as any)} placeholder="https://…" />
-            </div>
-          ))}
+        <div className="flex flex-col gap-4">
+          <ImageUploadInput
+            label="Grid logo"
+            value={draft.logo_grid_image}
+            onChange={url => set({ logo_grid_image: url })}
+          />
+          <ImageUploadInput
+            label="Header logo"
+            value={draft.logo_header_image}
+            onChange={url => set({ logo_header_image: url })}
+          />
+          <ImageUploadInput
+            label="Hero image"
+            value={draft.hero_image}
+            onChange={url => set({ hero_image: url })}
+          />
         </div>
 
         {/* Content blocks */}
