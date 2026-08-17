@@ -183,7 +183,6 @@ export default function AboutView() {
             <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
               {[
                 { label: 'jharolozano@gmail.com', href: 'mailto:jharolozano@gmail.com' },
-                { label: 'haroknow.myportfolio.com', href: 'https://haroknow.myportfolio.com' },
                 { label: '+52 312 124 8323', href: 'tel:+523121248323' },
               ].map(link => (
                 <a
