@@ -9,6 +9,7 @@ import authRoutes from './routes/auth.mjs';
 import projectRoutes from './routes/projects.mjs';
 import aboutRoutes from './routes/about.mjs';
 import uploadRoutes from './routes/upload.mjs';
+import imageRoutes from './routes/images.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -32,6 +33,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/about', aboutRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/images', imageRoutes);
 
 // Serve uploaded files as static
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));

@@ -3,8 +3,8 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
-import { Bold, Italic, List, ListOrdered, Heading2, Link as LinkIcon, Image as ImageIcon, Minus, Upload, Loader2 } from 'lucide-react';
-import { uploadImage } from './ImageUploadInput';
+import { Bold, Italic, List, ListOrdered, Heading2, Link as LinkIcon, Image as ImageIcon, Minus, Loader2 } from 'lucide-react';
+import { uploadImage } from '../../lib/api';
 
 interface Props {
   content: string;
@@ -15,7 +15,7 @@ interface Props {
 export default function RichTextEditor({ content, onChange, placeholder }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-
+  const [uploadError, setUploadError] = useState('');
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -33,28 +33,19 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
     if (url) editor?.chain().focus().setLink({ href: url }).run();
   }
 
-  function addImageUrl() {
-    const url = window.prompt('Image URL:');
-    if (url) editor?.chain().focus().setImage({ src: url }).run();
-  }
-
-  async function handleImageFile(file: File) {
-    if (!file.type.startsWith('image/')) return;
+  async function handleImageFile(file: File | undefined | null) {
+    if (!file) return;
+    setUploadError('');
     setUploading(true);
     try {
-      const url = await uploadImage(file);
+      const { url } = await uploadImage(file);
       editor?.chain().focus().setImage({ src: url }).run();
     } catch (e) {
-      console.error('Upload failed', e);
+      setUploadError(e instanceof Error ? e.message : 'Upload failed');
     } finally {
       setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
     }
-  }
-
-  function handleFileInput(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) handleImageFile(file);
-    e.target.value = '';
   }
 
   const btn = (action: () => void, active: boolean, label: string, Icon: React.ElementType) => (
@@ -80,23 +71,19 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
         {btn(() => editor.chain().focus().toggleOrderedList().run(), editor.isActive('orderedList'), 'Ordered list', ListOrdered)}
         <div className="w-px bg-white/10 mx-1" />
         {btn(addLink, editor.isActive('link'), 'Link', LinkIcon)}
-        {btn(addImageUrl, false, 'Image URL', ImageIcon)}
-
-        {/* Upload image button */}
-        <button
-          type="button"
-          title="Upload image"
-          onClick={() => fileRef.current?.click()}
-          disabled={uploading}
-          className="p-1.5 rounded-[6px] transition-colors text-white/40 hover:text-white hover:bg-white/10 disabled:opacity-40"
-        >
-          {uploading
-            ? <Loader2 size={14} strokeWidth={1.5} className="animate-spin" />
-            : <Upload size={14} strokeWidth={1.5} />}
-        </button>
-
+        {btn(() => fileRef.current?.click(), false, 'Insert image', uploading ? () => <Loader2 size={14} className="animate-spin" /> : ImageIcon)}
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp,image/avif"
+          className="hidden"
+          onChange={e => handleImageFile(e.target.files?.[0])}
+        />
         {btn(() => editor.chain().focus().setHorizontalRule().run(), false, 'Divider', Minus)}
       </div>
+      {uploadError && (
+        <p className="px-3 py-1.5 text-[#d25d5f] text-[0.72rem] font-['Source_Sans_3',sans-serif] border-b border-white/10">{uploadError}</p>
+      )}
 
       {/* Editor area */}
       <div className="relative">
@@ -110,9 +97,6 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
           className="prose prose-invert prose-sm max-w-none px-4 py-3 text-white/80 text-[0.85rem] font-['Source_Sans_3',sans-serif] min-h-[120px] focus:outline-none [&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[120px]"
         />
       </div>
-
-      {/* Hidden file input */}
-      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileInput} />
     </div>
   );
 }

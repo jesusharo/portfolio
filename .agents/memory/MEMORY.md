@@ -2,3 +2,4 @@
 - [Image uploads](image-uploads.md) — multer saves to public/uploads/; served as static by Express; proxied via Vite /uploads; 10 MB limit, images only
 - [Editor Auth](editor-auth.md) — JWT passcode auth; EDITOR_PASSCODE + JWT_SECRET secrets required; token in localStorage
 - [DB Schema](db-schema.md) — projects table (ui_project|case_study) + about_content; DATABASE_URL is runtime-managed by Replit
+- [Image storage](image-storage.md) — no Object Storage bucket provisioned; editor images live as bytea in Postgres, served at /api/images/:id

@@ -97,3 +97,17 @@ export async function updateAbout(content_html: string) {
   if (!res.ok) throw new Error('Update failed');
   return res.json();
 }
+
+// Images (editor)
+export async function uploadImage(file: File): Promise<{ id: string; url: string }> {
+  const form = new FormData();
+  form.append('file', file);
+  const res = await fetch(`${BASE}/images/editor/upload`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${getToken()}` },
+    body: form,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Upload failed');
+  return data;
+}

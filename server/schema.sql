@@ -16,6 +16,14 @@ CREATE TABLE IF NOT EXISTS projects (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS images (
+  id UUID PRIMARY KEY,
+  filename TEXT NOT NULL DEFAULT '',
+  mime_type TEXT NOT NULL,
+  data BYTEA NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS about_content (
   id INTEGER PRIMARY KEY DEFAULT 1,
   content_html TEXT DEFAULT '',
