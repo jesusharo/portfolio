@@ -27,10 +27,14 @@ CREATE TABLE IF NOT EXISTS images (
 CREATE TABLE IF NOT EXISTS about_content (
   id INTEGER PRIMARY KEY DEFAULT 1,
   content_html TEXT DEFAULT '',
+  resume_content TEXT DEFAULT '',
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 INSERT INTO about_content (id, content_html) VALUES (1, '') ON CONFLICT (id) DO NOTHING;
+
+-- Add resume_content if it didn't exist yet (idempotent)
+ALTER TABLE about_content ADD COLUMN IF NOT EXISTS resume_content TEXT DEFAULT '';
 
 CREATE TABLE IF NOT EXISTS images (
   id UUID PRIMARY KEY,

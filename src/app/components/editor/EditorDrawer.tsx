@@ -7,10 +7,11 @@ import AuthModal from './AuthModal';
 import ProjectList from './ProjectList';
 import ProjectEditor from './ProjectEditor';
 import AboutEditor from './AboutEditor';
+import ResumeEditor from './ResumeEditor';
 import { getEditorProjects } from '../../lib/api';
 import { useNetworkState } from '../../context/NetworkStateContext';
 
-type Tab = 'ui' | 'cases' | 'about';
+type Tab = 'ui' | 'cases' | 'about' | 'resume';
 type View = 'list' | 'detail';
 
 interface Project {
@@ -171,7 +172,7 @@ export default function EditorDrawer({ open, onClose }: Props) {
                 <>
                   {/* Tabs */}
                   <div className="flex gap-1 px-4 py-3 border-b border-white/10 shrink-0">
-                    {(['ui', 'cases', 'about'] as Tab[]).map(t => (
+                    {(['ui', 'cases', 'about', 'resume'] as Tab[]).map(t => (
                       <button
                         key={t}
                         onClick={() => setTab(t)}
@@ -179,7 +180,7 @@ export default function EditorDrawer({ open, onClose }: Props) {
                           tab === t ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'
                         }`}
                       >
-                        {t === 'ui' ? 'UI Projects' : t === 'cases' ? 'Case Studies' : 'About Me'}
+                        {t === 'ui' ? 'UI Projects' : t === 'cases' ? 'Case Studies' : t === 'about' ? 'About Me' : 'Resume'}
                       </button>
                     ))}
                   </div>
@@ -191,6 +192,8 @@ export default function EditorDrawer({ open, onClose }: Props) {
                       </div>
                     ) : tab === 'about' ? (
                       <AboutEditor />
+                    ) : tab === 'resume' ? (
+                      <ResumeEditor />
                     ) : (
                       <ProjectList
                         projects={activeProjects}

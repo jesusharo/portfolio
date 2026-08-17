@@ -1,53 +1,28 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import svgPaths from "../../imports/svg-qeyvz6rlpu";
 
 interface ChatInputProps {
-  onSendMessage: (message: string) => void;
+  onSendMessage: (message: string, isSuggestion?: boolean) => void;
   disabled?: boolean;
   centered?: boolean;
   onFocusChange?: (focused: boolean) => void;
+  suggestions?: string[];
 }
 
-const CATEGORIZED_SUGGESTIONS = [
-  {
-    category: "Sobre ti / panorama general",
-    questions: [
-      "¿Cuál es tu experiencia y a qué te dedicas?",
-      "¿Qué tipo de proyectos te interesa trabajar?",
-      "¿Cómo describirías tu proceso de trabajo?"
-    ]
-  },
-  {
-    category: "Sobre un proyecto específico",
-    questions: [
-      "¿Qué problema resolvía este proyecto?",
-      "¿Cuál fue tu rol en este proyecto?",
-      "¿Qué herramientas o tecnologías usaste aquí?",
-      "¿Qué fue lo más retador de este proyecto?",
-      "¿Qué resultado o impacto tuvo?"
-    ]
-  },
-  {
-    category: "Sobre habilidades / stack",
-    questions: [
-      "¿Con qué herramientas de diseño/desarrollo trabajas normalmente?",
-      "¿Tienes experiencia trabajando en equipo o con clientes directamente?"
-    ]
-  },
-  {
-    category: "Cierre / siguiente paso",
-    questions: [
-      "¿Cómo puedo contactarte?",
-      "¿Tienes disponibilidad para nuevos proyectos?"
-    ]
-  }
+const DEFAULT_SUGGESTIONS = [
+  "What's your background and experience?",
+  "What kind of projects do you enjoy working on?",
+  "Are you available for new projects?",
+  "How can I contact you?",
+  "What tools and software do you use?",
 ];
 
-export default function ChatInput({ onSendMessage, disabled, centered = false, onFocusChange }: ChatInputProps) {
+export default function ChatInput({ onSendMessage, disabled, centered = false, onFocusChange, suggestions }: ChatInputProps) {
   const [input, setInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  const pool = suggestions && suggestions.length > 0 ? suggestions : DEFAULT_SUGGESTIONS;
 
   useEffect(() => {
     const handleOutsidePointerDown = (event: PointerEvent) => {
@@ -56,7 +31,6 @@ export default function ChatInput({ onSendMessage, disabled, centered = false, o
         setShowSuggestions(false);
       }
     };
-
     document.addEventListener('pointerdown', handleOutsidePointerDown);
     return () => document.removeEventListener('pointerdown', handleOutsidePointerDown);
   }, []);
@@ -72,26 +46,24 @@ export default function ChatInput({ onSendMessage, disabled, centered = false, o
 
   const handleSuggestionClick = (suggestion: string) => {
     if (!disabled) {
-      onSendMessage(suggestion);
+      onSendMessage(suggestion, true); // isSuggestion=true — bypasses rate limit & topic filter
       setInput('');
       setShowSuggestions(false);
     }
   };
 
   const filteredSuggestions = useMemo(() => {
-    const allQuestions = CATEGORIZED_SUGGESTIONS.flatMap(cat => cat.questions);
-    if (!input.trim()) return allQuestions.slice(0, 5);
-    const lowerInput = input.toLowerCase();
-    return allQuestions.filter(q => q.toLowerCase().includes(lowerInput)).slice(0, 5);
-  }, [input]);
+    if (!input.trim()) return pool.slice(0, 5);
+    const lower = input.toLowerCase();
+    return pool.filter(q => q.toLowerCase().includes(lower)).slice(0, 5);
+  }, [input, pool]);
 
   return (
-    <div 
+    <div
       className={`-translate-x-1/2 absolute left-1/2 z-20 flex flex-col items-center w-full max-w-[600px] px-4 md:px-0 transition-all duration-500 ease-in-out ${
         centered ? 'top-1/2 -translate-y-1/2' : 'bottom-[160px] md:bottom-[80px]'
       }`}
     >
-      
       <form onSubmit={handleSubmit} className="w-full relative z-30">
         <div className="bg-[rgba(60,60,60,0.5)] backdrop-blur-xl content-stretch flex gap-[24px] items-center pl-[24px] pr-[8px] rounded-[32px] w-full mx-auto pt-[8px] pb-[8px]" style={{ boxShadow: '0px 4px 36px rgba(0,0,0,0.05), inset 0px 1px 0px rgba(255,255,255,0.10), inset 0px -1px 0px rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.08)' }}>
           <input
@@ -106,6 +78,7 @@ export default function ChatInput({ onSendMessage, disabled, centered = false, o
             onBlur={() => onFocusChange?.(false)}
             placeholder="Do you want to know anything in particular?"
             disabled={disabled}
+            maxLength={300}
             className="font-['Source_Sans_3',sans-serif] font-normal leading-[1.4] relative flex-1 text-[16px] text-white bg-transparent outline-none placeholder:text-[rgba(255,255,255,0.3)] disabled:opacity-50"
           />
           <button
@@ -122,7 +95,7 @@ export default function ChatInput({ onSendMessage, disabled, centered = false, o
         </div>
       </form>
 
-      {/* Suggestions — floating pills, above input when at bottom, below when centered */}
+      {/* Suggestion pills */}
       {showSuggestions && filteredSuggestions.length > 0 && (
         <div
           ref={suggestionsRef}

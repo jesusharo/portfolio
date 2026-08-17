@@ -100,6 +100,17 @@ export async function updateAbout(content_html: string) {
   return res.json();
 }
 
+// Resume
+export async function updateResume(resume_content: string) {
+  const res = await fetch(`${BASE}/about/resume`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify({ resume_content }),
+  });
+  if (!res.ok) throw new Error('Update failed');
+  return res.json();
+}
+
 // Images (editor)
 export async function uploadImage(file: File): Promise<{ id: string; url: string }> {
   const form = new FormData();

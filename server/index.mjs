@@ -11,6 +11,7 @@ import aboutRoutes from './routes/about.mjs';
 import uploadRoutes from './routes/upload.mjs';
 import imageRoutes from './routes/images.mjs';
 import contactRoutes from './routes/contact.mjs';
+import agentRoutes from './routes/agent.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -36,6 +37,7 @@ app.use('/api/about', aboutRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/agent', agentRoutes);
 
 // Serve uploaded files as static
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));

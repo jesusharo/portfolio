@@ -3,9 +3,9 @@ export type AgentType = 'search' | 'tools' | 'brain' | 'insights';
 export interface Message {
   id: string;
   content: string;
-  sender: 'user' | AgentType;
+  sender: 'user' | 'assistant';
   timestamp: Date;
-  agentName?: string;
+  isLoading?: boolean;
 }
 
 export interface Conversation {

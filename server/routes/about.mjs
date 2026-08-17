@@ -18,8 +18,11 @@ function requireAuth(req, res, next) {
 
 router.get('/', async (req, res) => {
   try {
-    const result = await query('SELECT content_html FROM about_content WHERE id = 1');
-    res.json({ content_html: result.rows[0]?.content_html || '' });
+    const result = await query('SELECT content_html, resume_content FROM about_content WHERE id = 1');
+    res.json({
+      content_html: result.rows[0]?.content_html || '',
+      resume_content: result.rows[0]?.resume_content || '',
+    });
   } catch (err) {
     res.status(500).json({ error: 'DB error' });
   }
@@ -31,6 +34,19 @@ router.put('/', requireAuth, async (req, res) => {
     await query(
       'UPDATE about_content SET content_html = $1, updated_at = NOW() WHERE id = 1',
       [content_html]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'DB error' });
+  }
+});
+
+router.put('/resume', requireAuth, async (req, res) => {
+  const { resume_content } = req.body;
+  try {
+    await query(
+      'UPDATE about_content SET resume_content = $1, updated_at = NOW() WHERE id = 1',
+      [resume_content ?? '']
     );
     res.json({ ok: true });
   } catch (err) {

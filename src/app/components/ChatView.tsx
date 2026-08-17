@@ -5,12 +5,38 @@ import MessageBubble from './MessageBubble';
 import ChatInput from './ChatInput';
 import PageTransition from './PageTransition';
 import LeaveAgentModal from './LeaveAgentModal';
+import ProjectModal from './ProjectModal';
 import { useNetworkState } from '../context/NetworkStateContext';
 
+interface SuggestionProject {
+  id: string;
+  type: string;
+  name: string;
+}
+
+function buildSuggestions(projects: SuggestionProject[]): string[] {
+  const general = [
+    "What's your background and experience?",
+    "What kind of projects do you enjoy working on?",
+    "Are you available for new projects?",
+    "How can I contact you?",
+    "What tools and software do you use?",
+  ];
+
+  const projectSuggestions = projects.flatMap(p => [
+    `What was ${p.name} about?`,
+    `What problem did ${p.name} solve?`,
+  ]).slice(0, 6);
+
+  return [...projectSuggestions, ...general];
+}
+
 export default function ChatView() {
-  const { activeConversation, sendMessage } = useChat();
+  const { activeConversation, sendMessage, loading } = useChat();
   const { setNetworkState } = useNetworkState();
   const [inputFocused, setInputFocused] = useState(false);
+  const [modalProjectId, setModalProjectId] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
 
   const hasMessages = !!(activeConversation && activeConversation.messages.length > 0);
 
@@ -18,38 +44,33 @@ export default function ChatView() {
     hasMessages && currentLocation.pathname !== nextLocation.pathname
   );
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Sync network state with current chat state
+  // Fetch dynamic suggestions from real content
   useEffect(() => {
-    if (hasMessages) {
-      setNetworkState('conversation');
-    } else if (inputFocused) {
-      setNetworkState('focused');
-    } else {
-      setNetworkState('idle');
-    }
-  }, [hasMessages, inputFocused]);
-
-  // Reset to idle on unmount
-  useEffect(() => {
-    return () => setNetworkState('idle');
+    fetch('/api/agent/suggestions')
+      .then(r => r.json())
+      .then(data => setSuggestions(buildSuggestions(data.projects || [])))
+      .catch(() => setSuggestions([]));
   }, []);
 
-  const scrollToBottom = () => {
-    const container = messagesContainerRef.current;
-    if (container) container.scrollTop = container.scrollHeight;
-  };
+  useEffect(() => {
+    if (hasMessages) setNetworkState('conversation');
+    else if (inputFocused) setNetworkState('focused');
+    else setNetworkState('idle');
+  }, [hasMessages, inputFocused]);
+
+  useEffect(() => () => setNetworkState('idle'), []);
 
   useEffect(() => {
-    scrollToBottom();
+    const container = messagesContainerRef.current;
+    if (container) container.scrollTop = container.scrollHeight;
   }, [activeConversation?.messages]);
 
   return (
     <PageTransition>
       <div className="relative size-full overflow-hidden">
 
-        {/* Radial gradient */}
+        {/* Radial gradient background */}
         <div className="absolute flex h-full items-center justify-center left-0 top-0 w-full z-0 pointer-events-none">
           <div className="flex-none rotate-180">
             <div className="h-full w-full" style={{
@@ -68,9 +89,12 @@ export default function ChatView() {
             >
               <div className="space-y-4">
                 {activeConversation.messages.map((message) => (
-                  <MessageBubble key={message.id} message={message} />
+                  <MessageBubble
+                    key={message.id}
+                    message={message}
+                    onOpenProject={setModalProjectId}
+                  />
                 ))}
-                <div ref={messagesEndRef} />
               </div>
             </div>
           )}
@@ -78,17 +102,24 @@ export default function ChatView() {
 
         <ChatInput
           onSendMessage={sendMessage}
+          disabled={loading}
           centered={!hasMessages}
-          onFocusChange={(focused) => {
-            setInputFocused(focused);
-          }}
+          suggestions={suggestions}
+          onFocusChange={setInputFocused}
         />
       </div>
 
+      {/* Leave confirmation modal */}
       <LeaveAgentModal
         open={blocker.state === 'blocked'}
         onConfirm={() => blocker.proceed?.()}
         onCancel={() => blocker.reset?.()}
+      />
+
+      {/* Project detail modal — overlays the chat without destroying it */}
+      <ProjectModal
+        projectId={modalProjectId}
+        onClose={() => setModalProjectId(null)}
       />
     </PageTransition>
   );
