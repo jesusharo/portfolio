@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, ArrowRight, Plus, AlignLeft, Image as ImageIcon, X, LayoutGrid, GalleryHorizontal } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Plus, AlignLeft, Image as ImageIcon, X, LayoutGrid, GalleryHorizontal, SeparatorHorizontal } from 'lucide-react';
 import PageTransition from './PageTransition';
 import { useNetworkState } from '../context/NetworkStateContext';
 import { getProjects, getEditorProjects, updateProject } from '../lib/api';
@@ -15,7 +15,7 @@ type SaveStatus = 'idle' | 'unsaved' | 'saving' | 'saved' | 'error';
 
 interface ContentBlock {
   id: string;
-  type: 'richtext' | 'image' | 'imagegrid' | 'carousel';
+  type: 'richtext' | 'image' | 'imagegrid' | 'carousel' | 'divider';
   // richtext
   html?: string;
   // image (single)
@@ -51,6 +51,7 @@ const BLOCK_OPTIONS: { type: BlockType; label: string; Icon: React.ElementType }
   { type: 'image',      label: 'Image',      Icon: ImageIcon },
   { type: 'imagegrid',  label: 'Grid',       Icon: LayoutGrid },
   { type: 'carousel',   label: 'Carousel',   Icon: GalleryHorizontal },
+  { type: 'divider',    label: 'Divider',    Icon: SeparatorHorizontal },
 ];
 
 function AddBlockButton({ onAdd }: { onAdd: (type: BlockType) => void }) {
@@ -80,11 +81,15 @@ function AddBlockButton({ onAdd }: { onAdd: (type: BlockType) => void }) {
               transition={{ duration: 0.12 }}
               className="absolute top-full left-1/2 -translate-x-1/2 mt-1 z-30 grid grid-cols-2 gap-1 bg-[rgba(14,14,14,0.98)] border border-white/15 rounded-xl p-1.5 shadow-2xl"
             >
-              {BLOCK_OPTIONS.map(({ type, label, Icon }) => (
+              {BLOCK_OPTIONS.map(({ type, label, Icon }, i) => (
                 <button
                   key={type}
                   onClick={() => { onAdd(type); setMenuOpen(false); }}
-                  className="flex items-center gap-2 px-3 py-2 rounded-[8px] hover:bg-white/10 text-white/60 hover:text-white text-[0.8rem] transition-colors whitespace-nowrap"
+                  className={`flex items-center gap-2 px-3 py-2 rounded-[8px] hover:bg-white/10 text-white/60 hover:text-white text-[0.8rem] transition-colors whitespace-nowrap ${
+                    i === BLOCK_OPTIONS.length - 1 && BLOCK_OPTIONS.length % 2 !== 0
+                      ? 'col-span-2 justify-center'
+                      : ''
+                  }`}
                   style={{ fontFamily: "'Source Sans 3', sans-serif" }}
                 >
                   <Icon size={13} strokeWidth={1.5} /> {label}
@@ -388,6 +393,11 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
                         onChange={images => updateBlock(block.id, { images })}
                       />
                     )}
+                    {block.type === 'divider' && (
+                      <div className="py-5 flex items-center px-2">
+                        <div className="flex-1 h-px bg-white/15 rounded-full" />
+                      </div>
+                    )}
                   </div>
 
                   {/* Add-block button after this block */}
@@ -430,6 +440,9 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
                     <CarouselBlock
                       images={(block.images || []) as CarouselImageItem[]}
                     />
+                  )}
+                  {block.type === 'divider' && (
+                    <hr className="border-0 border-t border-white/15 my-2" />
                   )}
                 </div>
               ))}
