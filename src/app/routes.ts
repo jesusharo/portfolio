@@ -23,6 +23,7 @@ export const router = createBrowserRouter([
       { path: "cases/:id", Component: ProjectDetailCases },
       { path: "contact", Component: ContactView },
       { path: "about", Component: AboutView },
+      { path: "login-editor", Component: () => null },
     ],
   },
 ]);

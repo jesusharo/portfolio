@@ -21,6 +21,14 @@ function RootInner() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const pendingEditMode = useRef(false);
 
+  // Secret entry point: navigating to /login-editor opens the drawer and redirects home
+  useEffect(() => {
+    if (location.pathname === '/login-editor') {
+      navigate('/', { replace: true });
+      setDrawerOpen(true);
+    }
+  }, [location.pathname]);
+
   const isDetailRoute = /^\/(projects|cases)\/.+/.test(location.pathname);
   const listPath = location.pathname.startsWith('/cases') ? '/cases' : '/projects';
 
@@ -114,17 +122,19 @@ function RootInner() {
           </motion.button>
         )}
 
-        {/* Content Editor — always visible; icon-only on detail pages */}
-        <motion.button
-          onClick={openDrawer}
-          className={`${pillBase} ${pillDefault}`}
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.96 }}
-          title="Content Editor"
-        >
-          <SquarePen size={15} strokeWidth={1.5} />
-          {!isDetailRoute && <span>Content Editor</span>}
-        </motion.button>
+        {/* Content Editor — only visible after authentication */}
+        {editorAuthed && (
+          <motion.button
+            onClick={openDrawer}
+            className={`${pillBase} ${pillDefault}`}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            title="Content Editor"
+          >
+            <SquarePen size={15} strokeWidth={1.5} />
+            {!isDetailRoute && <span>Content Editor</span>}
+          </motion.button>
+        )}
 
         {/* Close (X) — only on project detail pages */}
         {isDetailRoute && (
