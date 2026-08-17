@@ -73,9 +73,9 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
             <motion.button
               whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
               onClick={() => prevItem ? navigate(`${detailPath}/${prevItem.id}`) : navigate(listPath)}
-              className="size-[28px] flex items-center justify-center text-white/50 hover:text-white transition-colors"
+              className="size-[36px] flex items-center justify-center rounded-full bg-[rgba(255,255,255,0.2)] text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.35)] transition-colors"
             >
-              <ArrowLeft size={16} strokeWidth={1.5} />
+              <ArrowLeft size={20} strokeWidth={1.5} />
             </motion.button>
 
             <h1
@@ -88,9 +88,9 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
             <motion.button
               whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
               onClick={() => nextItem ? navigate(`${detailPath}/${nextItem.id}`) : navigate(listPath)}
-              className="size-[28px] flex items-center justify-center text-white/50 hover:text-white transition-colors"
+              className="size-[36px] flex items-center justify-center rounded-full bg-[rgba(255,255,255,0.2)] text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.35)] transition-colors"
             >
-              <ArrowRight size={16} strokeWidth={1.5} />
+              <ArrowRight size={20} strokeWidth={1.5} />
             </motion.button>
           </div>
 
