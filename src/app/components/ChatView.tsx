@@ -1,18 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
+import { useBlocker } from 'react-router';
 import { useChat } from '../hooks/useChat';
 import MessageBubble from './MessageBubble';
 import ChatInput from './ChatInput';
 import PageTransition from './PageTransition';
+import LeaveAgentModal from './LeaveAgentModal';
 import { useNetworkState } from '../context/NetworkStateContext';
 
 export default function ChatView() {
   const { activeConversation, sendMessage } = useChat();
   const { setNetworkState } = useNetworkState();
   const [inputFocused, setInputFocused] = useState(false);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const hasMessages = !!(activeConversation && activeConversation.messages.length > 0);
+
+  const blocker = useBlocker(({ currentLocation, nextLocation }) =>
+    hasMessages && currentLocation.pathname !== nextLocation.pathname
+  );
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Sync network state with current chat state
   useEffect(() => {
@@ -78,6 +84,12 @@ export default function ChatView() {
           }}
         />
       </div>
+
+      <LeaveAgentModal
+        open={blocker.state === 'blocked'}
+        onConfirm={() => blocker.proceed?.()}
+        onCancel={() => blocker.reset?.()}
+      />
     </PageTransition>
   );
 }
