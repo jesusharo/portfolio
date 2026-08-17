@@ -75,7 +75,7 @@ export default function ContactView() {
               letterSpacing: '0.01em',
             }}
           >
-            Contact
+            {status === 'sent' ? 'Thanks for reaching out!' : 'Contact'}
           </h1>
 
           {status === 'sent' ? (
