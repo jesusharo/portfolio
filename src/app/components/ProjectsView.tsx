@@ -25,7 +25,7 @@ export default function ProjectsView() {
   return (
     <PageTransition>
       <div className="absolute inset-0 flex items-center justify-center p-8 md:pl-24">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-[640px]">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full max-w-[320px]">
           {projects.map((project, i) => (
             <motion.button
               key={project.id}
