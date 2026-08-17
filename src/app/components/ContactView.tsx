@@ -63,11 +63,11 @@ export default function ContactView() {
     <PageTransition>
       <div className="absolute inset-0 overflow-y-auto">
         <div className="min-h-full flex items-center justify-center px-8 py-16">
-        <div className="w-full max-w-[480px]">
+        <div className={`w-full max-w-[480px] ${status === 'sent' ? 'text-center' : ''}`}>
 
           {/* Title */}
           <h1
-            className="text-white mb-10"
+            className={`text-white ${status === 'sent' ? 'mb-3' : 'mb-10'}`}
             style={{
               fontFamily: "'Source Sans 3', sans-serif",
               fontSize: '2rem',
