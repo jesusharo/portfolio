@@ -1,4 +1,4 @@
-import { BookMarked, Mail, Sparkles, Tags } from 'lucide-react';
+import { BookMarked, Mail, Sparkles, PenTool } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router';
 
 function AboutMeIcon({ className }: { className?: string }) {
@@ -28,7 +28,7 @@ export default function MainMenu() {
   const location = useLocation();
 
   const links = [
-    { id: 'projects', label: 'UI projects',    icon: Tags,        path: '/projects' },
+    { id: 'projects', label: 'UI projects',    icon: PenTool,     path: '/projects' },
     { id: 'cases',    label: 'Case studies',   icon: BookMarked,  path: '/cases' },
     { id: 'agent',    label: 'Agent',          icon: Sparkles,    path: '/' },
     { id: 'about',    label: 'About me',       icon: AboutMeIcon, path: '/about' },
