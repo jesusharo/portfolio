@@ -9,7 +9,7 @@ import { NetworkStateProvider, useNetworkState } from '../context/NetworkStateCo
 
 function RootInner() {
   const location = useLocation();
-  const { pageBackground, setPageBackground } = useNetworkState();
+  const { pageBackground, setPageBackground, bumpDataVersion } = useNetworkState();
   const [editorOpen, setEditorOpen] = useState(false);
   const isDetailRoute = /^\/(projects|cases)\/.+/.test(location.pathname);
 
@@ -52,7 +52,7 @@ function RootInner() {
       </motion.button>
 
       {/* Content editor drawer */}
-      <EditorDrawer open={editorOpen} onClose={() => setEditorOpen(false)} />
+      <EditorDrawer open={editorOpen} onClose={() => { setEditorOpen(false); bumpDataVersion(); }} />
     </div>
   );
 }

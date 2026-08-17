@@ -116,7 +116,7 @@ export default function EditorDrawer({ open, onClose }: Props) {
 
             {/* Drawer */}
             <motion.div
-              className="fixed top-0 right-0 h-full w-full max-w-[400px] z-[50] bg-[rgba(18,18,18,0.97)] border-l border-white/10 flex flex-col"
+              className="fixed top-0 right-0 h-full w-full max-w-[400px] z-[50] bg-[rgba(18,18,18,0.97)] border-l border-white/10 flex flex-col overflow-hidden"
               style={{ boxShadow: '-24px 0 60px rgba(0,0,0,0.4)' }}
               initial={{ x: '100%' }}
               animate={{ x: 0 }}

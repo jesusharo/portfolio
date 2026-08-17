@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { motion } from 'motion/react';
 import PageTransition from './PageTransition';
 import { getProjects } from '../lib/api';
+import { useNetworkState } from '../context/NetworkStateContext';
 
 interface Project {
   id: string;
@@ -15,10 +16,11 @@ interface Project {
 export default function CaseStudiesView() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
+  const { dataVersion } = useNetworkState();
 
   useEffect(() => {
     getProjects('case_study').then(setProjects).catch(() => {});
-  }, []);
+  }, [dataVersion]);
 
   return (
     <PageTransition>
