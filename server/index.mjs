@@ -15,7 +15,8 @@ import agentRoutes from './routes/agent.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
-const PORT = process.env.API_PORT || 3001;
+const PORT = process.env.PORT || process.env.API_PORT || 3001;
+const isProd = process.env.NODE_ENV === 'production';
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '10mb' }));
@@ -43,6 +44,15 @@ app.use('/api/agent', agentRoutes);
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 app.get('/api/health', (_, res) => res.json({ ok: true }));
+
+// In production, serve the Vite build and handle SPA routing
+if (isProd) {
+  const distPath = path.join(__dirname, '../dist');
+  app.use(express.static(distPath));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
 
 migrate().then(() => {
   app.listen(PORT, '0.0.0.0', () => {
