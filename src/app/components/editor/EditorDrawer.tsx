@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X } from 'lucide-react';
+import { X, LogOut } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router';
 import { verifyToken } from '../../lib/api';
 import AuthModal from './AuthModal';
@@ -99,6 +99,15 @@ export default function EditorDrawer({ open, onClose }: Props) {
     setSelectedProject(null);
   }
 
+  function handleLogout() {
+    localStorage.removeItem('editor_token');
+    setAuthed(false);
+    setEditorAuthed(false);
+    setView('list');
+    setSelectedProject(null);
+    onClose();
+  }
+
   function handleSelectProject(p: Project) {
     setSelectedProject(p);
     setView('detail');
@@ -163,9 +172,18 @@ export default function EditorDrawer({ open, onClose }: Props) {
                 <span className="text-white text-[0.95rem] font-semibold font-['Source_Sans_3',sans-serif]">
                   Content Editor
                 </span>
-                <button onClick={handleClose} className="size-[32px] flex items-center justify-center rounded-full bg-white/5 text-white/40 hover:text-white transition-colors">
-                  <X size={16} />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleLogout}
+                    title="Log out"
+                    className="size-[32px] flex items-center justify-center rounded-full bg-white/5 text-white/40 hover:text-red-400 transition-colors"
+                  >
+                    <LogOut size={15} />
+                  </button>
+                  <button onClick={handleClose} className="size-[32px] flex items-center justify-center rounded-full bg-white/5 text-white/40 hover:text-white transition-colors">
+                    <X size={16} />
+                  </button>
+                </div>
               </div>
 
               {view === 'list' && (
