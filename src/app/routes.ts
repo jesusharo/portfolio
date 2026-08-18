@@ -8,6 +8,7 @@ import ProjectDetailProjects from "./components/ProjectDetailProjects";
 import ProjectDetailCases from "./components/ProjectDetailCases";
 import ContactView from "./components/ContactView";
 import AboutView from "./components/AboutView";
+import NotFound from "./components/NotFound";
 
 export const router = createBrowserRouter([
   {
@@ -24,6 +25,7 @@ export const router = createBrowserRouter([
       { path: "contact", Component: ContactView },
       { path: "about", Component: AboutView },
       { path: "login-editor", Component: () => null },
+      { path: "*", Component: NotFound },
     ],
   },
 ]);
