@@ -30,14 +30,6 @@ export default function WelcomeView() {
         exit={{ opacity: 0, y: -12 }}
         transition={{ duration: 0.7, ease: 'easeOut' }}
       >
-        <motion.p
-          className="text-white/40 text-[0.85rem] uppercase tracking-[0.25em] font-['Source_Sans_3',sans-serif]"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
-        >
-          Jesus Haro · Senior Product Designer
-        </motion.p>
         <motion.h1
           className="text-white text-[2.8rem] md:text-[3.5rem] font-bold leading-tight font-['Source_Sans_3',sans-serif]"
           initial={{ opacity: 0, y: 8 }}
