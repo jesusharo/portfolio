@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { query } from '../db.mjs';
 import jwt from 'jsonwebtoken';
+import { sanitizePlainText, sanitizeContentBlocks } from '../sanitize.mjs';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
@@ -66,8 +67,10 @@ router.get('/editor/all', requireAuth, async (req, res) => {
 
 // Editor — create project
 router.post('/editor', requireAuth, async (req, res) => {
-  const { type, name } = req.body;
-  if (!type || !name) return res.status(400).json({ error: 'type and name required' });
+  const { type, name: rawName } = req.body;
+  if (!type || !rawName) return res.status(400).json({ error: 'type and name required' });
+  const name = sanitizePlainText(rawName);
+  if (!name) return res.status(400).json({ error: 'name is required' });
   const id = toSlug(name) + '-' + Date.now().toString(36);
   const slug = toSlug(name);
   try {
@@ -94,10 +97,13 @@ router.put('/editor/:id', requireAuth, async (req, res) => {
   const vals = [];
   let i = 1;
   for (const [k, v] of Object.entries(fields)) {
-    if (allowed.includes(k)) {
-      sets.push(`${k} = $${i++}`);
-      vals.push(k === 'content_blocks' ? JSON.stringify(v) : v);
-    }
+    if (!allowed.includes(k)) continue;
+    let sanitized = v;
+    if (k === 'name') sanitized = sanitizePlainText(String(v));
+    if (k === 'content_blocks') sanitized = JSON.stringify(sanitizeContentBlocks(v));
+    else if (k !== 'name') sanitized = v; // keep other fields as-is
+    sets.push(`${k} = $${i++}`);
+    vals.push(sanitized);
   }
   if (!sets.length) return res.status(400).json({ error: 'No valid fields' });
   sets.push(`updated_at = NOW()`);

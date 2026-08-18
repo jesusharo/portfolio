@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { query } from '../db.mjs';
 import jwt from 'jsonwebtoken';
+import { sanitizeRichText } from '../sanitize.mjs';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
@@ -30,10 +31,11 @@ router.get('/', async (req, res) => {
 
 router.put('/', requireAuth, async (req, res) => {
   const { content_html } = req.body;
+  const safeHtml = sanitizeRichText(content_html || '');
   try {
     await query(
       'UPDATE about_content SET content_html = $1, updated_at = NOW() WHERE id = 1',
-      [content_html]
+      [safeHtml]
     );
     res.json({ ok: true });
   } catch (err) {
