@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import PageTransition from './PageTransition';
 import { getProjects } from '../lib/api';
 import { useNetworkState } from '../context/NetworkStateContext';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 interface Project {
   id: string;
@@ -32,31 +33,44 @@ export default function ProjectsView() {
         >
           UI Projects
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full">
-          {projects.map((project, i) => (
-            <motion.button
-              key={project.id}
-              onClick={() => navigate(`/projects/${project.id}`)}
-              className="aspect-square rounded-[20px] flex items-center justify-center cursor-pointer relative overflow-hidden"
-              style={{ backgroundColor: project.background_color || '#333' }}
-              initial={{ opacity: 0, scale: 0.92 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.35, delay: i * 0.05 }}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              {project.logo_grid_image ? (
-                <img src={project.logo_grid_image} alt={project.name}
-                  className="max-w-[60%] max-h-[60%] object-contain" />
-              ) : (
-                <span className="text-[2rem] font-bold opacity-40"
-                  style={{ color: 'white', fontFamily: "'Source Sans 3', sans-serif" }}>
-                  {project.name[0]}
-                </span>
-              )}
-            </motion.button>
-          ))}
-        </div>
+        <TooltipProvider delayDuration={150}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full">
+            {projects.map((project, i) => (
+              <Tooltip key={project.id}>
+                <TooltipTrigger asChild>
+                  <motion.button
+                    onClick={() => navigate(`/projects/${project.id}`)}
+                    aria-label={`Open ${project.name}`}
+                    className="aspect-square rounded-[20px] flex items-center justify-center cursor-pointer relative overflow-hidden"
+                    style={{ backgroundColor: project.background_color || '#333' }}
+                    initial={{ opacity: 0, scale: 0.92 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.35, delay: i * 0.05 }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    {project.logo_grid_image ? (
+                      <img src={project.logo_grid_image} alt={project.name}
+                        className="max-w-[60%] max-h-[60%] object-contain" />
+                    ) : (
+                      <span className="text-[2rem] font-bold opacity-40"
+                        style={{ color: 'white', fontFamily: "'Source Sans 3', sans-serif" }}>
+                        {project.name[0]}
+                      </span>
+                    )}
+                  </motion.button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  sideOffset={8}
+                  className="border border-white/10 bg-[rgba(18,18,18,0.96)] text-white/80 shadow-xl backdrop-blur-md"
+                >
+                  {project.name}
+                </TooltipContent>
+              </Tooltip>
+            ))}
+          </div>
+        </TooltipProvider>
         </div>
       </div>
     </PageTransition>
