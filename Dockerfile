@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # Install all dependencies (dev included — needed for vite build)
-RUN npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps --no-package-lock
 
 # Copy source files AFTER install so node_modules is intact
 COPY . .
