@@ -115,6 +115,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   const { setNetworkState, setPageBackground, editorMode, bumpDataVersion, dataVersion, saveRequestVersion } = useNetworkState();
   const [items, setItems] = useState<Project[]>([]);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
+  const [showHeaderFade, setShowHeaderFade] = useState(false);
 
   const apiType = mode === 'projects' ? 'ui_project' : 'case_study';
   const listPath = mode === 'projects' ? '/projects' : '/cases';
@@ -254,7 +255,10 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
 
   return (
     <PageTransition>
-      <div className="absolute inset-0 overflow-y-auto">
+      <div
+        className="absolute inset-0 overflow-y-auto"
+        onScroll={event => setShowHeaderFade(event.currentTarget.scrollTop > 8)}
+      >
 
         {/* ── Sticky header ─────────────────────────────────────────────── */}
         <motion.div
@@ -264,8 +268,11 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           style={{ zIndex: 20 }}
         >
           <div
-            className="pointer-events-none absolute left-0 right-0 top-full h-12"
+            className="pointer-events-none absolute left-0 right-0 transition-opacity duration-200"
             style={{
+              top: 'calc(100% - 24px)',
+              height: '48px',
+              opacity: showHeaderFade ? 1 : 0,
               background: `linear-gradient(to bottom, ${accentColor} 0%, transparent 100%)`,
             }}
           />
