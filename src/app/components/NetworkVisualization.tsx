@@ -7,6 +7,7 @@ const CANVAS_WIDTH = 965;
 const CANVAS_HEIGHT = 961.324;
 const MOUSE_RADIUS = 250;
 const MOUSE_FORCE = 28;
+const GYRO_TILT_RANGE = 32;
 
 const SCALE_BY_STATE = {
   idle: 0.68,
@@ -149,6 +150,7 @@ export default function NetworkVisualization() {
     return 0.05 + t * 0.17;
   }), []);
   const mouseY = useMotionValue(CANVAS_HEIGHT / 2);
+  const orientationBaseline = useRef<{ beta: number; gamma: number } | null>(null);
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
@@ -159,6 +161,74 @@ export default function NetworkVisualization() {
     };
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [mouseX, mouseY]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('DeviceOrientationEvent' in window)) return;
+
+    let orientationEnabled = false;
+    let permissionPrompted = false;
+
+    const clamp = (value: number) => Math.max(-1, Math.min(1, value));
+
+    const handleOrientation = (event: DeviceOrientationEvent) => {
+      if (event.beta === null || event.gamma === null) return;
+
+      if (!orientationBaseline.current) {
+        orientationBaseline.current = { beta: event.beta, gamma: event.gamma };
+      }
+
+      const { beta, gamma } = orientationBaseline.current;
+      const tiltX = clamp((event.gamma - gamma) / GYRO_TILT_RANGE);
+      const tiltY = clamp((event.beta - beta) / GYRO_TILT_RANGE);
+
+      // Feed the same reaction used by the desktop pointer interaction.
+      mouseX.set(CANVAS_WIDTH / 2 + tiltX * CANVAS_WIDTH / 2);
+      mouseY.set(CANVAS_HEIGHT / 2 + tiltY * CANVAS_HEIGHT / 2);
+    };
+
+    const enableOrientation = async () => {
+      if (orientationEnabled || permissionPrompted) return;
+      permissionPrompted = true;
+
+      const OrientationEvent = window.DeviceOrientationEvent as typeof DeviceOrientationEvent & {
+        requestPermission?: () => Promise<'granted' | 'denied'>;
+      };
+
+      if (typeof OrientationEvent.requestPermission === 'function') {
+        try {
+          const permission = await OrientationEvent.requestPermission();
+          if (permission !== 'granted') return;
+        } catch {
+          return;
+        }
+      }
+
+      orientationEnabled = true;
+      window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+    };
+
+    const OrientationEvent = window.DeviceOrientationEvent as typeof DeviceOrientationEvent & {
+      requestPermission?: () => Promise<'granted' | 'denied'>;
+    };
+
+    if (typeof OrientationEvent.requestPermission === 'function') {
+      // iOS only allows requesting motion access from a user gesture.
+      window.addEventListener('touchstart', enableOrientation, { once: true, passive: true });
+    } else {
+      void enableOrientation();
+    }
+
+    const resetCalibration = () => {
+      orientationBaseline.current = null;
+    };
+    window.addEventListener('orientationchange', resetCalibration, { passive: true });
+
+    return () => {
+      window.removeEventListener('deviceorientation', handleOrientation);
+      window.removeEventListener('touchstart', enableOrientation);
+      window.removeEventListener('orientationchange', resetCalibration);
+    };
   }, [mouseX, mouseY]);
 
   return (
