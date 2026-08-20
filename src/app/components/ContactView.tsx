@@ -4,7 +4,6 @@ import PageTransition from './PageTransition';
 import { useNetworkState } from '../context/NetworkStateContext';
 
 const CONTACT_EMAIL = 'jharolozano@gmail.com';
-const CONTACT_MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Hello from your portfolio')}`;
 
 export default function ContactView() {
   const { setNetworkState } = useNetworkState();
@@ -36,18 +35,6 @@ export default function ContactView() {
             >
               Have a project in mind? Send me an email.
             </p>
-            <a
-              href={CONTACT_MAILTO}
-              className="inline-flex px-8 py-3 rounded-[32px] text-white font-semibold transition-transform hover:scale-[1.02] active:scale-[0.97]"
-              style={{
-                background: '#d25d5f',
-                fontFamily: "'Source Sans 3', sans-serif",
-                fontSize: '0.95rem',
-                letterSpacing: '0.05em',
-              }}
-            >
-              Email me
-            </a>
             <span
               className="text-white/35 text-[0.85rem]"
               style={{ fontFamily: "'Source Sans 3', sans-serif" }}

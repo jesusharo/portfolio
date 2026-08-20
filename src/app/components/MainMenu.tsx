@@ -1,6 +1,8 @@
 import { BookMarked, Mail, Sparkles, PenTool } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router';
 
+const CONTACT_MAILTO = 'mailto:jharolozano@gmail.com?subject=Hello%20from%20your%20portfolio';
+
 function AboutMeIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -43,10 +45,12 @@ export default function MainMenu() {
   function renderBtn(link: typeof links[0], desktop: boolean) {
     const Icon = link.icon;
     const active = isActive(link.path);
+    const isContact = link.id === 'contact';
     return (
       <button
         key={link.id}
-        onClick={() => navigate(link.path)}
+        onClick={() => isContact ? window.location.href = CONTACT_MAILTO : navigate(link.path)}
+        aria-label={link.label}
         className={`${desktop ? 'group relative' : ''} cursor-pointer flex items-center justify-center rounded-full transition-all duration-200 ${
           active
             ? 'size-[52px] bg-[#d25d5f] text-white'
