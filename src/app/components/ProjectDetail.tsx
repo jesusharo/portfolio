@@ -115,7 +115,6 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   const { setNetworkState, setPageBackground, editorMode, bumpDataVersion, dataVersion, saveRequestVersion } = useNetworkState();
   const [items, setItems] = useState<Project[]>([]);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
-  const [showHeaderFade, setShowHeaderFade] = useState(false);
 
   const apiType = mode === 'projects' ? 'ui_project' : 'case_study';
   const listPath = mode === 'projects' ? '/projects' : '/cases';
@@ -255,40 +254,30 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
 
   return (
     <PageTransition>
-      <div
-        className="absolute inset-0 overflow-y-auto"
-        onScroll={event => {
-          const shouldShow = event.currentTarget.scrollTop > 0;
-          setShowHeaderFade(previous => previous === shouldShow ? previous : shouldShow);
-        }}
-      >
+      <div className="absolute inset-0 overflow-y-auto">
 
         {/* ── Sticky header ─────────────────────────────────────────────── */}
         <motion.div
           className="sticky top-0 relative flex items-center justify-center px-6 py-5 gap-6"
-          animate={{ backgroundColor: accentColor }}
-          transition={{ duration: 0.4, ease: 'easeInOut' }}
           style={{ zIndex: 20 }}
         >
           <div
-            className="pointer-events-none absolute left-0 right-0 transition-opacity duration-200"
+            className="pointer-events-none absolute inset-0"
             style={{
-              top: 'calc(100% - 32px)',
-              height: '88px',
-              opacity: showHeaderFade ? 1 : 0,
-              background: `linear-gradient(to bottom, ${accentColor} 0%, ${accentColor} 48%, transparent 100%)`,
-              zIndex: 1,
+              background: `linear-gradient(to bottom, ${accentColor} 0%, ${accentColor} 58%, transparent 100%)`,
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
             }}
           />
           <motion.button
             whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
             onClick={() => prevItem ? navigate(`${detailPath}/${prevItem.id}`) : navigate(listPath)}
-            className="size-[36px] flex items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
+            className="relative z-10 size-[36px] flex items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
           >
             <ArrowLeft size={20} strokeWidth={1.5} />
           </motion.button>
 
-          <div className="min-w-0 max-w-[min(55vw,520px)] text-center">
+          <div className="relative z-10 min-w-0 max-w-[min(55vw,520px)] text-center">
             <h1
               className="truncate text-white text-[1.25rem] font-semibold uppercase"
               style={{ fontFamily: "'Source Sans 3', sans-serif", letterSpacing: '0.2em' }}
@@ -308,7 +297,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           <motion.button
             whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
             onClick={() => nextItem ? navigate(`${detailPath}/${nextItem.id}`) : navigate(listPath)}
-            className="size-[36px] flex items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
+            className="relative z-10 size-[36px] flex items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
           >
             <ArrowRight size={20} strokeWidth={1.5} />
           </motion.button>
