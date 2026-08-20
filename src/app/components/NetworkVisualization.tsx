@@ -1,6 +1,5 @@
 import { motion, useAnimationFrame, useMotionValue, useReducedMotion, useSpring, useTransform } from 'motion/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useEffect, useMemo, useRef } from 'react';
 import svgPaths from '../../imports/svg-qeyvz6rlpu';
 import { useNetworkState } from '../context/NetworkStateContext';
 
@@ -156,8 +155,6 @@ export default function NetworkVisualization() {
   const smoothGyroOffsetX = useSpring(gyroOffsetX, { stiffness: 90, damping: 22 });
   const smoothGyroOffsetY = useSpring(gyroOffsetY, { stiffness: 90, damping: 22 });
   const orientationBaseline = useRef<{ beta: number; gamma: number } | null>(null);
-  const requestMotionPermission = useRef<(() => void) | null>(null);
-  const [motionPermissionRequired, setMotionPermissionRequired] = useState(false);
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
@@ -205,18 +202,13 @@ export default function NetworkVisualization() {
       if (typeof OrientationEvent.requestPermission === 'function') {
         try {
           const permission = await OrientationEvent.requestPermission();
-          if (permission !== 'granted') {
-            setMotionPermissionRequired(false);
-            return;
-          }
+          if (permission !== 'granted') return;
         } catch {
-          setMotionPermissionRequired(false);
           return;
         }
       }
 
       orientationEnabled = true;
-      setMotionPermissionRequired(false);
       window.addEventListener('deviceorientation', handleOrientation, { passive: true });
     };
 
@@ -225,9 +217,9 @@ export default function NetworkVisualization() {
     };
 
     if (typeof OrientationEvent.requestPermission === 'function') {
-      // iOS only allows requesting motion access from a visible user gesture.
-      requestMotionPermission.current = () => { void enableOrientation(); };
-      setMotionPermissionRequired(true);
+      // Try immediately, then retry on the first touch for iOS gesture-gated permission.
+      void enableOrientation();
+      window.addEventListener('touchstart', enableOrientation, { once: true, passive: true });
     } else {
       void enableOrientation();
     }
@@ -239,8 +231,8 @@ export default function NetworkVisualization() {
 
     return () => {
       window.removeEventListener('deviceorientation', handleOrientation);
+      window.removeEventListener('touchstart', enableOrientation);
       window.removeEventListener('orientationchange', resetCalibration);
-      requestMotionPermission.current = null;
     };
   }, [gyroOffsetX, gyroOffsetY, mouseX, mouseY]);
 
@@ -262,17 +254,6 @@ export default function NetworkVisualization() {
           <FloatingNode key={node.index} node={node} fillOpacity={nodeOpacities[node.index]} mouseX={mouseX} mouseY={mouseY} reduceMotion={reduceMotion} />
         ))}
       </motion.div>
-      {motionPermissionRequired && typeof document !== 'undefined' && createPortal(
-        <button
-          type="button"
-          onClick={() => requestMotionPermission.current?.()}
-          className="fixed bottom-[112px] left-1/2 z-[60] -translate-x-1/2 rounded-full border border-white/20 bg-[rgba(28,28,28,0.88)] px-4 py-2 text-[0.78rem] text-white/70 shadow-lg backdrop-blur-sm transition-colors hover:bg-[rgba(28,28,28,0.98)] hover:text-white"
-          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
-        >
-          Enable motion
-        </button>,
-        document.body,
-      )}
     </>
   );
 }
