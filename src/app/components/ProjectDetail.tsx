@@ -10,6 +10,7 @@ import ImageDropZone from './editor/ImageDropZone';
 import ImageGridBlock, { type GridImageItem } from './editor/ImageGridBlock';
 import CarouselBlock, { type CarouselImageItem } from './editor/CarouselBlock';
 import ImageLightbox from './ImageLightbox';
+import HeroParallax from './HeroParallax';
 
 type Mode = 'projects' | 'cases';
 type SaveStatus = 'idle' | 'unsaved' | 'saving' | 'saved' | 'error';
@@ -35,6 +36,7 @@ interface Project {
   accent_color: string;
   description: string;
   hero_image: string;
+  hero_foreground_image?: string;
   content_blocks: ContentBlock[] | string;
 }
 
@@ -304,11 +306,11 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
             className="relative mx-auto max-w-[760px]"
           >
             {item.hero_image ? (
-              <img
-                src={item.hero_image}
+              <HeroParallax
+                background={item.hero_image}
+                foreground={item.hero_foreground_image}
                 alt={item.name}
-                className="w-full h-auto cursor-zoom-in rounded-[12px] object-contain"
-                onClick={() => setLightboxImage({ src: item.hero_image, alt: item.name })}
+                onOpen={() => setLightboxImage({ src: item.hero_image, alt: item.name })}
               />
             ) : (
               <div

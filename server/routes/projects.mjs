@@ -91,7 +91,7 @@ router.put('/editor/:id', requireAuth, async (req, res) => {
   const fields = req.body;
   const allowed = [
     'name','subtitle','slug','sort_order','hidden','background_color','accent_color',
-    'logo_grid_image','logo_header_image','hero_image','content_blocks','description'
+    'logo_grid_image','logo_header_image','hero_image','hero_foreground_image','content_blocks','description'
   ];
   const sets = [];
   const vals = [];

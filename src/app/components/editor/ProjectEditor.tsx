@@ -14,6 +14,7 @@ interface Project {
   logo_grid_image: string;
   logo_header_image: string;
   hero_image: string;
+  hero_foreground_image: string;
   description: string;
   hidden: boolean;
 }
@@ -49,6 +50,7 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
         logo_grid_image: draft.logo_grid_image,
         logo_header_image: draft.logo_header_image,
         hero_image: draft.hero_image,
+        hero_foreground_image: draft.hero_foreground_image,
         description: draft.description,
       });
       onSaved(updated);
@@ -160,7 +162,8 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
           {([
             ['logo_grid_image', 'Grid logo'],
             ['logo_header_image', 'Header logo'],
-            ['hero_image', 'Hero image'],
+            ['hero_image', 'Hero background'],
+            ['hero_foreground_image', 'Hero foreground (optional)'],
           ] as const).map(([field, label]) => (
             <div key={field}>
               <label className={labelCls}>{label}</label>

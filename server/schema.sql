@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS projects (
   logo_grid_image TEXT DEFAULT '',
   logo_header_image TEXT DEFAULT '',
   hero_image TEXT DEFAULT '',
+  hero_foreground_image TEXT DEFAULT '',
   content_blocks JSONB NOT NULL DEFAULT '[]',
   description TEXT DEFAULT '',
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -19,6 +20,7 @@ CREATE TABLE IF NOT EXISTS projects (
 
 -- Add subtitle to existing projects without affecting stored content.
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS subtitle TEXT DEFAULT '';
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS hero_foreground_image TEXT DEFAULT '';
 
 CREATE TABLE IF NOT EXISTS images (
   id UUID PRIMARY KEY,
