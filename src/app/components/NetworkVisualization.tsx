@@ -1,5 +1,6 @@
-import { motion, useAnimationFrame, useMotionValue, useReducedMotion, useTransform } from 'motion/react';
-import { useEffect, useMemo, useRef } from 'react';
+import { motion, useAnimationFrame, useMotionValue, useReducedMotion, useSpring, useTransform } from 'motion/react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import svgPaths from '../../imports/svg-qeyvz6rlpu';
 import { useNetworkState } from '../context/NetworkStateContext';
 
@@ -150,7 +151,13 @@ export default function NetworkVisualization() {
     return 0.05 + t * 0.17;
   }), []);
   const mouseY = useMotionValue(CANVAS_HEIGHT / 2);
+  const gyroOffsetX = useMotionValue(0);
+  const gyroOffsetY = useMotionValue(0);
+  const smoothGyroOffsetX = useSpring(gyroOffsetX, { stiffness: 90, damping: 22 });
+  const smoothGyroOffsetY = useSpring(gyroOffsetY, { stiffness: 90, damping: 22 });
   const orientationBaseline = useRef<{ beta: number; gamma: number } | null>(null);
+  const requestMotionPermission = useRef<(() => void) | null>(null);
+  const [motionPermissionRequired, setMotionPermissionRequired] = useState(false);
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
@@ -167,7 +174,6 @@ export default function NetworkVisualization() {
     if (typeof window === 'undefined' || !('DeviceOrientationEvent' in window)) return;
 
     let orientationEnabled = false;
-    let permissionPrompted = false;
 
     const clamp = (value: number) => Math.max(-1, Math.min(1, value));
 
@@ -185,11 +191,12 @@ export default function NetworkVisualization() {
       // Feed the same reaction used by the desktop pointer interaction.
       mouseX.set(CANVAS_WIDTH / 2 + tiltX * CANVAS_WIDTH / 2);
       mouseY.set(CANVAS_HEIGHT / 2 + tiltY * CANVAS_HEIGHT / 2);
+      gyroOffsetX.set(tiltX * 24);
+      gyroOffsetY.set(tiltY * 24);
     };
 
     const enableOrientation = async () => {
-      if (orientationEnabled || permissionPrompted) return;
-      permissionPrompted = true;
+      if (orientationEnabled) return;
 
       const OrientationEvent = window.DeviceOrientationEvent as typeof DeviceOrientationEvent & {
         requestPermission?: () => Promise<'granted' | 'denied'>;
@@ -198,13 +205,18 @@ export default function NetworkVisualization() {
       if (typeof OrientationEvent.requestPermission === 'function') {
         try {
           const permission = await OrientationEvent.requestPermission();
-          if (permission !== 'granted') return;
+          if (permission !== 'granted') {
+            setMotionPermissionRequired(false);
+            return;
+          }
         } catch {
+          setMotionPermissionRequired(false);
           return;
         }
       }
 
       orientationEnabled = true;
+      setMotionPermissionRequired(false);
       window.addEventListener('deviceorientation', handleOrientation, { passive: true });
     };
 
@@ -213,8 +225,9 @@ export default function NetworkVisualization() {
     };
 
     if (typeof OrientationEvent.requestPermission === 'function') {
-      // iOS only allows requesting motion access from a user gesture.
-      window.addEventListener('touchstart', enableOrientation, { once: true, passive: true });
+      // iOS only allows requesting motion access from a visible user gesture.
+      requestMotionPermission.current = () => { void enableOrientation(); };
+      setMotionPermissionRequired(true);
     } else {
       void enableOrientation();
     }
@@ -226,27 +239,40 @@ export default function NetworkVisualization() {
 
     return () => {
       window.removeEventListener('deviceorientation', handleOrientation);
-      window.removeEventListener('touchstart', enableOrientation);
       window.removeEventListener('orientationchange', resetCalibration);
+      requestMotionPermission.current = null;
     };
-  }, [mouseX, mouseY]);
+  }, [gyroOffsetX, gyroOffsetY, mouseX, mouseY]);
 
   return (
-    <motion.div
-      ref={containerRef}
-      className="absolute h-[961.324px] left-[50%] -translate-x-1/2 top-[50%] -translate-y-1/2 w-[965px] pointer-events-none origin-center"
-      animate={{ scale }}
-      transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-      style={{ filter: 'blur(8px)' }}
-    >
-      <div className="absolute inset-[0.57%_1.43%_1.05%_0.57%]">
-        <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 946.709 946.663">
-          <path d={svgPaths.p11e15a00} stroke="white" strokeOpacity="0.08" strokeWidth="0.5" />
-        </svg>
-      </div>
-      {nodes.map((node) => (
-        <FloatingNode key={node.index} node={node} fillOpacity={nodeOpacities[node.index]} mouseX={mouseX} mouseY={mouseY} reduceMotion={reduceMotion} />
-      ))}
-    </motion.div>
+    <>
+      <motion.div
+        ref={containerRef}
+        className="absolute h-[961.324px] left-[50%] -translate-x-1/2 top-[50%] -translate-y-1/2 w-[965px] pointer-events-none origin-center"
+        animate={{ scale }}
+        transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+        style={{ filter: 'blur(8px)', x: smoothGyroOffsetX, y: smoothGyroOffsetY }}
+      >
+        <div className="absolute inset-[0.57%_1.43%_1.05%_0.57%]">
+          <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 946.709 946.663">
+            <path d={svgPaths.p11e15a00} stroke="white" strokeOpacity="0.08" strokeWidth="0.5" />
+          </svg>
+        </div>
+        {nodes.map((node) => (
+          <FloatingNode key={node.index} node={node} fillOpacity={nodeOpacities[node.index]} mouseX={mouseX} mouseY={mouseY} reduceMotion={reduceMotion} />
+        ))}
+      </motion.div>
+      {motionPermissionRequired && typeof document !== 'undefined' && createPortal(
+        <button
+          type="button"
+          onClick={() => requestMotionPermission.current?.()}
+          className="fixed bottom-[112px] left-1/2 z-[60] -translate-x-1/2 rounded-full border border-white/20 bg-[rgba(28,28,28,0.88)] px-4 py-2 text-[0.78rem] text-white/70 shadow-lg backdrop-blur-sm transition-colors hover:bg-[rgba(28,28,28,0.98)] hover:text-white"
+          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+        >
+          Enable motion
+        </button>,
+        document.body,
+      )}
+    </>
   );
 }
