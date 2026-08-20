@@ -11,6 +11,10 @@ type OrientationEventConstructor = typeof DeviceOrientationEvent & {
   requestPermission?: () => Promise<'granted' | 'denied'>;
 };
 
+type MotionEventConstructor = typeof DeviceMotionEvent & {
+  requestPermission?: () => Promise<'granted' | 'denied'>;
+};
+
 const MAX_SHIFT = 14;
 const GYRO_RANGE = 35;
 
@@ -27,10 +31,15 @@ export default function HeroParallax({ background, foreground, alt }: Props) {
   const hasParallax = Boolean(background && foreground) && !reduceMotion;
 
   useEffect(() => {
-    if (!hasParallax || typeof window === 'undefined' || !('DeviceOrientationEvent' in window)) return;
+    if (
+      !hasParallax ||
+      typeof window === 'undefined' ||
+      (!('DeviceOrientationEvent' in window) && !('DeviceMotionEvent' in window))
+    ) return;
 
     let enabled = false;
-    const OrientationEvent = window.DeviceOrientationEvent as OrientationEventConstructor;
+    const OrientationEvent = window.DeviceOrientationEvent as OrientationEventConstructor | undefined;
+    const MotionEvent = window.DeviceMotionEvent as MotionEventConstructor | undefined;
     const baseline = { beta: null as number | null, gamma: null as number | null };
 
     const scheduleUpdate = (x: number, y: number) => {
@@ -42,36 +51,80 @@ export default function HeroParallax({ background, foreground, alt }: Props) {
       });
     };
 
+    const handleTilt = (beta: number, gamma: number) => {
+      if (baseline.beta === null || baseline.gamma === null) {
+        baseline.beta = beta;
+        baseline.gamma = gamma;
+      }
+      const x = clamp((gamma - baseline.gamma) / GYRO_RANGE, -1, 1) * MAX_SHIFT;
+      const y = clamp((beta - baseline.beta) / GYRO_RANGE, -1, 1) * MAX_SHIFT;
+      scheduleUpdate(x, y);
+    };
+
     const handleOrientation = (event: DeviceOrientationEvent) => {
       if (event.beta === null || event.gamma === null) return;
-      if (baseline.beta === null || baseline.gamma === null) {
-        baseline.beta = event.beta;
-        baseline.gamma = event.gamma;
-      }
-      const x = clamp((event.gamma - baseline.gamma) / GYRO_RANGE, -1, 1) * MAX_SHIFT;
-      const y = clamp((event.beta - baseline.beta) / GYRO_RANGE, -1, 1) * MAX_SHIFT;
-      scheduleUpdate(x, y);
+      handleTilt(event.beta, event.gamma);
+    };
+
+    // A number of mobile browsers expose gravity through devicemotion but
+    // do not emit usable deviceorientation events. Convert the gravity vector
+    // into the same beta/gamma values used by the orientation handler.
+    const handleMotion = (event: DeviceMotionEvent) => {
+      const acceleration = event.accelerationIncludingGravity;
+      if (
+        !acceleration ||
+        acceleration.x === null ||
+        acceleration.y === null ||
+        acceleration.z === null
+      ) return;
+
+      const gamma = Math.atan2(
+        acceleration.x,
+        Math.sqrt(acceleration.y ** 2 + acceleration.z ** 2),
+      ) * (180 / Math.PI);
+      const beta = Math.atan2(acceleration.y, acceleration.z) * (180 / Math.PI);
+      handleTilt(beta, gamma);
     };
 
     const enableOrientation = async () => {
       if (enabled) return;
-      if (typeof OrientationEvent.requestPermission === 'function') {
+      const requestPermission =
+        typeof OrientationEvent?.requestPermission === 'function'
+          ? OrientationEvent.requestPermission.bind(OrientationEvent)
+          : typeof MotionEvent?.requestPermission === 'function'
+            ? MotionEvent.requestPermission.bind(MotionEvent)
+            : null;
+
+      if (requestPermission) {
         try {
-          if (await OrientationEvent.requestPermission() !== 'granted') return;
+          if (await requestPermission() !== 'granted') return;
         } catch {
           return;
         }
       }
       enabled = true;
-      window.addEventListener('deviceorientation', handleOrientation, { passive: true });
-      // Some Android browsers expose the higher-fidelity absolute stream
-      // instead of (or in addition to) the standard orientation event.
-      window.addEventListener('deviceorientationabsolute', handleOrientation, { passive: true } as AddEventListenerOptions);
+      if ('DeviceOrientationEvent' in window) {
+        window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+        // Some Android browsers expose the higher-fidelity absolute stream
+        // instead of (or in addition to) the standard orientation event.
+        window.addEventListener(
+          'deviceorientationabsolute',
+          handleOrientation,
+          { passive: true } as AddEventListenerOptions,
+        );
+      }
+      if ('DeviceMotionEvent' in window) {
+        window.addEventListener('devicemotion', handleMotion, { passive: true });
+      }
     };
 
-    // iOS only allows requestPermission() from a user gesture. Avoid calling it
-    // on mount so the page remains navigable and the first touch can authorize it.
-    if (typeof OrientationEvent.requestPermission === 'function') {
+    // iOS only allows requestPermission() from a user gesture. Try once on
+    // mount for browsers that allow it, then retry from the first real gesture.
+    const needsGesture =
+      typeof OrientationEvent?.requestPermission === 'function' ||
+      typeof MotionEvent?.requestPermission === 'function';
+    if (needsGesture) {
+      void enableOrientation();
       window.addEventListener('touchstart', enableOrientation, { once: true, passive: true });
       window.addEventListener('pointerdown', enableOrientation, { once: true, passive: true });
     } else {
@@ -81,6 +134,7 @@ export default function HeroParallax({ background, foreground, alt }: Props) {
     return () => {
       window.removeEventListener('deviceorientation', handleOrientation);
       window.removeEventListener('deviceorientationabsolute', handleOrientation);
+      window.removeEventListener('devicemotion', handleMotion);
       window.removeEventListener('touchstart', enableOrientation);
       window.removeEventListener('pointerdown', enableOrientation);
       if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current);
