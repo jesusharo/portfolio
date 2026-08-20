@@ -66,8 +66,13 @@ export default function HeroParallax({ background, foreground, alt }: Props) {
       window.addEventListener('deviceorientation', handleOrientation, { passive: true });
     };
 
-    void enableOrientation();
-    window.addEventListener('touchstart', enableOrientation, { once: true, passive: true });
+    // iOS only allows requestPermission() from a user gesture. Avoid calling it
+    // on mount so the page remains navigable and the first touch can authorize it.
+    if (typeof OrientationEvent.requestPermission === 'function') {
+      window.addEventListener('touchstart', enableOrientation, { once: true, passive: true });
+    } else {
+      void enableOrientation();
+    }
 
     return () => {
       window.removeEventListener('deviceorientation', handleOrientation);

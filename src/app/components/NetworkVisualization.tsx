@@ -168,7 +168,11 @@ export default function NetworkVisualization() {
   }, [mouseX, mouseY]);
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !('DeviceOrientationEvent' in window)) return;
+    if (reduceMotion || typeof window === 'undefined' || !('DeviceOrientationEvent' in window)) {
+      gyroOffsetX.set(0);
+      gyroOffsetY.set(0);
+      return;
+    }
 
     let orientationEnabled = false;
 
@@ -234,7 +238,7 @@ export default function NetworkVisualization() {
       window.removeEventListener('touchstart', enableOrientation);
       window.removeEventListener('orientationchange', resetCalibration);
     };
-  }, [gyroOffsetX, gyroOffsetY, mouseX, mouseY]);
+  }, [gyroOffsetX, gyroOffsetY, mouseX, mouseY, reduceMotion]);
 
   return (
     <>
