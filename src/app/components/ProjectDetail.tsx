@@ -257,7 +257,10 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
     <PageTransition>
       <div
         className="absolute inset-0 overflow-y-auto"
-        onScroll={event => setShowHeaderFade(event.currentTarget.scrollTop > 8)}
+        onScroll={event => {
+          const shouldShow = event.currentTarget.scrollTop > 0;
+          setShowHeaderFade(previous => previous === shouldShow ? previous : shouldShow);
+        }}
       >
 
         {/* ── Sticky header ─────────────────────────────────────────────── */}
@@ -270,10 +273,11 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           <div
             className="pointer-events-none absolute left-0 right-0 transition-opacity duration-200"
             style={{
-              top: 'calc(100% - 24px)',
-              height: '48px',
+              top: 'calc(100% - 32px)',
+              height: '88px',
               opacity: showHeaderFade ? 1 : 0,
-              background: `linear-gradient(to bottom, ${accentColor} 0%, transparent 100%)`,
+              background: `linear-gradient(to bottom, ${accentColor} 0%, ${accentColor} 48%, transparent 100%)`,
+              zIndex: 1,
             }}
           />
           <motion.button
