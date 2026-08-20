@@ -295,7 +295,6 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
                 src={item.hero_image}
                 alt={item.name}
                 className="w-full h-auto rounded-[12px] object-contain"
-                style={{ maxHeight: '70vh' }}
               />
             ) : (
               <div

@@ -61,8 +61,7 @@ export default function ImageDropZone({ value, onChange, caption, onCaptionChang
           <img
             src={value}
             alt=""
-            className="w-full object-cover rounded-[12px]"
-            style={{ maxHeight: 400 }}
+            className="w-full h-auto object-contain rounded-[12px]"
           />
           {/* Overlay on hover */}
           <div className="absolute inset-0 bg-black/0 group-hover/preview:bg-black/40 transition-colors rounded-[12px] flex items-center justify-center gap-3 opacity-0 group-hover/preview:opacity-100">
