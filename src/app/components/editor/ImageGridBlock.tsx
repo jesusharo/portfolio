@@ -148,7 +148,7 @@ export default function ImageGridBlock({ images, columns, editorMode, onChange }
           <img
             src={img.url}
             alt={img.caption || ''}
-            className="w-full rounded-[8px] object-cover aspect-video"
+             className="w-full rounded-[8px] object-contain aspect-video bg-white/[0.03]"
           />
           {img.caption && (
             <figcaption className="text-white/35 text-[0.75rem] mt-1 text-center" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>

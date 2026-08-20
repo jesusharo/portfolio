@@ -294,8 +294,8 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
               <img
                 src={item.hero_image}
                 alt={item.name}
-                className="w-full rounded-[12px] object-cover"
-                style={{ maxHeight: 420 }}
+                className="w-full h-auto rounded-[12px] object-contain"
+                style={{ maxHeight: '70vh' }}
               />
             ) : (
               <div
@@ -419,7 +419,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
                   )}
                   {block.type === 'image' && block.url && (
                     <figure>
-                      <img src={block.url} alt={block.caption || ''} className="w-full rounded-[12px]" />
+                      <img src={block.url} alt={block.caption || ''} className="w-full h-auto rounded-[12px] object-contain" />
                       {block.caption && (
                         <figcaption
                           className="text-white/35 text-[0.8rem] mt-2 text-center"
