@@ -64,19 +64,25 @@ export default function HeroParallax({ background, foreground, alt }: Props) {
       }
       enabled = true;
       window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+      // Some Android browsers expose the higher-fidelity absolute stream
+      // instead of (or in addition to) the standard orientation event.
+      window.addEventListener('deviceorientationabsolute', handleOrientation, { passive: true } as AddEventListenerOptions);
     };
 
     // iOS only allows requestPermission() from a user gesture. Avoid calling it
     // on mount so the page remains navigable and the first touch can authorize it.
     if (typeof OrientationEvent.requestPermission === 'function') {
       window.addEventListener('touchstart', enableOrientation, { once: true, passive: true });
+      window.addEventListener('pointerdown', enableOrientation, { once: true, passive: true });
     } else {
       void enableOrientation();
     }
 
     return () => {
       window.removeEventListener('deviceorientation', handleOrientation);
+      window.removeEventListener('deviceorientationabsolute', handleOrientation);
       window.removeEventListener('touchstart', enableOrientation);
+      window.removeEventListener('pointerdown', enableOrientation);
       if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current);
     };
   }, [hasParallax]);

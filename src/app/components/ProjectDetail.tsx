@@ -293,7 +293,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
             </h1>
             {item.subtitle?.trim() && (
               <p
-                className="mt-0.5 truncate text-white/55 text-[0.72rem] leading-tight"
+                className="mt-0.5 hidden truncate text-white/55 text-[0.72rem] leading-tight md:block"
                 style={{ fontFamily: "'Source Sans 3', sans-serif" }}
               >
                 {item.subtitle}
@@ -310,8 +310,21 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           </motion.button>
         </motion.div>
 
+        {/* Keep the mobile subtitle out of the navigation row so it cannot
+            overlap the next/close controls on narrow screens. */}
+        {item.subtitle?.trim() && (
+          <div className="px-8 pt-3 md:hidden">
+            <p
+              className="text-center text-white/55 text-[0.78rem] leading-snug"
+              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+            >
+              {item.subtitle}
+            </p>
+          </div>
+        )}
+
         {/* ── Hero image ────────────────────────────────────────────────── */}
-        <div className="px-8 pb-4 pt-6">
+        <div className="px-8 pb-4 pt-6 md:pt-6">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
