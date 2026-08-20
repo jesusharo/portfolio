@@ -25,7 +25,6 @@ export default function HeroParallax({ background, foreground, alt, onOpen }: Pr
   const frameRef = useRef<number | null>(null);
   const targetRef = useRef({ x: 0, y: 0 });
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [aspectRatio, setAspectRatio] = useState<string>();
   const hasParallax = Boolean(background && foreground) && !reduceMotion;
 
   useEffect(() => {
@@ -102,7 +101,6 @@ export default function HeroParallax({ background, foreground, alt, onOpen }: Pr
     <div
       ref={containerRef}
       className="relative mx-auto max-w-[760px] overflow-hidden rounded-[12px] cursor-zoom-in"
-      style={aspectRatio ? { aspectRatio } : undefined}
       onPointerMove={handlePointerMove}
       onPointerLeave={resetPointer}
       onClick={onOpen}
@@ -113,16 +111,18 @@ export default function HeroParallax({ background, foreground, alt, onOpen }: Pr
       }}
       aria-label={`Open ${alt} image`}
     >
+      {hasParallax && (
+        <img
+          src={background}
+          alt=""
+          aria-hidden="true"
+          className="block w-full h-auto invisible pointer-events-none select-none"
+        />
+      )}
       <img
         src={background}
         alt={alt}
         className={`block w-full h-auto object-contain ${hasParallax ? 'absolute inset-0 h-full' : ''}`}
-        onLoad={event => {
-          const image = event.currentTarget;
-          if (image.naturalWidth && image.naturalHeight) {
-            setAspectRatio(`${image.naturalWidth} / ${image.naturalHeight}`);
-          }
-        }}
         style={hasParallax ? {
           transform: `translate3d(${offset.x * 0.45}px, ${offset.y * 0.45}px, 0) scale(1.05)`,
           transition: 'transform 180ms ease-out',
