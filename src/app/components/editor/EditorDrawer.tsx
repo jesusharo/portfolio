@@ -39,7 +39,7 @@ export default function EditorDrawer({ open, onClose }: Props) {
   const [uiProjects, setUiProjects] = useState<Project[]>([]);
   const [caseProjects, setCaseProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
-  const { bumpDataVersion, setEditorAuthed } = useNetworkState();
+  const { bumpDataVersion, setEditorAuthed, setEditorMode } = useNetworkState();
 
   // Verify token when drawer opens — editorAuthed only set after confirmation
   useEffect(() => {
@@ -103,6 +103,7 @@ export default function EditorDrawer({ open, onClose }: Props) {
     localStorage.removeItem('editor_token');
     setAuthed(false);
     setEditorAuthed(false);
+    setEditorMode(false);
     setView('list');
     setSelectedProject(null);
     onClose();

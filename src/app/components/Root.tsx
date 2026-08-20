@@ -107,8 +107,8 @@ function RootInner() {
       {/* ── Top-right button cluster ─────────────────────────────────────── */}
       <div className="fixed top-5 right-5 z-40 flex items-center gap-2">
 
-        {/* Edit / Save changes — only on project detail pages */}
-        {isDetailRoute && (
+        {/* Edit / Save changes — only for authenticated editors on detail pages */}
+        {editorAuthed && isDetailRoute && (
           <motion.button
             onClick={handleEditToggle}
             className={`${pillBase} ${editorMode ? pillActive : pillDefault}`}
