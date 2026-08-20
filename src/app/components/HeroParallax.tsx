@@ -100,7 +100,7 @@ export default function HeroParallax({ background, foreground, alt, onOpen }: Pr
   return (
     <div
       ref={containerRef}
-      className="relative mx-auto max-w-[760px] overflow-hidden rounded-[12px] cursor-zoom-in"
+      className="relative mx-auto max-w-[760px] rounded-[12px] cursor-zoom-in"
       onPointerMove={handlePointerMove}
       onPointerLeave={resetPointer}
       onClick={onOpen}
