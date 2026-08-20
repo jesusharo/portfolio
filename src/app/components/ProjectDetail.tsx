@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, ArrowRight, Plus, AlignLeft, Image as ImageIcon, X, LayoutGrid, GalleryHorizontal, SeparatorHorizontal } from 'lucide-react';
-import PageTransition from './PageTransition';
 import { useNetworkState } from '../context/NetworkStateContext';
 import { getProjects, getEditorProjects, updateProject } from '../lib/api';
 import RichTextEditor from './editor/RichTextEditor';
@@ -276,12 +275,11 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   const accentColor = item.accent_color || item.background_color || '#1c1c1c';
 
   return (
-    <PageTransition>
-      <div
-        className="absolute inset-0 overflow-y-auto"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
+    <div
+      className="absolute inset-0 overflow-y-auto"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
 
         {/* ── Sticky header ─────────────────────────────────────────────── */}
         <motion.div
@@ -550,7 +548,6 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           />
         )}
 
-      </div>
-    </PageTransition>
+    </div>
   );
 }
