@@ -36,7 +36,7 @@ export default function WelcomeView() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.7 }}
         >
-          Welcome to my portfolio
+          Welcome
         </motion.h1>
       </motion.div>
     </div>
