@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { X, Plus, Loader2, ChevronLeft, ChevronRight, GalleryHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { uploadImage } from '../../lib/api';
+import ImageLightbox from '../ImageLightbox';
 
 export interface CarouselImageItem {
   id: string;
@@ -65,6 +66,7 @@ function StripUploadSlot({ onUploaded }: { onUploaded: (url: string) => void }) 
 export default function CarouselBlock({ images, editorMode, onChange }: Props) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [dir, setDir] = useState<1 | -1>(1);
+  const [lightboxImage, setLightboxImage] = useState<CarouselImageItem | null>(null);
 
   function addImage(url: string) {
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -181,7 +183,8 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
             transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
             src={current.url}
             alt={current.caption || ''}
-            className="absolute inset-0 w-full h-full object-contain"
+            className="absolute inset-0 w-full h-full cursor-zoom-in object-contain"
+            onClick={() => setLightboxImage(current)}
           />
         </AnimatePresence>
 
@@ -226,6 +229,13 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
         <p className="text-white/35 text-[0.8rem] mt-2 text-center" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
           {current.caption}
         </p>
+      )}
+      {lightboxImage && (
+        <ImageLightbox
+          src={lightboxImage.url}
+          alt={lightboxImage.caption || ''}
+          onClose={() => setLightboxImage(null)}
+        />
       )}
     </div>
   );
