@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS projects (
   id TEXT PRIMARY KEY,
   type TEXT NOT NULL CHECK (type IN ('ui_project', 'case_study')),
   name TEXT NOT NULL,
+  subtitle TEXT DEFAULT '',
   slug TEXT NOT NULL,
   sort_order INTEGER NOT NULL DEFAULT 0,
   hidden BOOLEAN NOT NULL DEFAULT false,
@@ -15,6 +16,9 @@ CREATE TABLE IF NOT EXISTS projects (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Add subtitle to existing projects without affecting stored content.
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS subtitle TEXT DEFAULT '';
 
 CREATE TABLE IF NOT EXISTS images (
   id UUID PRIMARY KEY,

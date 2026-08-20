@@ -30,6 +30,7 @@ interface ContentBlock {
 interface Project {
   id: string;
   name: string;
+  subtitle?: string;
   background_color: string;
   accent_color: string;
   description: string;
@@ -268,12 +269,22 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
             <ArrowLeft size={20} strokeWidth={1.5} />
           </motion.button>
 
-          <h1
-            className="text-white text-[1.25rem] font-semibold uppercase"
-            style={{ fontFamily: "'Source Sans 3', sans-serif", letterSpacing: '0.2em' }}
-          >
-            {item.name}
-          </h1>
+          <div className="min-w-0 max-w-[min(55vw,520px)] text-center">
+            <h1
+              className="truncate text-white text-[1.25rem] font-semibold uppercase"
+              style={{ fontFamily: "'Source Sans 3', sans-serif", letterSpacing: '0.2em' }}
+            >
+              {item.name}
+            </h1>
+            {item.subtitle?.trim() && (
+              <p
+                className="mt-0.5 truncate text-white/55 text-[0.72rem] leading-tight"
+                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+              >
+                {item.subtitle}
+              </p>
+            )}
+          </div>
 
           <motion.button
             whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}

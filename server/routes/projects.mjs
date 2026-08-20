@@ -90,7 +90,7 @@ router.post('/editor', requireAuth, async (req, res) => {
 router.put('/editor/:id', requireAuth, async (req, res) => {
   const fields = req.body;
   const allowed = [
-    'name','slug','sort_order','hidden','background_color','accent_color',
+    'name','subtitle','slug','sort_order','hidden','background_color','accent_color',
     'logo_grid_image','logo_header_image','hero_image','content_blocks','description'
   ];
   const sets = [];
@@ -100,6 +100,7 @@ router.put('/editor/:id', requireAuth, async (req, res) => {
     if (!allowed.includes(k)) continue;
     let sanitized = v;
     if (k === 'name') sanitized = sanitizePlainText(String(v));
+    if (k === 'subtitle') sanitized = sanitizePlainText(String(v));
     if (k === 'content_blocks') sanitized = JSON.stringify(sanitizeContentBlocks(v));
     else if (k !== 'name') sanitized = v; // keep other fields as-is
     sets.push(`${k} = $${i++}`);

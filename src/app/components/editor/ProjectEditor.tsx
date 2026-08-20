@@ -6,6 +6,7 @@ import ImageUploadField from './ImageUploadField';
 interface Project {
   id: string;
   name: string;
+  subtitle: string;
   type: string;
   slug: string;
   background_color: string;
@@ -40,6 +41,7 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
     try {
       const updated = await updateProject(draft.id, {
         name: draft.name,
+        subtitle: draft.subtitle,
         slug: draft.slug,
         hidden: draft.hidden,
         background_color: draft.background_color,
@@ -94,6 +96,15 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
           <div>
             <label className={labelCls}>Name</label>
             <input className={inputCls} value={draft.name} onChange={e => set({ name: e.target.value })} />
+          </div>
+          <div>
+            <label className={labelCls}>What I did</label>
+            <input
+              className={inputCls}
+              value={draft.subtitle || ''}
+              onChange={e => set({ subtitle: e.target.value })}
+              placeholder="e.g. Product design, UX strategy & visual direction"
+            />
           </div>
           <div>
             <label className={labelCls}>Slug</label>
