@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { X, Plus, Loader2, LayoutGrid } from 'lucide-react';
 import { uploadImage } from '../../lib/api';
+import ImageLightbox from '../ImageLightbox';
 
 export interface GridImageItem {
   id: string;
@@ -84,6 +85,8 @@ function FilledSlot({
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function ImageGridBlock({ images, columns, editorMode, onChange }: Props) {
+  const [lightboxImage, setLightboxImage] = useState<GridImageItem | null>(null);
+
   function setColumns(c: 2 | 3) {
     onChange?.(images, c);
   }
@@ -142,21 +145,31 @@ export default function ImageGridBlock({ images, columns, editorMode, onChange }
   // ── Read-only mode ──
   if (!images.length) return null;
   return (
-    <div className={`grid ${colClass} gap-2`}>
-      {images.map(img => (
-        <figure key={img.id} className="m-0">
-          <img
-            src={img.url}
-            alt={img.caption || ''}
-             className="w-full rounded-[8px] object-contain aspect-video bg-white/[0.03]"
-          />
-          {img.caption && (
-            <figcaption className="text-white/35 text-[0.75rem] mt-1 text-center" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
-              {img.caption}
-            </figcaption>
-          )}
-        </figure>
-      ))}
-    </div>
+    <>
+      <div className={`grid ${colClass} gap-2`}>
+        {images.map(img => (
+          <figure key={img.id} className="m-0">
+            <img
+              src={img.url}
+              alt={img.caption || ''}
+              className="w-full cursor-zoom-in rounded-[8px] object-contain aspect-video bg-white/[0.03]"
+              onClick={() => setLightboxImage(img)}
+            />
+            {img.caption && (
+              <figcaption className="text-white/35 text-[0.75rem] mt-1 text-center" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+                {img.caption}
+              </figcaption>
+            )}
+          </figure>
+        ))}
+      </div>
+      {lightboxImage && (
+        <ImageLightbox
+          src={lightboxImage.url}
+          alt={lightboxImage.caption || ''}
+          onClose={() => setLightboxImage(null)}
+        />
+      )}
+    </>
   );
 }

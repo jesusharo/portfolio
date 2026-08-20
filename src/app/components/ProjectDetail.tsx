@@ -9,6 +9,7 @@ import RichTextEditor from './editor/RichTextEditor';
 import ImageDropZone from './editor/ImageDropZone';
 import ImageGridBlock, { type GridImageItem } from './editor/ImageGridBlock';
 import CarouselBlock, { type CarouselImageItem } from './editor/CarouselBlock';
+import ImageLightbox from './ImageLightbox';
 
 type Mode = 'projects' | 'cases';
 type SaveStatus = 'idle' | 'unsaved' | 'saving' | 'saved' | 'error';
@@ -110,6 +111,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   const navigate = useNavigate();
   const { setNetworkState, setPageBackground, editorMode, bumpDataVersion, dataVersion, saveRequestVersion } = useNetworkState();
   const [items, setItems] = useState<Project[]>([]);
+  const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
 
   const apiType = mode === 'projects' ? 'ui_project' : 'case_study';
   const listPath = mode === 'projects' ? '/projects' : '/cases';
@@ -294,7 +296,8 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
               <img
                 src={item.hero_image}
                 alt={item.name}
-                className="w-full h-auto rounded-[12px] object-contain"
+                className="w-full h-auto cursor-zoom-in rounded-[12px] object-contain"
+                onClick={() => setLightboxImage({ src: item.hero_image, alt: item.name })}
               />
             ) : (
               <div
@@ -418,7 +421,12 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
                   )}
                   {block.type === 'image' && block.url && (
                     <figure>
-                      <img src={block.url} alt={block.caption || ''} className="w-full h-auto rounded-[12px] object-contain" />
+                      <img
+                        src={block.url}
+                        alt={block.caption || ''}
+                        className="w-full h-auto cursor-zoom-in rounded-[12px] object-contain"
+                        onClick={() => setLightboxImage({ src: block.url!, alt: block.caption || '' })}
+                      />
                       {block.caption && (
                         <figcaption
                           className="text-white/35 text-[0.8rem] mt-2 text-center"
@@ -468,6 +476,14 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {lightboxImage && (
+          <ImageLightbox
+            src={lightboxImage.src}
+            alt={lightboxImage.alt}
+            onClose={() => setLightboxImage(null)}
+          />
+        )}
 
       </div>
     </PageTransition>
