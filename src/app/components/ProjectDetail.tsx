@@ -258,11 +258,17 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
 
         {/* ── Sticky header ─────────────────────────────────────────────── */}
         <motion.div
-          className="sticky top-0 flex items-center justify-center px-6 py-5 gap-6"
+          className="sticky top-0 relative flex items-center justify-center px-6 py-5 gap-6"
           animate={{ backgroundColor: accentColor }}
           transition={{ duration: 0.4, ease: 'easeInOut' }}
           style={{ zIndex: 20 }}
         >
+          <div
+            className="pointer-events-none absolute left-0 right-0 top-full h-12"
+            style={{
+              background: `linear-gradient(to bottom, ${accentColor} 0%, transparent 100%)`,
+            }}
+          />
           <motion.button
             whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
             onClick={() => prevItem ? navigate(`${detailPath}/${prevItem.id}`) : navigate(listPath)}
