@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useLayoutEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, ArrowRight, Plus, AlignLeft, Image as ImageIcon, X, LayoutGrid, GalleryHorizontal, SeparatorHorizontal } from 'lucide-react';
@@ -242,7 +242,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   }
 
   // ── Background / keyboard shortcuts ──────────────────────────────────────
-  useEffect(() => {
+  useLayoutEffect(() => {
     setNetworkState('conversation');
     if (item) setPageBackground(item.accent_color || item.background_color);
     return () => { setNetworkState('idle'); };
@@ -286,20 +286,24 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           className="sticky top-0 relative flex items-center justify-center px-6 py-5 gap-6"
           style={{ zIndex: 20 }}
         >
-          <div
+          <motion.div
             className="pointer-events-none absolute inset-0"
-            style={{
+            initial={false}
+            animate={{
               background: `linear-gradient(to bottom, ${accentColor} 0%, transparent 100%)`,
+            }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
+            style={{
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
             }}
           />
-          <div
+          <motion.div
             className="pointer-events-none absolute inset-0"
-            style={{
-              backgroundColor: accentColor,
-              opacity: 0.5,
-            }}
+            initial={false}
+            animate={{ backgroundColor: accentColor }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
+            style={{ opacity: 0.5 }}
           />
           <motion.button
             whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
