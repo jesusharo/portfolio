@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from 'motion/react';
 
 interface Props {
@@ -77,32 +77,41 @@ export default function HeroParallax({ background, foreground, alt, onOpen }: Pr
     };
   }, [hasParallax]);
 
-  function handlePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
-    if (!hasParallax || event.pointerType === 'touch') return;
-    const bounds = containerRef.current?.getBoundingClientRect();
-    if (!bounds) return;
-    const x = ((event.clientX - bounds.left) / bounds.width - 0.5) * MAX_SHIFT * 2;
-    const y = ((event.clientY - bounds.top) / bounds.height - 0.5) * MAX_SHIFT * 2;
-    targetRef.current = { x, y };
-    if (frameRef.current !== null) return;
-    frameRef.current = window.requestAnimationFrame(() => {
-      frameRef.current = null;
-      setOffset(targetRef.current);
-    });
-  }
+  useEffect(() => {
+    if (!hasParallax || typeof window === 'undefined') return;
 
-  function resetPointer() {
-    if (!hasParallax) return;
-    targetRef.current = { x: 0, y: 0 };
-    setOffset({ x: 0, y: 0 });
-  }
+    const handleGlobalPointerMove = (event: PointerEvent) => {
+      if (event.pointerType === 'touch') return;
+      const x = (event.clientX / window.innerWidth - 0.5) * MAX_SHIFT * 2;
+      const y = (event.clientY / window.innerHeight - 0.5) * MAX_SHIFT * 2;
+      targetRef.current = {
+        x: clamp(x, -MAX_SHIFT, MAX_SHIFT),
+        y: clamp(y, -MAX_SHIFT, MAX_SHIFT),
+      };
+      if (frameRef.current !== null) return;
+      frameRef.current = window.requestAnimationFrame(() => {
+        frameRef.current = null;
+        setOffset(targetRef.current);
+      });
+    };
+
+    const resetPointer = () => {
+      targetRef.current = { x: 0, y: 0 };
+      setOffset({ x: 0, y: 0 });
+    };
+
+    window.addEventListener('pointermove', handleGlobalPointerMove, { passive: true });
+    window.addEventListener('blur', resetPointer);
+    return () => {
+      window.removeEventListener('pointermove', handleGlobalPointerMove);
+      window.removeEventListener('blur', resetPointer);
+    };
+  }, [hasParallax]);
 
   return (
     <div
       ref={containerRef}
       className="relative mx-auto max-w-[760px] rounded-[12px] cursor-zoom-in"
-      onPointerMove={handlePointerMove}
-      onPointerLeave={resetPointer}
       onClick={onOpen}
       role="button"
       tabIndex={0}
