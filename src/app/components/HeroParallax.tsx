@@ -5,7 +5,6 @@ interface Props {
   background: string;
   foreground?: string;
   alt: string;
-  onOpen: () => void;
 }
 
 type OrientationEventConstructor = typeof DeviceOrientationEvent & {
@@ -19,7 +18,7 @@ function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
 
-export default function HeroParallax({ background, foreground, alt, onOpen }: Props) {
+export default function HeroParallax({ background, foreground, alt }: Props) {
   const reduceMotion = useReducedMotion() ?? false;
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number | null>(null);
@@ -111,14 +110,7 @@ export default function HeroParallax({ background, foreground, alt, onOpen }: Pr
   return (
     <div
       ref={containerRef}
-      className="relative mx-auto max-w-[760px] rounded-[12px] cursor-zoom-in"
-      onClick={onOpen}
-      role="button"
-      tabIndex={0}
-      onKeyDown={event => {
-        if (event.key === 'Enter' || event.key === ' ') onOpen();
-      }}
-      aria-label={`Open ${alt} image`}
+      className="relative mx-auto max-w-[760px] rounded-[12px]"
     >
       {hasParallax && (
         <img

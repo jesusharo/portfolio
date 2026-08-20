@@ -310,7 +310,6 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
                 background={item.hero_image}
                 foreground={item.hero_foreground_image}
                 alt={item.name}
-                onOpen={() => setLightboxImage({ src: item.hero_image, alt: item.name })}
               />
             ) : (
               <div
