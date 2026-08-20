@@ -264,9 +264,16 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           <div
             className="pointer-events-none absolute inset-0"
             style={{
-              background: `linear-gradient(to bottom, ${accentColor} 0%, ${accentColor} 58%, transparent 100%)`,
+              background: `linear-gradient(to bottom, ${accentColor} 0%, transparent 100%)`,
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
+            }}
+          />
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundColor: accentColor,
+              opacity: 0.5,
             }}
           />
           <motion.button
