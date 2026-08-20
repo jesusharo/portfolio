@@ -6,6 +6,7 @@ import NetworkVisualization from './NetworkVisualization';
 import MainMenu from './MainMenu';
 import EditorDrawer from './editor/EditorDrawer';
 import { NetworkStateProvider, useNetworkState } from '../context/NetworkStateContext';
+import { triggerHaptic } from '../lib/haptics';
 
 function RootInner() {
   const location = useLocation();
@@ -77,13 +78,22 @@ function RootInner() {
     }
   }
 
+  function handlePointerDownCapture(event: React.PointerEvent<HTMLDivElement>) {
+    if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
+    const target = event.target as HTMLElement;
+    if (target.closest('button, a, [role="button"]')) triggerHaptic();
+  }
+
   const pillBase = 'flex items-center gap-1.5 px-3 py-2 rounded-full border text-[0.78rem] font-["Source_Sans_3",sans-serif] transition-all backdrop-blur-sm';
   const pillDefault = 'bg-[rgba(255,255,255,0.12)] hover:bg-[rgba(255,255,255,0.22)] border-white/15 text-white/60 hover:text-white';
   const pillActive = 'bg-[#d25d5f] hover:bg-[#c25052] border-[#d25d5f]/40 text-white';
   const iconBtn = 'size-[36px] flex items-center justify-center rounded-full bg-[rgba(255,255,255,0.12)] hover:bg-[rgba(255,255,255,0.22)] border border-white/15 text-white/60 hover:text-white transition-all backdrop-blur-sm';
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-[#1c1c1c]">
+    <div
+      className="relative w-full h-full overflow-hidden bg-[#1c1c1c]"
+      onPointerDownCapture={handlePointerDownCapture}
+    >
       {/* Persistent animated background */}
       <motion.div
         className="absolute inset-0"
