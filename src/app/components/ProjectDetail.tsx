@@ -115,6 +115,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   const { setNetworkState, setPageBackground, editorMode, bumpDataVersion, dataVersion, saveRequestVersion } = useNetworkState();
   const [items, setItems] = useState<Project[]>([]);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const apiType = mode === 'projects' ? 'ui_project' : 'case_study';
   const listPath = mode === 'projects' ? '/projects' : '/cases';
@@ -138,6 +139,28 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   const item = items[currentIndex] ?? null;
   const prevItem = currentIndex > 0 ? items[currentIndex - 1] : null;
   const nextItem = currentIndex < items.length - 1 ? items[currentIndex + 1] : null;
+
+  function handleTouchStart(event: React.TouchEvent<HTMLDivElement>) {
+    const touch = event.changedTouches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  }
+
+  function handleTouchEnd(event: React.TouchEvent<HTMLDivElement>) {
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    if (!start) return;
+
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - start.x;
+    const deltaY = touch.clientY - start.y;
+    if (Math.abs(deltaX) < 55 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+
+    if (deltaX < 0 && nextItem) {
+      navigate(`${detailPath}/${nextItem.id}`);
+    } else if (deltaX > 0 && prevItem) {
+      navigate(`${detailPath}/${prevItem.id}`);
+    }
+  }
 
   // ── Inline content editing state ──────────────────────────────────────────
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
@@ -254,7 +277,11 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
 
   return (
     <PageTransition>
-      <div className="absolute inset-0 overflow-y-auto">
+      <div
+        className="absolute inset-0 overflow-y-auto"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
 
         {/* ── Sticky header ─────────────────────────────────────────────── */}
         <motion.div
@@ -279,7 +306,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           <motion.button
             whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
             onClick={() => prevItem ? navigate(`${detailPath}/${prevItem.id}`) : navigate(listPath)}
-            className="relative z-10 size-[36px] flex items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
+            className="relative z-10 hidden md:flex size-[36px] items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
           >
             <ArrowLeft size={20} strokeWidth={1.5} />
           </motion.button>
@@ -304,7 +331,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           <motion.button
             whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
             onClick={() => nextItem ? navigate(`${detailPath}/${nextItem.id}`) : navigate(listPath)}
-            className="relative z-10 size-[36px] flex items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
+            className="relative z-10 hidden md:flex size-[36px] items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
           >
             <ArrowRight size={20} strokeWidth={1.5} />
           </motion.button>
