@@ -9,6 +9,14 @@ const MOUSE_RADIUS = 250;
 const MOUSE_FORCE = 28;
 const GYRO_TILT_RANGE = 32;
 
+type OrientationEventConstructor = typeof DeviceOrientationEvent & {
+  requestPermission?: () => Promise<'granted' | 'denied'>;
+};
+
+type MotionEventConstructor = typeof DeviceMotionEvent & {
+  requestPermission?: () => Promise<'granted' | 'denied'>;
+};
+
 const SCALE_BY_STATE = {
   idle: 0.68,
   focused: 1.0,
@@ -168,26 +176,29 @@ export default function NetworkVisualization() {
   }, [mouseX, mouseY]);
 
   useEffect(() => {
-    if (reduceMotion || typeof window === 'undefined' || !('DeviceOrientationEvent' in window)) {
+    if (
+      reduceMotion ||
+      typeof window === 'undefined' ||
+      (!('DeviceOrientationEvent' in window) && !('DeviceMotionEvent' in window))
+    ) {
       gyroOffsetX.set(0);
       gyroOffsetY.set(0);
       return;
     }
 
     let orientationEnabled = false;
+    let hasOrientationSample = false;
 
     const clamp = (value: number) => Math.max(-1, Math.min(1, value));
 
-    const handleOrientation = (event: DeviceOrientationEvent) => {
-      if (event.beta === null || event.gamma === null) return;
-
+    const handleTilt = (beta: number, gamma: number) => {
       if (!orientationBaseline.current) {
-        orientationBaseline.current = { beta: event.beta, gamma: event.gamma };
+        orientationBaseline.current = { beta, gamma };
       }
 
-      const { beta, gamma } = orientationBaseline.current;
-      const tiltX = clamp((event.gamma - gamma) / GYRO_TILT_RANGE);
-      const tiltY = clamp((event.beta - beta) / GYRO_TILT_RANGE);
+      const { beta: baselineBeta, gamma: baselineGamma } = orientationBaseline.current;
+      const tiltX = clamp((gamma - baselineGamma) / GYRO_TILT_RANGE);
+      const tiltY = clamp((beta - baselineBeta) / GYRO_TILT_RANGE);
 
       // Feed the same reaction used by the desktop pointer interaction.
       mouseX.set(CANVAS_WIDTH / 2 + tiltX * CANVAS_WIDTH / 2);
@@ -196,31 +207,80 @@ export default function NetworkVisualization() {
       gyroOffsetY.set(tiltY * 24);
     };
 
+    const handleOrientation = (event: DeviceOrientationEvent) => {
+      if (event.beta === null || event.gamma === null) return;
+      hasOrientationSample = true;
+      handleTilt(event.beta, event.gamma);
+    };
+
+    // Some tablets expose gravity through devicemotion but do not emit a
+    // usable deviceorientation event. Convert it to the same tilt values.
+    const handleMotion = (event: DeviceMotionEvent) => {
+      if (hasOrientationSample) return;
+      const acceleration = event.accelerationIncludingGravity;
+      if (
+        !acceleration ||
+        acceleration.x === null ||
+        acceleration.y === null ||
+        acceleration.z === null
+      ) return;
+
+      const gamma = Math.atan2(
+        acceleration.x,
+        Math.sqrt(acceleration.y ** 2 + acceleration.z ** 2),
+      ) * (180 / Math.PI);
+      const beta = Math.atan2(acceleration.y, acceleration.z) * (180 / Math.PI);
+      handleTilt(beta, gamma);
+    };
+
     const enableOrientation = async () => {
       if (orientationEnabled) return;
 
-      const OrientationEvent = window.DeviceOrientationEvent as typeof DeviceOrientationEvent & {
-        requestPermission?: () => Promise<'granted' | 'denied'>;
-      };
+      const OrientationEvent = window.DeviceOrientationEvent as OrientationEventConstructor | undefined;
+      const MotionEvent = window.DeviceMotionEvent as MotionEventConstructor | undefined;
+      const requesters = [
+        typeof OrientationEvent?.requestPermission === 'function'
+          ? OrientationEvent.requestPermission.bind(OrientationEvent)
+          : null,
+        typeof MotionEvent?.requestPermission === 'function'
+          ? MotionEvent.requestPermission.bind(MotionEvent)
+          : null,
+      ].filter((requestPermission): requestPermission is () => Promise<'granted' | 'denied'> =>
+        requestPermission !== null,
+      );
 
-      if (typeof OrientationEvent.requestPermission === 'function') {
-        try {
-          const permission = await OrientationEvent.requestPermission();
-          if (permission !== 'granted') return;
-        } catch {
-          return;
-        }
+      if (requesters.length > 0) {
+        const permissions = await Promise.all(requesters.map(async requestPermission => {
+          try {
+            return await requestPermission();
+          } catch {
+            return 'denied' as const;
+          }
+        }));
+        if (!permissions.some(permission => permission === 'granted')) return;
       }
 
       orientationEnabled = true;
-      window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+      if ('DeviceOrientationEvent' in window) {
+        window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+        window.addEventListener(
+          'deviceorientationabsolute',
+          handleOrientation,
+          { passive: true } as AddEventListenerOptions,
+        );
+      }
+      if ('DeviceMotionEvent' in window) {
+        window.addEventListener('devicemotion', handleMotion, { passive: true });
+      }
     };
 
-    const OrientationEvent = window.DeviceOrientationEvent as typeof DeviceOrientationEvent & {
-      requestPermission?: () => Promise<'granted' | 'denied'>;
-    };
+    const OrientationEvent = window.DeviceOrientationEvent as OrientationEventConstructor | undefined;
+    const MotionEvent = window.DeviceMotionEvent as MotionEventConstructor | undefined;
 
-    if (typeof OrientationEvent.requestPermission === 'function') {
+    const needsGesture =
+      typeof OrientationEvent?.requestPermission === 'function' ||
+      typeof MotionEvent?.requestPermission === 'function';
+    if (needsGesture) {
       // Try immediately, then retry on the first touch for iOS gesture-gated permission.
       void enableOrientation();
       window.addEventListener('touchstart', enableOrientation, { once: true, passive: true });
@@ -235,6 +295,8 @@ export default function NetworkVisualization() {
 
     return () => {
       window.removeEventListener('deviceorientation', handleOrientation);
+      window.removeEventListener('deviceorientationabsolute', handleOrientation);
+      window.removeEventListener('devicemotion', handleMotion);
       window.removeEventListener('touchstart', enableOrientation);
       window.removeEventListener('orientationchange', resetCalibration);
     };
