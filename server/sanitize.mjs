@@ -16,8 +16,14 @@ const RICH_TEXT_OPTIONS = {
   ],
   allowedAttributes: {
     a: ['href', 'target', 'rel'],
-    span: ['style'],
-    '*': [],
+    '*': ['style'],
+  },
+  allowedStyles: {
+    '*': {
+      color: [/^#[0-9a-f]{6}$/i],
+      'font-size': [/^(0\.85|1|1\.25|1\.5)rem$/],
+      'text-align': [/^(left|center|right|justify)$/],
+    },
   },
   allowedSchemes: ['https', 'http', 'mailto'],
   allowedSchemesByTag: { a: ['https', 'http', 'mailto'] },
