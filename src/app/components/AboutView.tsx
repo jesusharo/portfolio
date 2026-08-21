@@ -184,7 +184,6 @@ export default function AboutView() {
               {[
                 { label: 'jharolozano@gmail.com', href: 'mailto:jharolozano@gmail.com' },
                 { label: 'linkedin', href: 'https://www.linkedin.com/in/jharolozano/' },
-                { label: '+52 312 124 8323', href: 'tel:+523121248323' },
               ].map(link => (
                 <a
                   key={link.href}
