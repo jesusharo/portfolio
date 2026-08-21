@@ -184,6 +184,7 @@ export default function AboutView() {
               {[
                 { label: 'jharolozano@gmail.com', href: 'mailto:jharolozano@gmail.com' },
                 { label: 'linkedin', href: 'https://www.linkedin.com/in/jharolozano/' },
+                { label: 'behance', href: 'https://www.behance.net/haroknow' },
               ].map(link => (
                 <a
                   key={link.href}
