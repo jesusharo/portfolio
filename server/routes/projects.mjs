@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { query } from '../db.mjs';
 import jwt from 'jsonwebtoken';
-import { sanitizePlainText, sanitizeContentBlocks, sanitizeHexColor } from '../sanitize.mjs';
+import { sanitizePlainText, sanitizeContentBlocks, sanitizeHexColor, sanitizeTextAlign } from '../sanitize.mjs';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
@@ -91,7 +91,8 @@ router.put('/editor/:id', requireAuth, async (req, res) => {
   const fields = req.body;
   const allowed = [
     'name','subtitle','slug','sort_order','hidden','background_color','accent_color','text_color',
-    'logo_grid_image','logo_header_image','hero_image','hero_foreground_image','content_blocks','description'
+    'logo_grid_image','logo_header_image','hero_image','hero_foreground_image','content_blocks','description',
+    'description_alignment'
   ];
   const sets = [];
   const vals = [];
@@ -101,6 +102,7 @@ router.put('/editor/:id', requireAuth, async (req, res) => {
     let sanitized;
     if (k === 'name' || k === 'subtitle') sanitized = sanitizePlainText(String(v));
     else if (k === 'text_color') sanitized = sanitizeHexColor(v);
+    else if (k === 'description_alignment') sanitized = sanitizeTextAlign(v);
     else if (k === 'content_blocks') sanitized = JSON.stringify(sanitizeContentBlocks(v));
     else sanitized = v;
     sets.push(`${k} = $${i++}`);

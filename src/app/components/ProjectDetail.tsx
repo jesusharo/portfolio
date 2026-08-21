@@ -35,6 +35,7 @@ interface Project {
   accent_color: string;
   text_color?: string;
   description: string;
+  description_alignment?: 'left' | 'center' | 'right' | 'justify';
   hero_image: string;
   hero_foreground_image?: string;
   content_blocks: ContentBlock[] | string;
@@ -275,6 +276,9 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   const paragraphs = (item.description ?? '').split('\n\n').filter(Boolean);
   const accentColor = item.accent_color || item.background_color || '#1c1c1c';
   const textColor = /^#[0-9a-f]{6}$/i.test(item.text_color || '') ? item.text_color! : '#ffffff';
+  const descriptionAlignment = ['left', 'center', 'right', 'justify'].includes(item.description_alignment || '')
+    ? item.description_alignment!
+    : 'center';
   const richTextStyle = {
     fontFamily: "'Source Sans 3', sans-serif",
     '--project-text-color': textColor,
@@ -401,6 +405,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.15 }}
             className="px-8 py-6 max-w-[760px] mx-auto"
+            style={{ textAlign: descriptionAlignment }}
           >
             {paragraphs.map((p, i) => (
               <p key={i} className="text-[0.9375rem] leading-[1.7] mb-4 last:mb-0 opacity-65"

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Trash2 } from 'lucide-react';
+import { AlignCenter, AlignJustify, AlignLeft, AlignRight, ArrowLeft, Trash2 } from 'lucide-react';
 import { updateProject, deleteProject } from '../../lib/api';
 import ImageUploadField from './ImageUploadField';
 
@@ -17,6 +17,7 @@ interface Project {
   hero_image: string;
   hero_foreground_image: string;
   description: string;
+  description_alignment?: 'left' | 'center' | 'right' | 'justify';
   hidden: boolean;
 }
 
@@ -54,6 +55,7 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
         hero_image: draft.hero_image,
         hero_foreground_image: draft.hero_foreground_image,
         description: draft.description,
+        description_alignment: draft.description_alignment || 'center',
       });
       onSaved(updated);
     } catch {
@@ -115,10 +117,38 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
             <input className={inputCls} value={draft.slug} onChange={e => set({ slug: e.target.value })} />
           </div>
           <div>
-            <label className={labelCls}>Description</label>
+            <div className="mb-1 flex items-center justify-between gap-3">
+              <label className={`${labelCls} mb-0`}>Description</label>
+              <div className="flex items-center gap-0.5 rounded-[8px] border border-white/10 bg-white/[0.03] p-0.5">
+                {([
+                  ['left', 'Align left', AlignLeft],
+                  ['center', 'Align center', AlignCenter],
+                  ['right', 'Align right', AlignRight],
+                  ['justify', 'Justify text', AlignJustify],
+                ] as const).map(([alignment, label, Icon]) => {
+                  const isActive = (draft.description_alignment || 'center') === alignment;
+                  return (
+                    <button
+                      key={alignment}
+                      type="button"
+                      onClick={() => set({ description_alignment: alignment })}
+                      title={label}
+                      aria-label={label}
+                      aria-pressed={isActive}
+                      className={`flex size-7 items-center justify-center rounded-[6px] transition-colors ${
+                        isActive ? 'bg-white/20 text-white' : 'text-white/40 hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
+                      <Icon size={14} strokeWidth={1.5} />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             <textarea
               className={`${inputCls} resize-none`} rows={4}
               value={draft.description} onChange={e => set({ description: e.target.value })}
+              style={{ textAlign: draft.description_alignment || 'center' }}
             />
           </div>
         </div>

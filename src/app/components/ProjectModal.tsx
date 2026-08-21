@@ -20,6 +20,7 @@ interface Project {
   accent_color: string;
   text_color?: string;
   hero_image: string;
+  description_alignment?: 'left' | 'center' | 'right' | 'justify';
   content_blocks: ContentBlock[];
 }
 
@@ -88,6 +89,9 @@ export default function ProjectModal({ projectId, onClose }: Props) {
 
   const bg = project?.background_color || '#1c1c1c';
   const textColor = /^#[0-9a-f]{6}$/i.test(project?.text_color || '') ? project!.text_color! : '#ffffff';
+  const descriptionAlignment = ['left', 'center', 'right', 'justify'].includes(project?.description_alignment || '')
+    ? project!.description_alignment!
+    : 'center';
 
   return (
     <AnimatePresence>
@@ -151,7 +155,10 @@ export default function ProjectModal({ projectId, onClose }: Props) {
                         {project.name}
                       </h2>
                       {project.description && (
-                        <p className="text-[0.95rem] leading-[1.6] mb-6 font-['Source_Sans_3',sans-serif] opacity-65" style={{ color: textColor }}>
+                        <p
+                          className="text-[0.95rem] leading-[1.6] mb-6 font-['Source_Sans_3',sans-serif] opacity-65"
+                          style={{ color: textColor, textAlign: descriptionAlignment }}
+                        >
                           {project.description}
                         </p>
                       )}

@@ -60,6 +60,11 @@ export function sanitizeHexColor(value, fallback = '#ffffff') {
   return /^#[0-9a-f]{6}$/i.test(color) ? color : fallback;
 }
 
+/** Limit the project description to the supported text alignment values. */
+export function sanitizeTextAlign(value, fallback = 'center') {
+  return ['left', 'center', 'right', 'justify'].includes(value) ? value : fallback;
+}
+
 /**
  * Walk a content_blocks array and sanitize every richtext block's html field in place.
  * Returns a new array — does not mutate the original.
