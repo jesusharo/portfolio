@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { motion } from 'motion/react';
+import { Linkedin, Mail, Palette } from 'lucide-react';
 import PageTransition from './PageTransition';
 import { useNetworkState } from '../context/NetworkStateContext';
 
@@ -177,14 +178,15 @@ export default function AboutView() {
             <h1 style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '2.4rem', fontWeight: 700, color: 'white', marginBottom: '4px' }}>
               Jesus Haro
             </h1>
-            <p style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '1rem', color: 'rgba(255,255,255,0.45)', marginBottom: '20px' }}>
-              Senior Product Designer
-            </p>
-            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+              <p style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '1rem', color: 'rgba(255,255,255,0.45)' }}>
+                Senior Product Designer
+              </p>
+              <div className="ml-auto flex flex-wrap items-center justify-end gap-x-5 gap-y-2">
               {[
-                { label: 'jharolozano@gmail.com', href: 'mailto:jharolozano@gmail.com' },
-                { label: 'linkedin', href: 'https://www.linkedin.com/in/jharolozano/' },
-                { label: 'behance', href: 'https://www.behance.net/haroknow' },
+                { label: 'jharolozano@gmail.com', href: 'mailto:jharolozano@gmail.com', Icon: Mail },
+                { label: 'linkedin', href: 'https://www.linkedin.com/in/jharolozano/', Icon: Linkedin },
+                { label: 'behance', href: 'https://www.behance.net/haroknow', Icon: Palette },
               ].map(link => (
                 <a
                   key={link.href}
@@ -192,6 +194,9 @@ export default function AboutView() {
                   target="_blank"
                   rel="noreferrer"
                   style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
                     fontFamily: "'Source Sans 3', sans-serif",
                     fontSize: '0.82rem',
                     color: 'rgba(255,255,255,0.4)',
@@ -201,9 +206,11 @@ export default function AboutView() {
                   onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.75)')}
                   onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
                 >
+                  <link.Icon size={14} strokeWidth={1.5} aria-hidden="true" />
                   {link.label}
                 </a>
               ))}
+              </div>
             </div>
           </motion.div>
 
