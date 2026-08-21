@@ -179,7 +179,7 @@ export default function AboutView() {
               Jesus Haro
             </h1>
             <div className="mb-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-              <p style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '1rem', color: 'rgba(255,255,255,0.45)' }}>
+              <p style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '1rem', color: '#d25d5f' }}>
                 Senior Product Designer
               </p>
               <div className="ml-auto flex flex-wrap items-center justify-end gap-x-5 gap-y-2">
