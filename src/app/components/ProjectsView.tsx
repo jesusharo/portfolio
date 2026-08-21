@@ -34,14 +34,14 @@ export default function ProjectsView() {
           UI Projects
         </h2>
         <TooltipProvider delayDuration={150}>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full">
+          <div className="flex w-full flex-wrap justify-center gap-3">
             {projects.map((project, i) => (
               <Tooltip key={project.id}>
                 <TooltipTrigger asChild>
                   <motion.button
                     onClick={() => navigate(`/projects/${project.id}`)}
                     aria-label={`Open ${project.name}`}
-                    className="aspect-square rounded-[20px] flex items-center justify-center cursor-pointer relative overflow-hidden"
+                    className="aspect-square w-[calc((100%-0.75rem)/2)] shrink-0 rounded-[20px] flex items-center justify-center cursor-pointer relative overflow-hidden md:w-[calc((100%-2.25rem)/4)]"
                     style={{ backgroundColor: project.background_color || '#333' }}
                     initial={{ opacity: 0, scale: 0.92 }}
                     animate={{ opacity: 1, scale: 1 }}
