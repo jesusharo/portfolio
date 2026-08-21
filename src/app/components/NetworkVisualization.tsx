@@ -187,6 +187,7 @@ export default function NetworkVisualization() {
     }
 
     let orientationEnabled = false;
+    let enablingOrientation = false;
     let hasOrientationSample = false;
 
     const clamp = (value: number) => Math.max(-1, Math.min(1, value));
@@ -234,7 +235,8 @@ export default function NetworkVisualization() {
     };
 
     const enableOrientation = async () => {
-      if (orientationEnabled) return;
+      if (orientationEnabled || enablingOrientation) return;
+      enablingOrientation = true;
 
       const OrientationEvent = window.DeviceOrientationEvent as OrientationEventConstructor | undefined;
       const MotionEvent = window.DeviceMotionEvent as MotionEventConstructor | undefined;
@@ -257,10 +259,16 @@ export default function NetworkVisualization() {
             return 'denied' as const;
           }
         }));
-        if (!permissions.some(permission => permission === 'granted')) return;
+        if (!permissions.some(permission => permission === 'granted')) {
+          enablingOrientation = false;
+          return;
+        }
       }
 
       orientationEnabled = true;
+      enablingOrientation = false;
+      window.removeEventListener('touchstart', enableOrientation);
+      window.removeEventListener('pointerdown', enableOrientation);
       if ('DeviceOrientationEvent' in window) {
         window.addEventListener('deviceorientation', handleOrientation, { passive: true });
         window.addEventListener(
@@ -281,9 +289,11 @@ export default function NetworkVisualization() {
       typeof OrientationEvent?.requestPermission === 'function' ||
       typeof MotionEvent?.requestPermission === 'function';
     if (needsGesture) {
-      // Try immediately, then retry on the first touch for iOS gesture-gated permission.
+      // Try immediately, then keep retrying from a real gesture if the browser
+      // rejected the non-gesture request (as iOS Safari commonly does).
       void enableOrientation();
-      window.addEventListener('touchstart', enableOrientation, { once: true, passive: true });
+      window.addEventListener('touchstart', enableOrientation, { passive: true });
+      window.addEventListener('pointerdown', enableOrientation, { passive: true });
     } else {
       void enableOrientation();
     }

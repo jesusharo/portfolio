@@ -38,6 +38,7 @@ export default function HeroParallax({ background, foreground, alt }: Props) {
     ) return;
 
     let enabled = false;
+    let enabling = false;
     const OrientationEvent = window.DeviceOrientationEvent as OrientationEventConstructor | undefined;
     const MotionEvent = window.DeviceMotionEvent as MotionEventConstructor | undefined;
     const baseline = { beta: null as number | null, gamma: null as number | null };
@@ -87,7 +88,8 @@ export default function HeroParallax({ background, foreground, alt }: Props) {
     };
 
     const enableOrientation = async () => {
-      if (enabled) return;
+      if (enabled || enabling) return;
+      enabling = true;
       const requestPermission =
         typeof OrientationEvent?.requestPermission === 'function'
           ? OrientationEvent.requestPermission.bind(OrientationEvent)
@@ -97,12 +99,19 @@ export default function HeroParallax({ background, foreground, alt }: Props) {
 
       if (requestPermission) {
         try {
-          if (await requestPermission() !== 'granted') return;
+          if (await requestPermission() !== 'granted') {
+            enabling = false;
+            return;
+          }
         } catch {
+          enabling = false;
           return;
         }
       }
       enabled = true;
+      enabling = false;
+      window.removeEventListener('touchstart', enableOrientation);
+      window.removeEventListener('pointerdown', enableOrientation);
       if ('DeviceOrientationEvent' in window) {
         window.addEventListener('deviceorientation', handleOrientation, { passive: true });
         // Some Android browsers expose the higher-fidelity absolute stream
@@ -118,15 +127,16 @@ export default function HeroParallax({ background, foreground, alt }: Props) {
       }
     };
 
-    // iOS only allows requestPermission() from a user gesture. Try once on
-    // mount for browsers that allow it, then retry from the first real gesture.
+    // iOS only allows requestPermission() from a user gesture. Try on mount
+    // for browsers that allow it, then keep retrying from real gestures if
+    // the browser rejected the non-gesture request.
     const needsGesture =
       typeof OrientationEvent?.requestPermission === 'function' ||
       typeof MotionEvent?.requestPermission === 'function';
     if (needsGesture) {
       void enableOrientation();
-      window.addEventListener('touchstart', enableOrientation, { once: true, passive: true });
-      window.addEventListener('pointerdown', enableOrientation, { once: true, passive: true });
+      window.addEventListener('touchstart', enableOrientation, { passive: true });
+      window.addEventListener('pointerdown', enableOrientation, { passive: true });
     } else {
       void enableOrientation();
     }

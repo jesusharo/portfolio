@@ -21,6 +21,7 @@ function RootInner() {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const pendingEditMode = useRef(false);
+  const lastHapticRef = useRef(0);
 
   // Secret entry point: navigating to /login-editor opens the drawer and redirects home
   useEffect(() => {
@@ -78,10 +79,22 @@ function RootInner() {
     }
   }
 
+  function handleHapticTarget(target: EventTarget | null) {
+    const element = target as HTMLElement | null;
+    if (!element?.closest('button, a, [role="button"]')) return;
+    const now = Date.now();
+    if (now - lastHapticRef.current < 80) return;
+    lastHapticRef.current = now;
+    triggerHaptic();
+  }
+
   function handlePointerDownCapture(event: React.PointerEvent<HTMLDivElement>) {
     if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
-    const target = event.target as HTMLElement;
-    if (target.closest('button, a, [role="button"]')) triggerHaptic();
+    handleHapticTarget(event.target);
+  }
+
+  function handleTouchStartCapture(event: React.TouchEvent<HTMLDivElement>) {
+    handleHapticTarget(event.target);
   }
 
   const pillBase = 'flex items-center gap-1.5 px-3 py-2 rounded-full border text-[0.78rem] font-["Source_Sans_3",sans-serif] transition-all backdrop-blur-sm';
@@ -93,6 +106,7 @@ function RootInner() {
     <div
       className="relative w-full h-full overflow-hidden bg-[#1c1c1c]"
       onPointerDownCapture={handlePointerDownCapture}
+      onTouchStartCapture={handleTouchStartCapture}
     >
       {/* Persistent animated background */}
       <motion.div
