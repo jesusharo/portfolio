@@ -5,7 +5,6 @@ import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import TextAlign from '@tiptap/extension-text-align';
 import { TextStyle, FontSize } from '@tiptap/extension-text-style';
-import Color from '@tiptap/extension-color';
 import {
   AlignCenter,
   AlignJustify,
@@ -20,7 +19,6 @@ import {
   ListOrdered,
   Loader2,
   Minus,
-  Palette,
 } from 'lucide-react';
 import { uploadImage } from '../../lib/api';
 
@@ -48,7 +46,6 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
       Image.configure({ inline: false }),
       Link.configure({ openOnClick: false }),
       TextStyle,
-      Color,
       FontSize,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
@@ -91,7 +88,6 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
       <Icon size={14} strokeWidth={1.5} />
     </button>
   );
-  const currentColor = editor.getAttributes('textStyle').color || '#ffffff';
   const currentFontSize = editor.getAttributes('textStyle').fontSize || '';
 
   return (
@@ -107,23 +103,6 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
         {btn(() => editor.chain().focus().setTextAlign('right').run(), editor.isActive({ textAlign: 'right' }), 'Align right', AlignRight)}
         {btn(() => editor.chain().focus().setTextAlign('justify').run(), editor.isActive({ textAlign: 'justify' }), 'Justify text', AlignJustify)}
         <div className="w-px bg-white/10 mx-1" />
-        <label
-          className="relative flex items-center justify-center p-1.5 rounded-[6px] text-white/40 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-          title="Text color"
-        >
-          <Palette size={14} strokeWidth={1.5} />
-          <span
-            className="absolute bottom-1 left-1/2 -translate-x-1/2 w-2.5 h-0.5 rounded-full"
-            style={{ backgroundColor: currentColor }}
-          />
-          <input
-            type="color"
-            value={currentColor}
-            className="absolute inset-0 opacity-0 cursor-pointer"
-            aria-label="Text color"
-            onChange={event => editor.chain().focus().setColor(event.target.value).run()}
-          />
-        </label>
         <select
           value={currentFontSize}
           aria-label="Text size"

@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS projects (
   hidden BOOLEAN NOT NULL DEFAULT false,
   background_color TEXT DEFAULT '#1c1c1c',
   accent_color TEXT DEFAULT '#1c1c1c',
+  text_color TEXT DEFAULT '#ffffff',
   logo_grid_image TEXT DEFAULT '',
   logo_header_image TEXT DEFAULT '',
   hero_image TEXT DEFAULT '',
@@ -21,6 +22,7 @@ CREATE TABLE IF NOT EXISTS projects (
 -- Add subtitle to existing projects without affecting stored content.
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS subtitle TEXT DEFAULT '';
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS hero_foreground_image TEXT DEFAULT '';
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS text_color TEXT DEFAULT '#ffffff';
 
 CREATE TABLE IF NOT EXISTS images (
   id UUID PRIMARY KEY,

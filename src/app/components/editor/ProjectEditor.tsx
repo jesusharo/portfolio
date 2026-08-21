@@ -11,6 +11,7 @@ interface Project {
   slug: string;
   background_color: string;
   accent_color: string;
+  text_color: string;
   logo_grid_image: string;
   logo_header_image: string;
   hero_image: string;
@@ -47,6 +48,7 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
         hidden: draft.hidden,
         background_color: draft.background_color,
         accent_color: draft.accent_color,
+        text_color: draft.text_color,
         logo_grid_image: draft.logo_grid_image,
         logo_header_image: draft.logo_header_image,
         hero_image: draft.hero_image,
@@ -154,6 +156,23 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
                 onChange={e => set({ accent_color: e.target.value })}
               />
             </div>
+          </div>
+        </div>
+        <div>
+          <label className={labelCls}>Typography color</label>
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              value={draft.text_color || '#ffffff'}
+              onChange={e => set({ text_color: e.target.value })}
+              className="w-9 h-9 rounded-[8px] border border-white/10 bg-transparent cursor-pointer p-0.5"
+            />
+            <input
+              className={inputCls}
+              value={draft.text_color || '#ffffff'}
+              onChange={e => set({ text_color: e.target.value })}
+              placeholder="#ffffff"
+            />
           </div>
         </div>
 

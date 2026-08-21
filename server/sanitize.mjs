@@ -54,6 +54,12 @@ export function sanitizePlainText(text) {
   return sanitizeHtml(text, { allowedTags: [], allowedAttributes: {} }).trim();
 }
 
+/** Allow project-scoped colors only in standard six-digit hex notation. */
+export function sanitizeHexColor(value, fallback = '#ffffff') {
+  const color = typeof value === 'string' ? value.trim() : '';
+  return /^#[0-9a-f]{6}$/i.test(color) ? color : fallback;
+}
+
 /**
  * Walk a content_blocks array and sanitize every richtext block's html field in place.
  * Returns a new array — does not mutate the original.

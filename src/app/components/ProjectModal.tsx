@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, type CSSProperties } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
 import { getProject } from '../lib/api';
@@ -18,6 +18,7 @@ interface Project {
   description: string;
   background_color: string;
   accent_color: string;
+  text_color?: string;
   hero_image: string;
   content_blocks: ContentBlock[];
 }
@@ -27,39 +28,40 @@ interface Props {
   onClose: () => void;
 }
 
-function RichTextBlock({ html }: { html: string }) {
+function RichTextBlock({ html, textColor }: { html: string; textColor: string }) {
   return (
     <div
-      className="prose prose-invert prose-sm max-w-none text-white/80 leading-relaxed"
+      className="project-rich-text prose prose-invert prose-sm max-w-none leading-relaxed"
+      style={{ '--project-text-color': textColor } as CSSProperties}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
 }
 
-function ImageBlock({ url, caption }: { url: string; caption?: string }) {
+function ImageBlock({ url, caption, textColor }: { url: string; caption?: string; textColor: string }) {
   return (
     <figure className="my-4">
       <img src={url} alt={caption || ''} className="w-full rounded-[12px] object-cover" />
-      {caption && <figcaption className="mt-2 text-center text-[0.75rem] text-white/40 font-['Source_Sans_3',sans-serif]">{caption}</figcaption>}
+      {caption && <figcaption className="mt-2 text-center text-[0.75rem] opacity-55 font-['Source_Sans_3',sans-serif]" style={{ color: textColor }}>{caption}</figcaption>}
     </figure>
   );
 }
 
-function ImageGridBlock({ images, columns = 2 }: { images: { url: string; caption?: string }[]; columns?: 2 | 3 }) {
+function ImageGridBlock({ images, columns = 2, textColor }: { images: { url: string; caption?: string }[]; columns?: 2 | 3; textColor: string }) {
   return (
     <div className={`grid gap-3 my-4 ${columns === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
       {images.map((img, i) => (
         <figure key={i}>
           <img src={img.url} alt={img.caption || ''} className="w-full rounded-[10px] object-cover" />
-          {img.caption && <figcaption className="mt-1 text-center text-[0.72rem] text-white/40 font-['Source_Sans_3',sans-serif]">{img.caption}</figcaption>}
+          {img.caption && <figcaption className="mt-1 text-center text-[0.72rem] opacity-55 font-['Source_Sans_3',sans-serif]" style={{ color: textColor }}>{img.caption}</figcaption>}
         </figure>
       ))}
     </div>
   );
 }
 
-function Divider() {
-  return <hr className="my-6 border-white/10" />;
+function Divider({ textColor }: { textColor: string }) {
+  return <hr className="my-6 opacity-30" style={{ borderColor: textColor }} />;
 }
 
 export default function ProjectModal({ projectId, onClose }: Props) {
@@ -85,6 +87,7 @@ export default function ProjectModal({ projectId, onClose }: Props) {
   }, [projectId, handleKeyDown]);
 
   const bg = project?.background_color || '#1c1c1c';
+  const textColor = /^#[0-9a-f]{6}$/i.test(project?.text_color || '') ? project!.text_color! : '#ffffff';
 
   return (
     <AnimatePresence>
@@ -144,11 +147,11 @@ export default function ProjectModal({ projectId, onClose }: Props) {
 
                     {/* Body */}
                     <div className="px-8 py-8">
-                      <h2 className="text-white text-[1.6rem] font-bold leading-tight mb-2 font-['Source_Sans_3',sans-serif]">
+                      <h2 className="text-[1.6rem] font-bold leading-tight mb-2 font-['Source_Sans_3',sans-serif]" style={{ color: textColor }}>
                         {project.name}
                       </h2>
                       {project.description && (
-                        <p className="text-white/60 text-[0.95rem] leading-[1.6] mb-6 font-['Source_Sans_3',sans-serif]">
+                        <p className="text-[0.95rem] leading-[1.6] mb-6 font-['Source_Sans_3',sans-serif] opacity-65" style={{ color: textColor }}>
                           {project.description}
                         </p>
                       )}
@@ -156,10 +159,10 @@ export default function ProjectModal({ projectId, onClose }: Props) {
                       {/* Content blocks */}
                       <div className="space-y-2">
                         {(project.content_blocks || []).map((block, i) => {
-                          if (block.type === 'richtext' && block.html) return <RichTextBlock key={i} html={block.html} />;
-                          if (block.type === 'image' && block.url) return <ImageBlock key={i} url={block.url} caption={block.caption} />;
-                          if (block.type === 'imagegrid' && block.images?.length) return <ImageGridBlock key={i} images={block.images} columns={block.columns} />;
-                          if (block.type === 'divider') return <Divider key={i} />;
+                          if (block.type === 'richtext' && block.html) return <RichTextBlock key={i} html={block.html} textColor={textColor} />;
+                          if (block.type === 'image' && block.url) return <ImageBlock key={i} url={block.url} caption={block.caption} textColor={textColor} />;
+                          if (block.type === 'imagegrid' && block.images?.length) return <ImageGridBlock key={i} images={block.images} columns={block.columns} textColor={textColor} />;
+                          if (block.type === 'divider') return <Divider key={i} textColor={textColor} />;
                           return null;
                         })}
                       </div>

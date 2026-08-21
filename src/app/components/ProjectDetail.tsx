@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState, useRef } from 'react';
+import { useEffect, useLayoutEffect, useState, useRef, type CSSProperties } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, ArrowRight, Plus, AlignLeft, Image as ImageIcon, X, LayoutGrid, GalleryHorizontal, SeparatorHorizontal } from 'lucide-react';
@@ -33,6 +33,7 @@ interface Project {
   subtitle?: string;
   background_color: string;
   accent_color: string;
+  text_color?: string;
   description: string;
   hero_image: string;
   hero_foreground_image?: string;
@@ -273,6 +274,11 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
 
   const paragraphs = (item.description ?? '').split('\n\n').filter(Boolean);
   const accentColor = item.accent_color || item.background_color || '#1c1c1c';
+  const textColor = /^#[0-9a-f]{6}$/i.test(item.text_color || '') ? item.text_color! : '#ffffff';
+  const richTextStyle = {
+    fontFamily: "'Source Sans 3', sans-serif",
+    '--project-text-color': textColor,
+  } as CSSProperties;
 
   return (
     <div
@@ -315,15 +321,15 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
 
           <div className="relative z-10 min-w-0 max-w-[min(55vw,520px)] text-center">
             <h1
-              className="truncate text-white text-[1.25rem] font-semibold uppercase"
-              style={{ fontFamily: "'Source Sans 3', sans-serif", letterSpacing: '0.2em' }}
+              className="truncate text-[1.25rem] font-semibold uppercase"
+              style={{ fontFamily: "'Source Sans 3', sans-serif", letterSpacing: '0.2em', color: textColor }}
             >
               {item.name}
             </h1>
             {item.subtitle?.trim() && (
               <p
-                className="mt-0.5 hidden truncate text-white/55 text-[0.72rem] leading-tight md:block"
-                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                className="mt-0.5 hidden truncate text-[0.72rem] leading-tight md:block opacity-55"
+                style={{ fontFamily: "'Source Sans 3', sans-serif", color: textColor }}
               >
                 {item.subtitle}
               </p>
@@ -344,8 +350,8 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
         {item.subtitle?.trim() && (
           <div className="px-8 pt-3 md:hidden">
             <p
-              className="text-center text-white/55 text-[0.78rem] leading-snug"
-              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+              className="text-center text-[0.78rem] leading-snug opacity-55"
+              style={{ fontFamily: "'Source Sans 3', sans-serif", color: textColor }}
             >
               {item.subtitle}
             </p>
@@ -397,8 +403,8 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
             className="px-8 py-6 max-w-[760px] mx-auto"
           >
             {paragraphs.map((p, i) => (
-              <p key={i} className="text-white/65 text-[0.9375rem] leading-[1.7] mb-4 last:mb-0"
-                style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+              <p key={i} className="text-[0.9375rem] leading-[1.7] mb-4 last:mb-0 opacity-65"
+                style={{ fontFamily: "'Source Sans 3', sans-serif", color: textColor }}>
                 {p}
               </p>
             ))}
@@ -464,7 +470,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
                     )}
                     {block.type === 'divider' && (
                       <div className="py-5 flex items-center px-2">
-                        <div className="flex-1 h-px bg-white/15 rounded-full" />
+                          <div className="flex-1 h-px rounded-full opacity-30" style={{ backgroundColor: textColor }} />
                       </div>
                     )}
                   </div>
@@ -481,8 +487,8 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
                 <div key={block.id} className="mb-8">
                   {block.type === 'richtext' && block.html && (
                     <div
-                      className="prose prose-invert prose-lg max-w-none text-white/70"
-                      style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                      className="project-rich-text prose prose-invert prose-lg max-w-none"
+                      style={richTextStyle}
                       dangerouslySetInnerHTML={{ __html: block.html }}
                     />
                   )}
@@ -496,8 +502,8 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
                       />
                       {block.caption && (
                         <figcaption
-                          className="text-white/35 text-[0.8rem] mt-2 text-center"
-                          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                          className="text-[0.8rem] mt-2 text-center opacity-55"
+                          style={{ fontFamily: "'Source Sans 3', sans-serif", color: textColor }}
                         >
                           {block.caption}
                         </figcaption>
@@ -516,7 +522,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
                     />
                   )}
                   {block.type === 'divider' && (
-                    <hr className="border-0 border-t border-white/15 my-2" />
+                    <hr className="border-0 border-t my-2 opacity-30" style={{ borderColor: textColor }} />
                   )}
                 </div>
               ))}
