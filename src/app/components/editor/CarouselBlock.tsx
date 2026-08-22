@@ -130,9 +130,9 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
   const visibleImages = getVisibleImages();
   const centerIdx = !isMobile && images.length >= 3 ? 1 : -1;
   const slideVariants = {
-    enter: (direction: number) => ({ x: direction > 0 ? '100%' : '-100%', opacity: 0 }),
+    enter: (direction: number) => ({ x: direction > 0 ? '8%' : '-8%', opacity: 0 }),
     center: { x: 0, opacity: 1 },
-    exit: (direction: number) => ({ x: direction > 0 ? '-100%' : '100%', opacity: 0 }),
+    exit: (direction: number) => ({ x: direction > 0 ? '-8%' : '8%', opacity: 0 }),
   };
 
   // ── Editor mode ──
@@ -183,7 +183,7 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
                   animate="center"
                   exit="exit"
                   className="flex items-start py-5 md:py-8"
-                  transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+                  transition={{ duration: 0.55, ease: [0.32, 0.72, 0, 1] }}
                 >
                   {visibleImages.map((img, i) => (
                     <motion.div
@@ -194,7 +194,7 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
                         scale: i === centerIdx ? 1.12 : 1,
                         zIndex: i === centerIdx ? 1 : 0,
                       }}
-                      transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+                      transition={{ duration: 0.55, ease: [0.32, 0.72, 0, 1] }}
                     >
                       <img
                         src={img.url}
@@ -260,7 +260,7 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
               animate="center"
               exit="exit"
               className="flex items-start py-5 md:py-8"
-              transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+              transition={{ duration: 0.55, ease: [0.32, 0.72, 0, 1] }}
             >
               {visibleImages.map((img, i) => (
                 <motion.div
@@ -271,7 +271,7 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
                     scale: i === centerIdx ? 1.12 : 1,
                     zIndex: i === centerIdx ? 1 : 0,
                   }}
-                  transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+                  transition={{ duration: 0.55, ease: [0.32, 0.72, 0, 1] }}
                 >
                   <img
                     src={img.url}
