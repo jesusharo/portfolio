@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { X, Plus, Loader2, ChevronLeft, ChevronRight, GalleryHorizontal } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { uploadImage } from '../../lib/api';
 import ImageLightbox from '../ImageLightbox';
 
@@ -168,29 +168,27 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
             )}
             <div className="relative min-w-0 flex-1 overflow-hidden">
               <div className="flex items-start py-5 md:py-8">
-                <AnimatePresence initial={false}>
-                  {visibleImages.map((img, i) => (
-                    <motion.div
-                      key={img.id}
-                      layout="position"
-                      className="flex min-w-0 shrink-0 items-start justify-center px-0 md:px-1"
-                      style={{ width: `${100 / visibleCount}%` }}
-                      initial={{ opacity: 0, scale: 0.88 }}
-                      animate={{
-                        scale: i === centerIdx ? 1.12 : 1,
-                        zIndex: i === centerIdx ? 1 : 0,
-                      }}
-                      exit={{ opacity: 0, scale: 0.88 }}
-                      transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
-                    >
-                      <img
-                        src={img.url}
-                        alt=""
-                        className="block h-auto w-full object-contain"
-                      />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+                {visibleImages.map((img, i) => (
+                  <motion.div
+                    key={img.id}
+                    layout="position"
+                    className="flex min-w-0 shrink-0 items-start justify-center px-0 md:px-1"
+                    style={{ width: `${100 / visibleCount}%` }}
+                    initial={{ opacity: 0, scale: 0.88 }}
+                    animate={{
+                      opacity: 1,
+                      scale: i === centerIdx ? 1.12 : 1,
+                      zIndex: i === centerIdx ? 1 : 0,
+                    }}
+                    transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+                  >
+                    <img
+                      src={img.url}
+                      alt=""
+                      className="block h-auto w-full object-contain"
+                    />
+                  </motion.div>
+                ))}
               </div>
               {images.length > 1 && (
                 <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1">
@@ -239,30 +237,28 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
         )}
         <div className="relative min-w-0 flex-1 overflow-hidden">
           <div className="flex items-start py-5 md:py-8">
-            <AnimatePresence initial={false}>
-              {visibleImages.map((img, i) => (
-                <motion.div
-                  key={img.id}
-                  layout="position"
-                  className="flex min-w-0 shrink-0 items-start justify-center px-0 md:px-1"
-                  style={{ width: `${100 / visibleCount}%` }}
-                  initial={{ opacity: 0, scale: 0.88 }}
-                  animate={{
-                    scale: i === centerIdx ? 1.12 : 1,
-                    zIndex: i === centerIdx ? 1 : 0,
-                  }}
-                  exit={{ opacity: 0, scale: 0.88 }}
-                  transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
-                >
-                  <img
-                    src={img.url}
-                    alt={img.caption || ''}
-                    className="block h-auto w-full cursor-zoom-in object-contain"
-                    onClick={() => setLightboxImage(img)}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
+            {visibleImages.map((img, i) => (
+              <motion.div
+                key={img.id}
+                layout="position"
+                className="flex min-w-0 shrink-0 items-start justify-center px-0 md:px-1"
+                style={{ width: `${100 / visibleCount}%` }}
+                initial={{ opacity: 0, scale: 0.88 }}
+                animate={{
+                  opacity: 1,
+                  scale: i === centerIdx ? 1.12 : 1,
+                  zIndex: i === centerIdx ? 1 : 0,
+                }}
+                transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+              >
+                <img
+                  src={img.url}
+                  alt={img.caption || ''}
+                  className="block h-auto w-full cursor-zoom-in object-contain"
+                  onClick={() => setLightboxImage(img)}
+                />
+              </motion.div>
+            ))}
           </div>
 
           {/* Dots */}
