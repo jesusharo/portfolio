@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { X, Plus, Loader2, ChevronLeft, ChevronRight, GalleryHorizontal } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { uploadImage } from '../../lib/api';
 import ImageLightbox from '../ImageLightbox';
 
@@ -62,11 +62,34 @@ function StripUploadSlot({ onUploaded }: { onUploaded: (url: string) => void }) 
   );
 }
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+  );
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 767px)');
+    const sync = () => setIsMobile(mediaQuery.matches);
+    sync();
+    mediaQuery.addEventListener?.('change', sync);
+    return () => mediaQuery.removeEventListener?.('change', sync);
+  }, []);
+
+  return isMobile;
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function CarouselBlock({ images, editorMode, onChange }: Props) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [dir, setDir] = useState<1 | -1>(1);
   const [lightboxImage, setLightboxImage] = useState<CarouselImageItem | null>(null);
+  const isMobile = useIsMobile();
+  const visibleCount = isMobile ? 1 : 3;
+  const maxStartIdx = Math.max(0, images.length - visibleCount);
+
+  useEffect(() => {
+    setCurrentIdx(index => Math.min(index, maxStartIdx));
+  }, [maxStartIdx]);
 
   function addImage(url: string) {
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -84,11 +107,11 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
   }
 
   function prev() {
-    goTo(currentIdx === 0 ? images.length - 1 : currentIdx - 1, -1);
+    goTo(currentIdx === 0 ? maxStartIdx : currentIdx - 1, -1);
   }
 
   function next() {
-    goTo(currentIdx === images.length - 1 ? 0 : currentIdx + 1, 1);
+    goTo(currentIdx >= maxStartIdx ? 0 : currentIdx + 1, 1);
   }
 
   // ── Editor mode ──
@@ -104,7 +127,7 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
         {/* Horizontal thumbnail strip */}
         <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
           {images.map(img => (
-            <div key={img.id} className="relative group/thumb shrink-0 w-[100px] h-[70px] rounded-[8px] overflow-hidden bg-white/5">
+            <div key={img.id} className="relative group/thumb shrink-0 w-[100px] h-[70px] rounded-[8px] overflow-hidden">
               <img src={img.url} alt="" className="w-full h-full object-cover" />
               <button
                 onClick={() => removeImage(img.id)}
@@ -119,13 +142,27 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
 
         {/* Mini carousel preview */}
         {images.length > 0 && (
-          <div className="relative rounded-[8px] overflow-hidden bg-white/5" style={{ aspectRatio: '16/9' }}>
-            <img
-              src={images[Math.min(currentIdx, images.length - 1)]?.url}
-              alt=""
-              className="w-full h-full object-contain"
-            />
-            {images.length > 1 && (
+          <div className="relative overflow-hidden">
+            <motion.div
+              className="flex items-start"
+              animate={{ x: `${-(Math.min(currentIdx, maxStartIdx) * 100) / visibleCount}%` }}
+              transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+            >
+              {images.map(img => (
+                <div
+                  key={img.id}
+                  className="min-w-0 shrink-0 px-0 md:px-1"
+                  style={{ width: `${100 / visibleCount}%` }}
+                >
+                  <img
+                    src={img.url}
+                    alt=""
+                    className="block h-auto w-full object-contain"
+                  />
+                </div>
+              ))}
+            </motion.div>
+            {maxStartIdx > 0 && (
               <>
                 <button
                   onClick={prev}
@@ -140,9 +177,9 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
                   <ChevronRight size={14} />
                 </button>
                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                  {images.map((img, i) => (
+                  {Array.from({ length: maxStartIdx + 1 }).map((_, i) => (
                     <button
-                      key={img.id}
+                      key={i}
                       onClick={() => goTo(i, i > currentIdx ? 1 : -1)}
                       className={`rounded-full transition-all ${i === currentIdx ? 'w-4 h-1.5 bg-white' : 'size-1.5 bg-white/35 hover:bg-white/60'}`}
                     />
@@ -159,37 +196,36 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
   // ── Read-only carousel ────────────────────────────────────────────────────
   if (!images.length) return null;
 
-  const safeIdx = Math.min(currentIdx, images.length - 1);
-  const current = images[safeIdx];
-
-  const variants = {
-    enter: (d: number) => ({ x: d > 0 ? '100%' : '-100%', opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (d: number) => ({ x: d > 0 ? '-100%' : '100%', opacity: 0 }),
-  };
+  const safeStartIdx = Math.min(currentIdx, maxStartIdx);
+  const current = images[safeStartIdx];
 
   return (
     <div className="select-none">
       {/* Slide area */}
-      <div className="relative rounded-[12px] overflow-hidden bg-black/20" style={{ aspectRatio: '16/9' }}>
-        <AnimatePresence custom={dir} mode="popLayout">
-          <motion.img
-            key={current.id}
-            custom={dir}
-            variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
-            src={current.url}
-            alt={current.caption || ''}
-            className="absolute inset-0 w-full h-full cursor-zoom-in object-contain"
-            onClick={() => setLightboxImage(current)}
-          />
-        </AnimatePresence>
+      <div className="relative overflow-hidden">
+        <motion.div
+          className="flex items-start"
+          animate={{ x: `${-(safeStartIdx * 100) / visibleCount}%` }}
+          transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+        >
+          {images.map(img => (
+            <div
+              key={img.id}
+              className="min-w-0 shrink-0 px-0 md:px-1"
+              style={{ width: `${100 / visibleCount}%` }}
+            >
+              <img
+                src={img.url}
+                alt={img.caption || ''}
+                className="block h-auto w-full cursor-zoom-in object-contain"
+                onClick={() => setLightboxImage(img)}
+              />
+            </div>
+          ))}
+        </motion.div>
 
         {/* Prev / Next */}
-        {images.length > 1 && (
+        {maxStartIdx > 0 && (
           <>
             <button
               onClick={prev}
@@ -207,14 +243,14 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
         )}
 
         {/* Dots */}
-        {images.length > 1 && (
+        {maxStartIdx > 0 && (
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-            {images.map((img, i) => (
+            {Array.from({ length: maxStartIdx + 1 }).map((_, i) => (
               <button
-                key={img.id}
-                onClick={() => goTo(i, i > safeIdx ? 1 : -1)}
+                key={i}
+                onClick={() => goTo(i, i > safeStartIdx ? 1 : -1)}
                 className={`rounded-full transition-all ${
-                  i === safeIdx
+                  i === safeStartIdx
                     ? 'w-5 h-1.5 bg-white'
                     : 'size-1.5 bg-white/35 hover:bg-white/60'
                 }`}
@@ -225,7 +261,7 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
       </div>
 
       {/* Caption */}
-      {current.caption && (
+      {current?.caption && (
         <p className="text-white/35 text-[0.8rem] mt-2 text-center" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
           {current.caption}
         </p>

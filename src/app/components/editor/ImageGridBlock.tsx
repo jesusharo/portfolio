@@ -71,8 +71,8 @@ function FilledSlot({
   onRemove: () => void;
 }) {
   return (
-    <div className="relative group/slot aspect-video rounded-[8px] overflow-hidden bg-white/5">
-      <img src={item.url} alt={item.caption || ''} className="w-full h-full object-cover" />
+    <div className="relative group/slot min-w-0 overflow-hidden">
+      <img src={item.url} alt={item.caption || ''} className="block h-auto w-full object-contain" />
       <button
         onClick={onRemove}
         className="absolute top-1.5 right-1.5 size-[22px] flex items-center justify-center rounded-full bg-black/60 border border-white/15 text-white/50 hover:text-[#d25d5f] hover:bg-black/80 transition-all opacity-0 group-hover/slot:opacity-100"
@@ -152,7 +152,7 @@ export default function ImageGridBlock({ images, columns, editorMode, onChange }
             <img
               src={img.url}
               alt={img.caption || ''}
-              className="w-full cursor-zoom-in rounded-[8px] object-contain aspect-video bg-white/[0.03]"
+              className="block h-auto w-full cursor-zoom-in object-contain"
               onClick={() => setLightboxImage(img)}
             />
             {img.caption && (
