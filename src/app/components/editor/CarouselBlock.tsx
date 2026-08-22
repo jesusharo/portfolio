@@ -81,11 +81,12 @@ function useIsMobile() {
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function CarouselBlock({ images, editorMode, onChange }: Props) {
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [dir, setDir] = useState<1 | -1>(1);
   const [lightboxImage, setLightboxImage] = useState<CarouselImageItem | null>(null);
   const isMobile = useIsMobile();
   const visibleCount = isMobile ? 1 : 3;
   const maxStartIdx = Math.max(0, images.length - visibleCount);
+  const safeStartIdx = Math.min(currentIdx, maxStartIdx);
+  const centerIdx = !isMobile && images.length >= 3 ? safeStartIdx + 1 : -1;
 
   useEffect(() => {
     setCurrentIdx(index => Math.min(index, maxStartIdx));
@@ -101,17 +102,16 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
     onChange?.(next);
   }
 
-  function goTo(idx: number, direction: 1 | -1) {
-    setDir(direction);
+  function goTo(idx: number) {
     setCurrentIdx(idx);
   }
 
   function prev() {
-    goTo(currentIdx === 0 ? maxStartIdx : currentIdx - 1, -1);
+    goTo(safeStartIdx === 0 ? maxStartIdx : safeStartIdx - 1);
   }
 
   function next() {
-    goTo(currentIdx >= maxStartIdx ? 0 : currentIdx + 1, 1);
+    goTo(safeStartIdx >= maxStartIdx ? 0 : safeStartIdx + 1);
   }
 
   // ── Editor mode ──
@@ -144,22 +144,27 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
         {images.length > 0 && (
           <div className="relative overflow-hidden">
             <motion.div
-              className="flex items-start"
-              animate={{ x: `${-(Math.min(currentIdx, maxStartIdx) * 100) / visibleCount}%` }}
+              className="flex items-start py-5 md:py-8"
+              animate={{ x: `${-(safeStartIdx * 100) / visibleCount}%` }}
               transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
             >
-              {images.map(img => (
-                <div
+              {images.map((img, i) => (
+                <motion.div
                   key={img.id}
-                  className="min-w-0 shrink-0 px-0 md:px-1"
+                  className="flex min-w-0 shrink-0 items-start justify-center px-0 md:px-1"
                   style={{ width: `${100 / visibleCount}%` }}
+                  animate={{
+                    scale: i === centerIdx ? 1.12 : 1,
+                    zIndex: i === centerIdx ? 1 : 0,
+                  }}
+                  transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
                 >
                   <img
                     src={img.url}
                     alt=""
                     className="block h-auto w-full object-contain"
                   />
-                </div>
+                </motion.div>
               ))}
             </motion.div>
             {maxStartIdx > 0 && (
@@ -180,8 +185,8 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
                   {Array.from({ length: maxStartIdx + 1 }).map((_, i) => (
                     <button
                       key={i}
-                      onClick={() => goTo(i, i > currentIdx ? 1 : -1)}
-                      className={`rounded-full transition-all ${i === currentIdx ? 'w-4 h-1.5 bg-white' : 'size-1.5 bg-white/35 hover:bg-white/60'}`}
+                      onClick={() => goTo(i)}
+                      className={`rounded-full transition-all ${i === safeStartIdx ? 'w-4 h-1.5 bg-white' : 'size-1.5 bg-white/35 hover:bg-white/60'}`}
                     />
                   ))}
                 </div>
@@ -196,7 +201,6 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
   // ── Read-only carousel ────────────────────────────────────────────────────
   if (!images.length) return null;
 
-  const safeStartIdx = Math.min(currentIdx, maxStartIdx);
   const current = images[safeStartIdx];
 
   return (
@@ -204,15 +208,20 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
       {/* Slide area */}
       <div className="relative overflow-hidden">
         <motion.div
-          className="flex items-start"
+          className="flex items-start py-5 md:py-8"
           animate={{ x: `${-(safeStartIdx * 100) / visibleCount}%` }}
           transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
         >
-          {images.map(img => (
-            <div
+          {images.map((img, i) => (
+            <motion.div
               key={img.id}
-              className="min-w-0 shrink-0 px-0 md:px-1"
+              className="flex min-w-0 shrink-0 items-start justify-center px-0 md:px-1"
               style={{ width: `${100 / visibleCount}%` }}
+              animate={{
+                scale: i === centerIdx ? 1.12 : 1,
+                zIndex: i === centerIdx ? 1 : 0,
+              }}
+              transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
             >
               <img
                 src={img.url}
@@ -220,7 +229,7 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
                 className="block h-auto w-full cursor-zoom-in object-contain"
                 onClick={() => setLightboxImage(img)}
               />
-            </div>
+            </motion.div>
           ))}
         </motion.div>
 
@@ -248,7 +257,7 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
             {Array.from({ length: maxStartIdx + 1 }).map((_, i) => (
               <button
                 key={i}
-                onClick={() => goTo(i, i > safeStartIdx ? 1 : -1)}
+                onClick={() => goTo(i)}
                 className={`rounded-full transition-all ${
                   i === safeStartIdx
                     ? 'w-5 h-1.5 bg-white'
