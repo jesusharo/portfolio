@@ -163,62 +163,68 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
 
         {/* Mini carousel preview */}
         {images.length > 0 && (
-          <div className="relative overflow-hidden">
-            <AnimatePresence initial={false} custom={dir} mode="popLayout">
-              <motion.div
-                key={`${safeStartIdx}-${isMobile ? 'mobile' : 'desktop'}`}
-                custom={dir}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                className="flex items-start py-5 md:py-8"
-                transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-              >
-                {visibleImages.map((img, i) => (
-                  <motion.div
-                    key={`${img.id}-${i}`}
-                    className="flex min-w-0 shrink-0 items-start justify-center px-0 md:px-1"
-                    style={{ width: `${100 / visibleCount}%` }}
-                    animate={{
-                      scale: i === centerIdx ? 1.12 : 1,
-                      zIndex: i === centerIdx ? 1 : 0,
-                    }}
-                    transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-                  >
-                    <img
-                      src={img.url}
-                      alt=""
-                      className="block h-auto w-full object-contain"
-                    />
-                  </motion.div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
+          <div className="flex items-center gap-1.5 md:gap-3">
             {images.length > 1 && (
-              <>
-                <button
-                  onClick={prev}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 size-7 flex items-center justify-center rounded-full bg-black/50 border border-white/15 text-white/70 hover:text-white hover:bg-black/70 transition-all"
+              <button
+                onClick={prev}
+                aria-label="Previous carousel image"
+                className="flex size-7 shrink-0 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/70 transition-all hover:bg-black/70 hover:text-white"
+              >
+                <ChevronLeft size={14} />
+              </button>
+            )}
+            <div className="relative min-w-0 flex-1 overflow-hidden">
+              <AnimatePresence initial={false} custom={dir} mode="popLayout">
+                <motion.div
+                  key={`${safeStartIdx}-${isMobile ? 'mobile' : 'desktop'}`}
+                  custom={dir}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  className="flex items-start py-5 md:py-8"
+                  transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
                 >
-                  <ChevronLeft size={14} />
-                </button>
-                <button
-                  onClick={next}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 size-7 flex items-center justify-center rounded-full bg-black/50 border border-white/15 text-white/70 hover:text-white hover:bg-black/70 transition-all"
-                >
-                  <ChevronRight size={14} />
-                </button>
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                  {visibleImages.map((img, i) => (
+                    <motion.div
+                      key={`${img.id}-${i}`}
+                      className="flex min-w-0 shrink-0 items-start justify-center px-0 md:px-1"
+                      style={{ width: `${100 / visibleCount}%` }}
+                      animate={{
+                        scale: i === centerIdx ? 1.12 : 1,
+                        zIndex: i === centerIdx ? 1 : 0,
+                      }}
+                      transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+                    >
+                      <img
+                        src={img.url}
+                        alt=""
+                        className="block h-auto w-full object-contain"
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </AnimatePresence>
+              {images.length > 1 && (
+                <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1">
                   {images.map((img, i) => (
                     <button
                       key={img.id}
                       onClick={() => goTo(i, i > safeStartIdx ? 1 : -1)}
-                      className={`rounded-full transition-all ${i === safeStartIdx ? 'w-4 h-1.5 bg-white' : 'size-1.5 bg-white/35 hover:bg-white/60'}`}
+                      className={`rounded-full transition-all ${i === safeStartIdx ? 'h-1.5 w-4 bg-white' : 'size-1.5 bg-white/35 hover:bg-white/60'}`}
                     />
                   ))}
                 </div>
-              </>
+              )}
+            </div>
+            {images.length > 1 && (
+              <button
+                onClick={next}
+                aria-label="Next carousel image"
+                className="flex size-7 shrink-0 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/70 transition-all hover:bg-black/70 hover:text-white"
+              >
+                <ChevronRight size={14} />
+              </button>
             )}
           </div>
         )}
@@ -234,73 +240,75 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
   return (
     <div className="select-none">
       {/* Slide area */}
-      <div className="relative overflow-hidden">
-        <AnimatePresence initial={false} custom={dir} mode="popLayout">
-          <motion.div
-            key={`${safeStartIdx}-${isMobile ? 'mobile' : 'desktop'}`}
-            custom={dir}
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            className="flex items-start py-5 md:py-8"
-            transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+      <div className="flex items-center gap-1.5 md:gap-4">
+        {images.length > 1 && (
+          <button
+            onClick={prev}
+            aria-label="Previous carousel image"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white/70 backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white"
           >
-            {visibleImages.map((img, i) => (
-              <motion.div
-                key={`${img.id}-${i}`}
-                className="flex min-w-0 shrink-0 items-start justify-center px-0 md:px-1"
-                style={{ width: `${100 / visibleCount}%` }}
-                animate={{
-                  scale: i === centerIdx ? 1.12 : 1,
-                  zIndex: i === centerIdx ? 1 : 0,
-                }}
-                transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
-              >
-                <img
-                  src={img.url}
-                  alt={img.caption || ''}
-                  className="block h-auto w-full cursor-zoom-in object-contain"
-                  onClick={() => setLightboxImage(img)}
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Prev / Next */}
-        {images.length > 1 && (
-          <>
-            <button
-              onClick={prev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 size-9 flex items-center justify-center rounded-full bg-black/40 border border-white/15 text-white/70 hover:text-white hover:bg-black/60 transition-all backdrop-blur-sm"
-            >
-              <ChevronLeft size={18} strokeWidth={1.5} />
-            </button>
-            <button
-              onClick={next}
-              className="absolute right-3 top-1/2 -translate-y-1/2 size-9 flex items-center justify-center rounded-full bg-black/40 border border-white/15 text-white/70 hover:text-white hover:bg-black/60 transition-all backdrop-blur-sm"
-            >
-              <ChevronRight size={18} strokeWidth={1.5} />
-            </button>
-          </>
+            <ChevronLeft size={18} strokeWidth={1.5} />
+          </button>
         )}
+        <div className="relative min-w-0 flex-1 overflow-hidden">
+          <AnimatePresence initial={false} custom={dir} mode="popLayout">
+            <motion.div
+              key={`${safeStartIdx}-${isMobile ? 'mobile' : 'desktop'}`}
+              custom={dir}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              className="flex items-start py-5 md:py-8"
+              transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+            >
+              {visibleImages.map((img, i) => (
+                <motion.div
+                  key={`${img.id}-${i}`}
+                  className="flex min-w-0 shrink-0 items-start justify-center px-0 md:px-1"
+                  style={{ width: `${100 / visibleCount}%` }}
+                  animate={{
+                    scale: i === centerIdx ? 1.12 : 1,
+                    zIndex: i === centerIdx ? 1 : 0,
+                  }}
+                  transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+                >
+                  <img
+                    src={img.url}
+                    alt={img.caption || ''}
+                    className="block h-auto w-full cursor-zoom-in object-contain"
+                    onClick={() => setLightboxImage(img)}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
 
-        {/* Dots */}
+          {/* Dots */}
+          {images.length > 1 && (
+            <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+              {images.map((img, i) => (
+                <button
+                  key={img.id}
+                  onClick={() => goTo(i, i > safeStartIdx ? 1 : -1)}
+                  className={`rounded-full transition-all ${
+                    i === safeStartIdx
+                      ? 'h-1.5 w-5 bg-white'
+                      : 'size-1.5 bg-white/35 hover:bg-white/60'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
         {images.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-            {images.map((img, i) => (
-              <button
-                key={img.id}
-                onClick={() => goTo(i, i > safeStartIdx ? 1 : -1)}
-                className={`rounded-full transition-all ${
-                  i === safeStartIdx
-                    ? 'w-5 h-1.5 bg-white'
-                    : 'size-1.5 bg-white/35 hover:bg-white/60'
-                }`}
-              />
-            ))}
-          </div>
+          <button
+            onClick={next}
+            aria-label="Next carousel image"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white/70 backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white"
+          >
+            <ChevronRight size={18} strokeWidth={1.5} />
+          </button>
         )}
       </div>
 
