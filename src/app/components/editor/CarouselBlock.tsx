@@ -297,8 +297,11 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
       )}
       {lightboxImage && (
         <ImageLightbox
-          src={lightboxImage.url}
-          alt={lightboxImage.caption || ''}
+          images={images.map(img => ({
+            src: img.url,
+            alt: img.caption || '',
+          }))}
+          initialIndex={Math.max(0, images.findIndex(img => img.id === lightboxImage.id))}
           onClose={() => setLightboxImage(null)}
         />
       )}

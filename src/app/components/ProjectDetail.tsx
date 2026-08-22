@@ -256,6 +256,10 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      // Image previews own the arrow keys; do not navigate between projects
+      // while a grid, carousel, or standalone image is open.
+      if (document.querySelector('[data-image-lightbox="true"]')) return;
+
       // Don't hijack keyboard shortcuts when focus is inside an editable element
       // (inputs, textareas, Tiptap contenteditable, etc.)
       const el = document.activeElement as HTMLElement | null;
