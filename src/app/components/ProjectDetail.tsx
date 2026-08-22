@@ -535,6 +535,15 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           )}
         </div>
 
+        {/* ── Navigation instructions ────────────────────────────────────── */}
+        <div
+          className="px-8 pb-32 pt-2 text-center text-[0.7rem] uppercase tracking-[0.16em] opacity-45 md:pb-12"
+          style={{ fontFamily: "'Source Sans 3', sans-serif", color: textColor }}
+        >
+          <p className="hidden md:block">Press next/previous keys to change between projects.</p>
+          <p className="md:hidden">Swipe left/right to change project.</p>
+        </div>
+
         {/* ── Auto-save status toast ─────────────────────────────────────── */}
         <AnimatePresence>
           {editorMode && saveStatus !== 'idle' && (
