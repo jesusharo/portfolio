@@ -25,52 +25,54 @@ export default function ProjectsView() {
 
   return (
     <PageTransition>
-      <div className="absolute inset-0 flex items-center justify-center p-8 md:pl-24">
-        <div className="flex flex-col items-center gap-5 w-[430px]">
-        <h2
-          className="text-white/50 text-[0.72rem] font-semibold tracking-[0.22em] uppercase select-none"
-          style={{ fontFamily: "'Source Sans 3', sans-serif" }}
-        >
-          UI Projects
-        </h2>
-        <TooltipProvider delayDuration={150}>
-          <div className="flex w-full flex-wrap justify-center gap-3">
-            {projects.map((project, i) => (
-              <Tooltip key={project.id}>
-                <TooltipTrigger asChild>
-                  <motion.button
-                    onClick={() => navigate(`/projects/${project.id}`)}
-                    aria-label={`Open ${project.name}`}
-                    className="aspect-square w-[calc((100%-0.75rem)/2)] shrink-0 rounded-[20px] flex items-center justify-center cursor-pointer relative overflow-hidden md:w-[calc((100%-2.25rem)/4)]"
-                    style={{ backgroundColor: project.background_color || '#333' }}
-                    initial={{ opacity: 0, scale: 0.92 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.35, delay: i * 0.05 }}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                  >
-                    {project.logo_grid_image ? (
-                      <img src={project.logo_grid_image} alt={project.name}
-                        className="max-w-[60%] max-h-[60%] object-contain" />
-                    ) : (
-                      <span className="text-[2rem] font-bold opacity-40"
-                        style={{ color: 'white', fontFamily: "'Source Sans 3', sans-serif" }}>
-                        {project.name[0]}
-                      </span>
-                    )}
-                  </motion.button>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  sideOffset={8}
-                  className="border border-white/10 bg-[rgba(18,18,18,0.96)] text-white/80 shadow-xl backdrop-blur-md"
-                >
-                  {project.name}
-                </TooltipContent>
-              </Tooltip>
-            ))}
+      <div className="absolute inset-0 overflow-y-auto overscroll-contain">
+        <div className="flex min-h-full w-full items-center justify-center px-4 pb-32 pt-24 md:px-8 md:pb-8 md:pl-24 md:pt-8">
+          <div className="flex w-full max-w-[430px] flex-col items-center gap-5">
+            <h2
+              className="text-white/50 text-[0.72rem] font-semibold tracking-[0.22em] uppercase select-none"
+              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+            >
+              UI Projects
+            </h2>
+            <TooltipProvider delayDuration={150}>
+              <div className="flex w-full flex-wrap justify-center gap-3">
+                {projects.map((project, i) => (
+                  <Tooltip key={project.id}>
+                    <TooltipTrigger asChild>
+                      <motion.button
+                        onClick={() => navigate(`/projects/${project.id}`)}
+                        aria-label={`Open ${project.name}`}
+                        className="relative flex aspect-square w-[calc((100%-1.5rem)/3)] cursor-pointer items-center justify-center overflow-hidden rounded-[20px] md:w-[calc((100%-2.25rem)/4)]"
+                        style={{ backgroundColor: project.background_color || '#333' }}
+                        initial={{ opacity: 0, scale: 0.92 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.35, delay: i * 0.05 }}
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                      >
+                        {project.logo_grid_image ? (
+                          <img src={project.logo_grid_image} alt={project.name}
+                            className="max-h-[60%] max-w-[60%] object-contain" />
+                        ) : (
+                          <span className="text-[2rem] font-bold opacity-40"
+                            style={{ color: 'white', fontFamily: "'Source Sans 3', sans-serif" }}>
+                            {project.name[0]}
+                          </span>
+                        )}
+                      </motion.button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      sideOffset={8}
+                      className="border border-white/10 bg-[rgba(18,18,18,0.96)] text-white/80 shadow-xl backdrop-blur-md"
+                    >
+                      {project.name}
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </div>
+            </TooltipProvider>
           </div>
-        </TooltipProvider>
         </div>
       </div>
     </PageTransition>
