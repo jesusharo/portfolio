@@ -81,7 +81,6 @@ function useIsMobile() {
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function CarouselBlock({ images, editorMode, onChange }: Props) {
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [dir, setDir] = useState<1 | -1>(1);
   const [lightboxImage, setLightboxImage] = useState<CarouselImageItem | null>(null);
   const isMobile = useIsMobile();
   const visibleCount = isMobile ? 1 : Math.min(3, images.length);
@@ -101,17 +100,16 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
     onChange?.(next);
   }
 
-  function goTo(idx: number, direction: 1 | -1) {
-    setDir(direction);
+  function goTo(idx: number) {
     setCurrentIdx(idx);
   }
 
   function prev() {
-    goTo(safeStartIdx === 0 ? images.length - 1 : safeStartIdx - 1, -1);
+    goTo(safeStartIdx === 0 ? images.length - 1 : safeStartIdx - 1);
   }
 
   function next() {
-    goTo(safeStartIdx === images.length - 1 ? 0 : safeStartIdx + 1, 1);
+    goTo(safeStartIdx === images.length - 1 ? 0 : safeStartIdx + 1);
   }
 
   function getVisibleImages(): CarouselImageItem[] {
@@ -129,11 +127,6 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
 
   const visibleImages = getVisibleImages();
   const centerIdx = !isMobile && images.length >= 3 ? 1 : -1;
-  const slideVariants = {
-    enter: (direction: number) => ({ x: direction > 0 ? '8%' : '-8%', opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (direction: number) => ({ x: direction > 0 ? '-8%' : '8%', opacity: 0 }),
-  };
 
   // ── Editor mode ──
   if (editorMode) {
@@ -174,27 +167,21 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
               </button>
             )}
             <div className="relative min-w-0 flex-1 overflow-hidden">
-              <AnimatePresence initial={false} custom={dir} mode="popLayout">
-                <motion.div
-                  key={`${safeStartIdx}-${isMobile ? 'mobile' : 'desktop'}`}
-                  custom={dir}
-                  variants={slideVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  className="flex items-start py-5 md:py-8"
-                  transition={{ duration: 0.55, ease: [0.32, 0.72, 0, 1] }}
-                >
+              <div className="flex items-start py-5 md:py-8">
+                <AnimatePresence initial={false}>
                   {visibleImages.map((img, i) => (
                     <motion.div
-                      key={`${img.id}-${i}`}
+                      key={img.id}
+                      layout="position"
                       className="flex min-w-0 shrink-0 items-start justify-center px-0 md:px-1"
                       style={{ width: `${100 / visibleCount}%` }}
+                      initial={{ opacity: 0, scale: 0.88 }}
                       animate={{
                         scale: i === centerIdx ? 1.12 : 1,
                         zIndex: i === centerIdx ? 1 : 0,
                       }}
-                      transition={{ duration: 0.55, ease: [0.32, 0.72, 0, 1] }}
+                      exit={{ opacity: 0, scale: 0.88 }}
+                      transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
                     >
                       <img
                         src={img.url}
@@ -203,14 +190,14 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
                       />
                     </motion.div>
                   ))}
-                </motion.div>
-              </AnimatePresence>
+                </AnimatePresence>
+              </div>
               {images.length > 1 && (
                 <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1">
                   {images.map((img, i) => (
                     <button
                       key={img.id}
-                      onClick={() => goTo(i, i > safeStartIdx ? 1 : -1)}
+                      onClick={() => goTo(i)}
                       className={`rounded-full transition-all ${i === safeStartIdx ? 'h-1.5 w-4 bg-white' : 'size-1.5 bg-white/35 hover:bg-white/60'}`}
                     />
                   ))}
@@ -251,27 +238,21 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
           </button>
         )}
         <div className="relative min-w-0 flex-1 overflow-hidden">
-          <AnimatePresence initial={false} custom={dir} mode="popLayout">
-            <motion.div
-              key={`${safeStartIdx}-${isMobile ? 'mobile' : 'desktop'}`}
-              custom={dir}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              className="flex items-start py-5 md:py-8"
-              transition={{ duration: 0.55, ease: [0.32, 0.72, 0, 1] }}
-            >
+          <div className="flex items-start py-5 md:py-8">
+            <AnimatePresence initial={false}>
               {visibleImages.map((img, i) => (
                 <motion.div
-                  key={`${img.id}-${i}`}
+                  key={img.id}
+                  layout="position"
                   className="flex min-w-0 shrink-0 items-start justify-center px-0 md:px-1"
                   style={{ width: `${100 / visibleCount}%` }}
+                  initial={{ opacity: 0, scale: 0.88 }}
                   animate={{
                     scale: i === centerIdx ? 1.12 : 1,
                     zIndex: i === centerIdx ? 1 : 0,
                   }}
-                  transition={{ duration: 0.55, ease: [0.32, 0.72, 0, 1] }}
+                  exit={{ opacity: 0, scale: 0.88 }}
+                  transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
                 >
                   <img
                     src={img.url}
@@ -281,8 +262,8 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
                   />
                 </motion.div>
               ))}
-            </motion.div>
-          </AnimatePresence>
+            </AnimatePresence>
+          </div>
 
           {/* Dots */}
           {images.length > 1 && (
@@ -290,7 +271,7 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
               {images.map((img, i) => (
                 <button
                   key={img.id}
-                  onClick={() => goTo(i, i > safeStartIdx ? 1 : -1)}
+                  onClick={() => goTo(i)}
                   className={`rounded-full transition-all ${
                     i === safeStartIdx
                       ? 'h-1.5 w-5 bg-white'
