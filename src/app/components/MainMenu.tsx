@@ -1,12 +1,14 @@
 import { BookMarked, Mail, Sparkles, PenTool } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router';
+import type { SVGProps } from 'react';
 
 const CONTACT_MAILTO = 'mailto:jharolozano@gmail.com?subject=Hello%20from%20your%20portfolio';
 
-function AboutMeIcon({ className }: { className?: string }) {
+function AboutMeIcon({ className, style }: SVGProps<SVGSVGElement>) {
   return (
     <svg
       className={className}
+      style={style}
       viewBox="0 0 17 17"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
