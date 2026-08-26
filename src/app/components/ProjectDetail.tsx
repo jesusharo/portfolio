@@ -297,8 +297,11 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   const descriptionAlignment = ['left', 'center', 'right', 'justify'].includes(item.description_alignment || '')
     ? item.description_alignment!
     : 'center';
-  const richTextStyle = {
+  const projectBodyStyle = {
     fontFamily: "'Source Sans 3', sans-serif",
+    fontSize: '1rem',
+    fontWeight: 400,
+    lineHeight: 1.5,
     '--project-text-color': textColor,
   } as CSSProperties;
 
@@ -422,11 +425,11 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.15 }}
-            className="px-8 py-6 max-w-[760px] mx-auto"
+            className="project-body-copy px-8 py-6 max-w-[760px] mx-auto"
             style={{ textAlign: descriptionAlignment }}
           >
             {paragraphs.map((p, i) => (
-              <p key={i} className="text-[0.9375rem] leading-[1.7] mb-4 last:mb-0 opacity-65"
+              <p key={i} className="mb-4 last:mb-0 opacity-65"
                 style={{ fontFamily: "'Source Sans 3', sans-serif", color: textColor }}>
                 {p}
               </p>
@@ -510,8 +513,8 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
                 <div key={block.id} className="mb-8">
                   {block.type === 'richtext' && block.html && (
                     <div
-                      className="project-rich-text prose prose-invert prose-lg max-w-none"
-                      style={richTextStyle}
+                      className="project-rich-text project-body-copy prose prose-invert max-w-none"
+                      style={projectBodyStyle}
                       dangerouslySetInnerHTML={{ __html: block.html }}
                     />
                   )}

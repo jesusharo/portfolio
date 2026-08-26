@@ -9,6 +9,14 @@ body, #root {
   color: rgba(255, 255, 255, 0.65);
 }
 
+/* Keep the project intro and rich-text body copy on the same typographic scale. */
+.project-body-copy {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
 /* Text color is intentionally scoped to one project detail via a CSS variable. */
 .project-rich-text,
 .project-rich-text :where(p, h1, h2, h3, h4, li, blockquote, pre, code, a, strong, em, i, b, s, u, span) {
