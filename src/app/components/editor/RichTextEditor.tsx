@@ -19,7 +19,9 @@ import {
   ListOrdered,
   Loader2,
   Minus,
+  Palette,
 } from 'lucide-react';
+import Color from '@tiptap/extension-color';
 import { uploadImage } from '../../lib/api';
 
 const TEXT_SIZES = [
@@ -46,6 +48,7 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
       Image.configure({ inline: false }),
       Link.configure({ openOnClick: false }),
       TextStyle,
+      Color.configure({ types: ['textStyle'] }),
       FontSize,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
@@ -89,6 +92,7 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
     </button>
   );
   const currentFontSize = editor.getAttributes('textStyle').fontSize || '';
+  const currentColor = editor.getAttributes('textStyle').color || '#ffffff';
 
   return (
     <div className="rounded-[12px] border border-white/10 bg-white/5 overflow-hidden">
@@ -120,6 +124,23 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
             </option>
           ))}
         </select>
+        <label
+          title="Text color"
+          className="relative flex size-[29px] items-center justify-center rounded-[6px] text-white/55 hover:bg-white/10 hover:text-white cursor-pointer"
+        >
+          <Palette size={14} strokeWidth={1.5} />
+          <span
+            className="absolute bottom-[3px] left-1/2 h-[3px] w-[12px] -translate-x-1/2 rounded-full"
+            style={{ backgroundColor: currentColor }}
+          />
+          <input
+            type="color"
+            value={currentColor}
+            aria-label="Text color"
+            onChange={event => editor.chain().focus().setColor(event.target.value).run()}
+            className="absolute inset-0 size-full cursor-pointer opacity-0"
+          />
+        </label>
         <div className="w-px bg-white/10 mx-1" />
         {btn(() => editor.chain().focus().toggleBulletList().run(), editor.isActive('bulletList'), 'Bullet list', List)}
         {btn(() => editor.chain().focus().toggleOrderedList().run(), editor.isActive('orderedList'), 'Ordered list', ListOrdered)}

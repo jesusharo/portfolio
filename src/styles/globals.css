@@ -19,8 +19,8 @@ body, #root {
 
 /* Text color is intentionally scoped to one project detail via a CSS variable. */
 .project-rich-text,
-.project-rich-text :where(p, h1, h2, h3, h4, li, blockquote, pre, code, a, strong, em, i, b, s, u, span) {
-  color: var(--project-text-color) !important;
+.project-rich-text :where(p, h1, h2, h3, h4, li, blockquote, pre, code, a, strong, em, i, b, s, u) {
+  color: var(--project-text-color);
 }
 
 .project-rich-text ::marker {
