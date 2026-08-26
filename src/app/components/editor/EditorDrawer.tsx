@@ -8,10 +8,11 @@ import ProjectList from './ProjectList';
 import ProjectEditor from './ProjectEditor';
 import AboutEditor from './AboutEditor';
 import ResumeEditor from './ResumeEditor';
+import GeneralEditor from './GeneralEditor';
 import { getEditorProjects } from '../../lib/api';
 import { useNetworkState } from '../../context/NetworkStateContext';
 
-type Tab = 'ui' | 'cases' | 'about' | 'resume';
+type Tab = 'general' | 'ui' | 'cases' | 'about' | 'resume';
 type View = 'list' | 'detail';
 
 interface Project {
@@ -191,7 +192,7 @@ export default function EditorDrawer({ open, onClose }: Props) {
                 <>
                   {/* Tabs */}
                   <div className="flex gap-1 px-4 py-3 border-b border-white/10 shrink-0">
-                    {(['ui', 'cases', 'about', 'resume'] as Tab[]).map(t => (
+                    {(['general', 'ui', 'cases', 'about', 'resume'] as Tab[]).map(t => (
                       <button
                         key={t}
                         onClick={() => setTab(t)}
@@ -199,7 +200,7 @@ export default function EditorDrawer({ open, onClose }: Props) {
                           tab === t ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'
                         }`}
                       >
-                        {t === 'ui' ? 'UI Projects' : t === 'cases' ? 'Case Studies' : t === 'about' ? 'About Me' : 'Resume'}
+                        {t === 'general' ? 'General' : t === 'ui' ? 'UI Projects' : t === 'cases' ? 'Case Studies' : t === 'about' ? 'About Me' : 'Resume'}
                       </button>
                     ))}
                   </div>
@@ -209,6 +210,8 @@ export default function EditorDrawer({ open, onClose }: Props) {
                       <div className="flex items-center justify-center h-full text-white/30 text-[0.85rem] font-['Source_Sans_3',sans-serif]">
                         Loading…
                       </div>
+                    ) : tab === 'general' ? (
+                      <GeneralEditor />
                     ) : tab === 'about' ? (
                       <AboutEditor />
                     ) : tab === 'resume' ? (

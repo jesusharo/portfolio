@@ -30,6 +30,24 @@ export function logout() {
   localStorage.removeItem('editor_token');
 }
 
+// Site settings
+export async function getSiteSettings(): Promise<{ favicon_url: string }> {
+  const res = await fetch(`${BASE}/settings`);
+  if (!res.ok) throw new Error('Settings fetch failed');
+  return res.json();
+}
+
+export async function updateFavicon(favicon_url: string) {
+  const res = await fetch(`${BASE}/settings/favicon`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify({ favicon_url }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Favicon update failed');
+  return data as { favicon_url: string };
+}
+
 // Projects (public)
 export async function getProjects(type?: string) {
   const url = type ? `${BASE}/projects?type=${type}` : `${BASE}/projects`;

@@ -8,6 +8,7 @@ import path from 'path';
 import authRoutes from './routes/auth.mjs';
 import projectRoutes from './routes/projects.mjs';
 import aboutRoutes from './routes/about.mjs';
+import settingsRoutes from './routes/settings.mjs';
 import uploadRoutes from './routes/upload.mjs';
 import imageRoutes from './routes/images.mjs';
 import agentRoutes from './routes/agent.mjs';
@@ -34,6 +35,7 @@ async function migrate() {
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/about', aboutRoutes);
+app.use('/api/settings', settingsRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/agent', agentRoutes);

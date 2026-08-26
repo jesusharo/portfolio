@@ -7,6 +7,8 @@ import MainMenu from './MainMenu';
 import EditorDrawer from './editor/EditorDrawer';
 import { NetworkStateProvider, useNetworkState } from '../context/NetworkStateContext';
 import { triggerHaptic } from '../lib/haptics';
+import { getSiteSettings } from '../lib/api';
+import { applyFavicon } from '../lib/favicon';
 
 function RootInner() {
   const location = useLocation();
@@ -23,6 +25,14 @@ function RootInner() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const pendingEditMode = useRef(false);
   const lastHapticRef = useRef(0);
+
+  // Apply the saved site favicon once when the app starts. The static favicon
+  // remains in place if settings cannot be loaded.
+  useEffect(() => {
+    getSiteSettings()
+      .then(settings => applyFavicon(settings.favicon_url))
+      .catch(() => {});
+  }, []);
 
   // Secret entry point: navigating to /login-editor opens the drawer and redirects home
   useEffect(() => {
