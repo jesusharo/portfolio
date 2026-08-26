@@ -7,6 +7,8 @@ interface NetworkStateContextValue {
   setNetworkState: (state: NetworkState) => void;
   pageBackground: string | null;
   setPageBackground: (color: string | null) => void;
+  detailTextColor: string | null;
+  setDetailTextColor: (color: string | null) => void;
   dataVersion: number;
   bumpDataVersion: () => void;
   editorMode: boolean;
@@ -22,6 +24,8 @@ const NetworkStateContext = createContext<NetworkStateContextValue>({
   setNetworkState: () => {},
   pageBackground: null,
   setPageBackground: () => {},
+  detailTextColor: null,
+  setDetailTextColor: () => {},
   dataVersion: 0,
   bumpDataVersion: () => {},
   editorMode: false,
@@ -35,6 +39,7 @@ const NetworkStateContext = createContext<NetworkStateContextValue>({
 export function NetworkStateProvider({ children }: { children: ReactNode }) {
   const [networkState, setNetworkState] = useState<NetworkState>('idle');
   const [pageBackground, setPageBackground] = useState<string | null>(null);
+  const [detailTextColor, setDetailTextColor] = useState<string | null>(null);
   const [dataVersion, setDataVersion] = useState(0);
   const [editorMode, setEditorMode] = useState(false);
   const [editorAuthed, setEditorAuthed] = useState(false);
@@ -47,6 +52,7 @@ export function NetworkStateProvider({ children }: { children: ReactNode }) {
     <NetworkStateContext.Provider value={{
       networkState, setNetworkState,
       pageBackground, setPageBackground,
+      detailTextColor, setDetailTextColor,
       dataVersion, bumpDataVersion,
       editorMode, setEditorMode,
       editorAuthed, setEditorAuthed,

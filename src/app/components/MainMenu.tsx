@@ -25,7 +25,7 @@ function AboutMeIcon({ className }: { className?: string }) {
   );
 }
 
-export default function MainMenu() {
+export default function MainMenu({ detailTextColor }: { detailTextColor?: string | null }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -57,7 +57,11 @@ export default function MainMenu() {
             : 'size-[44px] bg-[rgba(255,255,255,0.15)] text-white hover:bg-[rgba(255,255,255,0.25)]'
         }`}
       >
-        <Icon className="size-[22px]" strokeWidth={1.5} />
+        <Icon
+          className="size-[22px]"
+          strokeWidth={1.5}
+          style={detailTextColor ? { color: detailTextColor } : undefined}
+        />
         {desktop && (
           <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
             <p className="text-white/70 text-sm whitespace-nowrap font-['Source_Sans_3',sans-serif]">{link.label}</p>

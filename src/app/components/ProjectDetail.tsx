@@ -113,7 +113,15 @@ function AddBlockButton({ onAdd }: { onAdd: (type: BlockType) => void }) {
 export default function ProjectDetail({ mode }: { mode: Mode }) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { setNetworkState, setPageBackground, editorMode, bumpDataVersion, dataVersion, saveRequestVersion } = useNetworkState();
+  const {
+    setNetworkState,
+    setPageBackground,
+    setDetailTextColor,
+    editorMode,
+    bumpDataVersion,
+    dataVersion,
+    saveRequestVersion,
+  } = useNetworkState();
   const [items, setItems] = useState<Project[]>([]);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -246,9 +254,15 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   // ── Background / keyboard shortcuts ──────────────────────────────────────
   useLayoutEffect(() => {
     setNetworkState('conversation');
-    if (item) setPageBackground(item.accent_color || item.background_color);
-    return () => { setNetworkState('idle'); };
-  }, [item?.accent_color]);
+    if (item) {
+      setPageBackground(item.accent_color || item.background_color);
+      setDetailTextColor(/^#[0-9a-f]{6}$/i.test(item.text_color || '') ? item.text_color! : '#ffffff');
+    }
+    return () => {
+      setNetworkState('idle');
+      setDetailTextColor(null);
+    };
+  }, [item?.accent_color, item?.background_color, item?.text_color]);
 
   useEffect(() => {
     if (items.length > 0 && !item) navigate(listPath);
@@ -324,7 +338,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
             onClick={() => prevItem ? navigate(`${detailPath}/${prevItem.id}`) : navigate(listPath)}
             className="relative z-10 hidden md:flex size-[36px] items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
           >
-            <ArrowLeft size={20} strokeWidth={1.5} />
+            <ArrowLeft size={20} strokeWidth={1.5} style={{ color: textColor }} />
           </motion.button>
 
           <div className="relative z-10 min-w-0 max-w-[min(55vw,520px)] text-center">
@@ -349,7 +363,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
             onClick={() => nextItem ? navigate(`${detailPath}/${nextItem.id}`) : navigate(listPath)}
             className="relative z-10 hidden md:flex size-[36px] items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
           >
-            <ArrowRight size={20} strokeWidth={1.5} />
+            <ArrowRight size={20} strokeWidth={1.5} style={{ color: textColor }} />
           </motion.button>
         </motion.div>
 

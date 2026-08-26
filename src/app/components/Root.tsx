@@ -13,6 +13,7 @@ function RootInner() {
   const navigate = useNavigate();
   const {
     pageBackground, setPageBackground,
+    detailTextColor,
     bumpDataVersion,
     editorMode, setEditorMode,
     editorAuthed,
@@ -126,7 +127,7 @@ function RootInner() {
       </AnimatePresence>
 
       {/* Navigation */}
-      <MainMenu />
+      <MainMenu detailTextColor={detailTextColor} />
 
       {/* ── Top-right button cluster ─────────────────────────────────────── */}
       <div className="fixed top-5 right-5 z-40 flex items-center gap-2">
@@ -140,8 +141,8 @@ function RootInner() {
             whileTap={{ scale: 0.96 }}
           >
             {editorMode
-              ? <><Check size={14} strokeWidth={2} /> Save changes</>
-              : <><PenLine size={14} strokeWidth={1.5} /> Edit</>
+              ? <><Check size={14} strokeWidth={2} style={detailTextColor ? { color: detailTextColor } : undefined} /> Save changes</>
+              : <><PenLine size={14} strokeWidth={1.5} style={detailTextColor ? { color: detailTextColor } : undefined} /> Edit</>
             }
           </motion.button>
         )}
@@ -155,7 +156,7 @@ function RootInner() {
             whileTap={{ scale: 0.96 }}
             title="Content Editor"
           >
-            <SquarePen size={15} strokeWidth={1.5} />
+            <SquarePen size={15} strokeWidth={1.5} style={detailTextColor ? { color: detailTextColor } : undefined} />
             {!isDetailRoute && <span>Content Editor</span>}
           </motion.button>
         )}
@@ -169,7 +170,7 @@ function RootInner() {
             whileTap={{ scale: 0.96 }}
             title="Close"
           >
-            <X size={16} strokeWidth={1.5} />
+            <X size={16} strokeWidth={1.5} style={detailTextColor ? { color: detailTextColor } : undefined} />
           </motion.button>
         )}
       </div>
