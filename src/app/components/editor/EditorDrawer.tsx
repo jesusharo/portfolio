@@ -191,12 +191,12 @@ export default function EditorDrawer({ open, onClose }: Props) {
               {view === 'list' && (
                 <>
                   {/* Tabs */}
-                  <div className="flex gap-1 px-4 py-3 border-b border-white/10 shrink-0">
+                  <div className="flex gap-1 overflow-x-auto px-4 py-3 border-b border-white/10 shrink-0" style={{ scrollbarWidth: 'none' }}>
                     {(['general', 'ui', 'cases', 'about', 'resume'] as Tab[]).map(t => (
                       <button
                         key={t}
                         onClick={() => setTab(t)}
-                        className={`px-3 py-1.5 rounded-[8px] text-[0.8rem] font-['Source_Sans_3',sans-serif] transition-colors ${
+                          className={`shrink-0 px-3 py-1.5 rounded-[8px] text-[0.8rem] font-['Source_Sans_3',sans-serif] transition-colors ${
                           tab === t ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'
                         }`}
                       >
