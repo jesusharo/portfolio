@@ -192,12 +192,12 @@ export default function CarouselBlock({
 
         {/* Mini carousel preview */}
         {images.length > 0 && (
-          <div className="flex items-center gap-1.5 md:gap-3">
+          <div className="relative w-full">
             {images.length > 1 && (
               <button
                 onClick={prev}
                 aria-label="Previous carousel image"
-                className="flex size-7 shrink-0 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/70 transition-all hover:bg-black/70 hover:text-white"
+                className="absolute left-1 top-1/2 z-10 flex size-7 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/70 transition-all hover:bg-black/70 hover:text-white min-[900px]:-left-8"
               >
                 <ChevronLeft size={14} />
               </button>
@@ -269,7 +269,7 @@ export default function CarouselBlock({
               <button
                 onClick={next}
                 aria-label="Next carousel image"
-                className="flex size-7 shrink-0 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/70 transition-all hover:bg-black/70 hover:text-white"
+                className="absolute right-1 top-1/2 z-10 flex size-7 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/70 transition-all hover:bg-black/70 hover:text-white min-[900px]:-right-8"
               >
                 <ChevronRight size={14} />
               </button>
@@ -288,12 +288,12 @@ export default function CarouselBlock({
   return (
     <div className="select-none">
       {/* Slide area */}
-      <div className="flex items-center gap-1.5 md:gap-4">
+      <div className="relative w-full">
         {images.length > 1 && (
           <button
             onClick={prev}
             aria-label="Previous carousel image"
-            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white/70 backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white"
+            className="absolute left-1 top-1/2 z-10 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white/70 backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white min-[900px]:-left-12"
           >
             <ChevronLeft size={18} strokeWidth={1.5} />
           </button>
@@ -373,7 +373,7 @@ export default function CarouselBlock({
           <button
             onClick={next}
             aria-label="Next carousel image"
-            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white/70 backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white"
+            className="absolute right-1 top-1/2 z-10 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white/70 backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white min-[900px]:-right-12"
           >
             <ChevronRight size={18} strokeWidth={1.5} />
           </button>
