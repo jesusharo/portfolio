@@ -75,6 +75,10 @@ export function sanitizeContentBlocks(blocks) {
     if (block?.type === 'richtext' && typeof block.html === 'string') {
       return { ...block, html: sanitizeRichText(block.html) };
     }
+    if (block?.type === 'carousel') {
+      const visibleCount = [1, 2, 3].includes(block.visible_count) ? block.visible_count : 3;
+      return { ...block, visible_count: visibleCount };
+    }
     return block;
   });
 }

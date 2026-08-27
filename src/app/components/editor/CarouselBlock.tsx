@@ -10,10 +10,14 @@ export interface CarouselImageItem {
   caption?: string;
 }
 
+export type CarouselVisibleCount = 1 | 2 | 3;
+
 interface Props {
   images: CarouselImageItem[];
+  visibleCount?: CarouselVisibleCount;
   editorMode?: boolean;
   onChange?: (images: CarouselImageItem[]) => void;
+  onVisibleCountChange?: (count: CarouselVisibleCount) => void;
 }
 
 // ─── Mini upload strip slot ───────────────────────────────────────────────────
@@ -79,11 +83,17 @@ function useIsMobile() {
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export default function CarouselBlock({ images, editorMode, onChange }: Props) {
+export default function CarouselBlock({
+  images,
+  visibleCount: configuredVisibleCount = 3,
+  editorMode,
+  onChange,
+  onVisibleCountChange,
+}: Props) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [lightboxImage, setLightboxImage] = useState<CarouselImageItem | null>(null);
   const isMobile = useIsMobile();
-  const visibleCount = isMobile ? 1 : Math.min(3, images.length);
+  const visibleCount = isMobile ? 1 : Math.min(configuredVisibleCount, images.length);
   const safeStartIdx = Math.min(currentIdx, Math.max(0, images.length - 1));
 
   useEffect(() => {
@@ -114,9 +124,9 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
 
   function getVisibleImages(): CarouselImageItem[] {
     if (!images.length) return [];
-    if (isMobile || images.length <= 1) return [images[safeStartIdx]];
-    if (images.length === 2) {
-      return [images[(safeStartIdx + 1) % images.length], images[safeStartIdx]];
+    if (visibleCount <= 1 || images.length <= 1) return [images[safeStartIdx]];
+    if (visibleCount === 2) {
+      return [images[safeStartIdx], images[(safeStartIdx + 1) % images.length]];
     }
     return [
       images[(safeStartIdx - 1 + images.length) % images.length],
@@ -126,7 +136,7 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
   }
 
   const visibleImages = getVisibleImages();
-  const centerIdx = !isMobile && images.length >= 3 ? 1 : -1;
+  const centerIdx = !isMobile && visibleCount === 3 ? 1 : -1;
 
   // ── Editor mode ──
   if (editorMode) {
@@ -135,7 +145,21 @@ export default function CarouselBlock({ images, editorMode, onChange }: Props) {
         {/* Header */}
         <div className="flex items-center gap-1.5 text-white/35 text-[0.75rem]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
           <GalleryHorizontal size={13} strokeWidth={1.5} />
-          Carousel · {images.length} image{images.length !== 1 ? 's' : ''}
+          <span>Carousel · {images.length} image{images.length !== 1 ? 's' : ''}</span>
+          <span className="ml-auto text-white/25">Screens</span>
+          <select
+            value={configuredVisibleCount}
+            aria-label="Screens visible in carousel"
+            title="Screens visible in carousel"
+            onChange={event => onVisibleCountChange?.(Number(event.target.value) as CarouselVisibleCount)}
+            className="h-[25px] rounded-[6px] border border-white/10 bg-white/[0.04] px-1.5 text-[0.7rem] text-white/60 outline-none hover:border-white/25 hover:text-white cursor-pointer"
+          >
+            {[1, 2, 3].map(count => (
+              <option key={count} value={count} className="bg-[#242424] text-white">
+                {count}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Horizontal thumbnail strip */}

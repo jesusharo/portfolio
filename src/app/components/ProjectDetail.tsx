@@ -7,7 +7,7 @@ import { getProjects, getEditorProjects, updateProject } from '../lib/api';
 import RichTextEditor from './editor/RichTextEditor';
 import ImageDropZone from './editor/ImageDropZone';
 import ImageGridBlock, { type GridImageItem } from './editor/ImageGridBlock';
-import CarouselBlock, { type CarouselImageItem } from './editor/CarouselBlock';
+import CarouselBlock, { type CarouselImageItem, type CarouselVisibleCount } from './editor/CarouselBlock';
 import ImageLightbox from './ImageLightbox';
 import HeroParallax from './HeroParallax';
 
@@ -25,6 +25,7 @@ interface ContentBlock {
   // imagegrid & carousel
   images?: GridImageItem[];
   columns?: 2 | 3;
+  visible_count?: CarouselVisibleCount;
 }
 
 interface Project {
@@ -229,7 +230,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
     const blockId = Date.now().toString(36) + Math.random().toString(36).slice(2);
     let newBlock: ContentBlock = { id: blockId, type };
     if (type === 'imagegrid') newBlock = { ...newBlock, images: [], columns: 2 };
-    if (type === 'carousel')  newBlock = { ...newBlock, images: [] };
+    if (type === 'carousel')  newBlock = { ...newBlock, images: [], visible_count: 3 };
     const next = [
       ...contentBlocks.slice(0, atIndex),
       newBlock,
@@ -490,8 +491,10 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
                     {block.type === 'carousel' && (
                       <CarouselBlock
                         images={(block.images || []) as CarouselImageItem[]}
+                        visibleCount={block.visible_count ?? 3}
                         editorMode
                         onChange={images => updateBlock(block.id, { images })}
+                        onVisibleCountChange={visible_count => updateBlock(block.id, { visible_count })}
                       />
                     )}
                     {block.type === 'divider' && (
@@ -545,6 +548,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
                   {block.type === 'carousel' && (block.images?.length ?? 0) > 0 && (
                     <CarouselBlock
                       images={(block.images || []) as CarouselImageItem[]}
+                      visibleCount={block.visible_count ?? 3}
                     />
                   )}
                   {block.type === 'divider' && (
