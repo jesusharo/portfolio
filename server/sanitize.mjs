@@ -65,6 +65,12 @@ export function sanitizeTextAlign(value, fallback = 'center') {
   return ['left', 'center', 'right', 'justify'].includes(value) ? value : fallback;
 }
 
+/** Keep image captions as plain text with no more than three lines. */
+export function sanitizeCaption(value) {
+  if (typeof value !== 'string') return '';
+  return sanitizePlainText(value).replace(/\r\n?/g, '\n').split('\n').slice(0, 3).join('\n');
+}
+
 /**
  * Walk a content_blocks array and sanitize every richtext block's html field in place.
  * Returns a new array — does not mutate the original.
@@ -77,7 +83,20 @@ export function sanitizeContentBlocks(blocks) {
     }
     if (block?.type === 'carousel') {
       const visibleCount = [1, 2, 3].includes(block.visible_count) ? block.visible_count : 3;
-      return { ...block, visible_count: visibleCount };
+      const images = Array.isArray(block.images)
+        ? block.images.map(image => typeof image === 'object' && image !== null
+          ? { ...image, ...(typeof image.caption === 'string' ? { caption: sanitizeCaption(image.caption) } : {}) }
+          : image)
+        : block.images;
+      return { ...block, images, visible_count: visibleCount };
+    }
+    if (block?.type === 'imagegrid' && Array.isArray(block.images)) {
+      return {
+        ...block,
+        images: block.images.map(image => typeof image === 'object' && image !== null
+          ? { ...image, ...(typeof image.caption === 'string' ? { caption: sanitizeCaption(image.caption) } : {}) }
+          : image),
+      };
     }
     return block;
   });

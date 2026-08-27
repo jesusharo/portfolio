@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { X, Plus, Loader2, LayoutGrid } from 'lucide-react';
 import { uploadImage } from '../../lib/api';
 import ImageLightbox from '../ImageLightbox';
+import ImageCaptionField from './ImageCaptionField';
 
 export interface GridImageItem {
   id: string;
@@ -66,19 +67,24 @@ function UploadSlot({ onUploaded }: { onUploaded: (url: string) => void }) {
 function FilledSlot({
   item,
   onRemove,
+  onCaptionChange,
 }: {
   item: GridImageItem;
   onRemove: () => void;
+  onCaptionChange: (caption: string) => void;
 }) {
   return (
-    <div className="relative group/slot min-w-0 overflow-hidden">
-      <img src={item.url} alt={item.caption || ''} className="block h-auto w-full object-contain" />
-      <button
-        onClick={onRemove}
-        className="absolute top-1.5 right-1.5 size-[22px] flex items-center justify-center rounded-full bg-black/60 border border-white/15 text-white/50 hover:text-[#d25d5f] hover:bg-black/80 transition-all opacity-0 group-hover/slot:opacity-100"
-      >
-        <X size={11} strokeWidth={2} />
-      </button>
+    <div className="relative group/slot min-w-0">
+      <div className="relative overflow-hidden rounded-[8px]">
+        <img src={item.url} alt={item.caption || ''} className="block h-auto w-full object-contain" />
+        <button
+          onClick={onRemove}
+          className="absolute top-1.5 right-1.5 size-[22px] flex items-center justify-center rounded-full bg-black/60 border border-white/15 text-white/50 hover:text-[#d25d5f] hover:bg-black/80 transition-all opacity-0 group-hover/slot:opacity-100"
+        >
+          <X size={11} strokeWidth={2} />
+        </button>
+      </div>
+      <ImageCaptionField value={item.caption} onChange={onCaptionChange} placeholder="Caption" />
     </div>
   );
 }
@@ -134,7 +140,15 @@ export default function ImageGridBlock({ images, columns, editorMode, onChange }
         {/* Grid */}
         <div className={`grid ${colClass} gap-2`}>
           {images.map(img => (
-            <FilledSlot key={img.id} item={img} onRemove={() => removeImage(img.id)} />
+            <FilledSlot
+              key={img.id}
+              item={img}
+              onRemove={() => removeImage(img.id)}
+              onCaptionChange={caption => onChange?.(
+                images.map(current => current.id === img.id ? { ...current, caption } : current),
+                columns,
+              )}
+            />
           ))}
           <UploadSlot onUploaded={addImage} />
         </div>
@@ -156,7 +170,17 @@ export default function ImageGridBlock({ images, columns, editorMode, onChange }
               onClick={() => setLightboxImage(img)}
             />
             {img.caption && (
-              <figcaption className="text-white/35 text-[0.75rem] mt-1 text-center" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+              <figcaption
+                className="mt-1 text-center text-[0.75rem] whitespace-pre-line"
+                style={{
+                  fontFamily: "'Source Sans 3', sans-serif",
+                  color: 'rgba(255,255,255,0.35)',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                }}
+              >
                 {img.caption}
               </figcaption>
             )}

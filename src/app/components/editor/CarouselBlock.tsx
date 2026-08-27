@@ -3,6 +3,7 @@ import { X, Plus, Loader2, ChevronLeft, ChevronRight, GalleryHorizontal } from '
 import { AnimatePresence, motion } from 'motion/react';
 import { uploadImage } from '../../lib/api';
 import ImageLightbox from '../ImageLightbox';
+import ImageCaptionField from './ImageCaptionField';
 
 export interface CarouselImageItem {
   id: string;
@@ -110,6 +111,10 @@ export default function CarouselBlock({
     onChange?.(next);
   }
 
+  function updateCaption(id: string, caption: string) {
+    onChange?.(images.map(img => img.id === id ? { ...img, caption } : img));
+  }
+
   function goTo(idx: number) {
     setCurrentIdx(idx);
   }
@@ -165,14 +170,21 @@ export default function CarouselBlock({
         {/* Horizontal thumbnail strip */}
         <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
           {images.map(img => (
-            <div key={img.id} className="relative group/thumb shrink-0 w-[100px] h-[70px] rounded-[8px] overflow-hidden">
-              <img src={img.url} alt="" className="w-full h-full object-cover" />
-              <button
-                onClick={() => removeImage(img.id)}
-                className="absolute top-1 right-1 size-[18px] flex items-center justify-center rounded-full bg-black/70 border border-white/15 text-white/50 hover:text-[#d25d5f] hover:bg-black/90 transition-all opacity-0 group-hover/thumb:opacity-100"
-              >
-                <X size={9} strokeWidth={2.5} />
-              </button>
+            <div key={img.id} className="shrink-0 w-[100px] flex flex-col gap-1">
+              <div className="relative group/thumb h-[70px] rounded-[8px] overflow-hidden">
+                <img src={img.url} alt="" className="w-full h-full object-cover" />
+                <button
+                  onClick={() => removeImage(img.id)}
+                  className="absolute top-1 right-1 size-[18px] flex items-center justify-center rounded-full bg-black/70 border border-white/15 text-white/50 hover:text-[#d25d5f] hover:bg-black/90 transition-all opacity-0 group-hover/thumb:opacity-100"
+                >
+                  <X size={9} strokeWidth={2.5} />
+                </button>
+              </div>
+              <ImageCaptionField
+                value={img.caption}
+                onChange={caption => updateCaption(img.id, caption)}
+                placeholder="Caption"
+              />
             </div>
           ))}
           <StripUploadSlot onUploaded={addImage} />
@@ -370,7 +382,17 @@ export default function CarouselBlock({
 
       {/* Caption */}
       {current?.caption && (
-        <p className="text-white/35 text-[0.8rem] mt-2 text-center" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+        <p
+          className="mt-2 text-center text-[0.8rem] whitespace-pre-line"
+          style={{
+            fontFamily: "'Source Sans 3', sans-serif",
+            color: 'rgba(255,255,255,0.35)',
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+        >
           {current.caption}
         </p>
       )}
