@@ -197,7 +197,7 @@ export default function CarouselBlock({
               <button
                 onClick={prev}
                 aria-label="Previous carousel image"
-                className="absolute left-1 top-1/2 z-10 flex size-7 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/70 transition-all hover:bg-black/70 hover:text-white min-[900px]:-left-8"
+                className="absolute left-1 top-1/2 z-10 hidden size-7 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/70 transition-all hover:bg-black/70 hover:text-white min-[900px]:-left-8 min-[900px]:flex"
               >
                 <ChevronLeft size={14} />
               </button>
