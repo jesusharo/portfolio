@@ -203,7 +203,7 @@ export default function CarouselBlock({
               </button>
             )}
             <div className="relative min-w-0 flex-1 overflow-hidden">
-              <div className="flex items-start py-5 md:py-8">
+              <div className="flex items-start pt-5 min-[900px]:py-8">
                 {visibleCount <= 2 ? (
                   <AnimatePresence initial={false} mode="wait">
                     <motion.div
@@ -254,7 +254,7 @@ export default function CarouselBlock({
                 )}
               </div>
               {images.length > 1 && (
-                <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1">
+                <div className="absolute bottom-2 left-1/2 hidden -translate-x-1/2 gap-1 min-[900px]:flex">
                   {images.map((img, i) => (
                     <button
                       key={img.id}
@@ -269,10 +269,38 @@ export default function CarouselBlock({
               <button
                 onClick={next}
                 aria-label="Next carousel image"
-                className="absolute right-1 top-1/2 z-10 flex size-7 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/70 transition-all hover:bg-black/70 hover:text-white min-[900px]:-right-8"
+                className="absolute right-1 top-1/2 z-10 hidden size-7 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/70 transition-all hover:bg-black/70 hover:text-white min-[900px]:-right-8 min-[900px]:flex"
               >
                 <ChevronRight size={14} />
               </button>
+            )}
+            {images.length > 1 && (
+              <div className="flex items-center justify-center gap-3 pt-4 min-[900px]:hidden">
+                <button
+                  onClick={prev}
+                  aria-label="Previous carousel image"
+                  className="flex size-7 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/70 transition-all hover:bg-black/70 hover:text-white"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                <div className="flex items-center gap-1">
+                  {images.map((img, i) => (
+                    <button
+                      key={img.id}
+                      onClick={() => goTo(i)}
+                      aria-label={`Go to carousel image ${i + 1}`}
+                      className={`rounded-full transition-all ${i === safeStartIdx ? 'h-1.5 w-4 bg-white' : 'size-1.5 bg-white/35 hover:bg-white/60'}`}
+                    />
+                  ))}
+                </div>
+                <button
+                  onClick={next}
+                  aria-label="Next carousel image"
+                  className="flex size-7 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/70 transition-all hover:bg-black/70 hover:text-white"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
             )}
           </div>
         )}
@@ -293,13 +321,13 @@ export default function CarouselBlock({
           <button
             onClick={prev}
             aria-label="Previous carousel image"
-            className="absolute left-1 top-1/2 z-10 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white/70 backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white min-[900px]:-left-12"
+            className="absolute left-1 top-1/2 z-10 hidden size-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white/70 backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white min-[900px]:-left-12 min-[900px]:flex"
           >
             <ChevronLeft size={18} strokeWidth={1.5} />
           </button>
         )}
         <div className="relative min-w-0 flex-1 overflow-hidden">
-          <div className="flex items-start py-5 md:py-8">
+          <div className="flex items-start pt-5 min-[900px]:py-8">
               {visibleCount <= 2 ? (
                 <AnimatePresence initial={false} mode="wait">
                   <motion.div
@@ -354,7 +382,7 @@ export default function CarouselBlock({
 
           {/* Dots */}
           {images.length > 1 && (
-            <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+            <div className="absolute bottom-3 left-1/2 hidden -translate-x-1/2 gap-1.5 min-[900px]:flex">
               {images.map((img, i) => (
                 <button
                   key={img.id}
@@ -373,10 +401,42 @@ export default function CarouselBlock({
           <button
             onClick={next}
             aria-label="Next carousel image"
-            className="absolute right-1 top-1/2 z-10 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white/70 backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white min-[900px]:-right-12"
+            className="absolute right-1 top-1/2 z-10 hidden size-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white/70 backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white min-[900px]:-right-12 min-[900px]:flex"
           >
             <ChevronRight size={18} strokeWidth={1.5} />
           </button>
+        )}
+        {images.length > 1 && (
+          <div className="flex items-center justify-center gap-4 pt-4 min-[900px]:hidden">
+            <button
+              onClick={prev}
+              aria-label="Previous carousel image"
+              className="flex size-9 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white/70 backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white"
+            >
+              <ChevronLeft size={18} strokeWidth={1.5} />
+            </button>
+            <div className="flex items-center gap-1.5">
+              {images.map((img, i) => (
+                <button
+                  key={img.id}
+                  onClick={() => goTo(i)}
+                  aria-label={`Go to carousel image ${i + 1}`}
+                  className={`rounded-full transition-all ${
+                    i === safeStartIdx
+                      ? 'h-1.5 w-5 bg-white'
+                      : 'size-1.5 bg-white/35 hover:bg-white/60'
+                  }`}
+                />
+              ))}
+            </div>
+            <button
+              onClick={next}
+              aria-label="Next carousel image"
+              className="flex size-9 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white/70 backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white"
+            >
+              <ChevronRight size={18} strokeWidth={1.5} />
+            </button>
+          </div>
         )}
       </div>
 
