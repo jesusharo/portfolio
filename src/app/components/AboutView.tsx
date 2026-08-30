@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Linkedin, Mail, Palette } from 'lucide-react';
+import { Globe, Linkedin, Mail, Palette, Phone } from 'lucide-react';
 import PageTransition from './PageTransition';
 import { useNetworkState } from '../context/NetworkStateContext';
 
@@ -26,17 +26,18 @@ const experience = [
         title: 'Senior Product Designer (AI)',
         period: 'Oct 2025 – Aug 2026',
         bullets: [
-          'Designed and implemented features from scratch using Replit and AI tooling, delivering working versions for stakeholder feedback in 2–4 days.',
-          'Defined functional scope, PRDs, and user stories for 20+ modules spanning device administration, support ticketing, notifications, and fleet operations.',
-          'Designed a relationship-based access model using a lean set of core profiles that combine dynamically to support complex permission configurations.',
-          'Researched and designed an AI-first technical support concept exploring how AI could autonomously resolve user support queries.',
+          'Used Replit and AI tooling to build NEXT platform features from scratch, putting a first working version in front of stakeholders in 2–4 days instead of the weeks a Figma-based process took.',
+          'Owned functional scope, PRDs, and user stories across 20+ modules: device and organization administration, support ticketing, notifications, and fleet operations (geofencing, fuel reporting, command aliases).',
+          'Solved the profile sprawl common in legacy systems with a relationship-based access model: a lean set of core profiles (up to 10) combine dynamically to cover a wide range of permission and visibility configurations.',
+          "Every prototype ran on the platform's existing design system, so new modules stayed consistent and front-end and back-end teams could build straight from them.",
+          'Also explored an AI-first technical support concept: could AI resolve user support queries autonomously instead of routing them to an agent?',
         ],
       },
       {
         title: 'Product Designer',
         period: 'Jun 2023 – Apr 2024',
         bullets: [
-          "Defined the platform's first modules — monitoring, events, unit detail, trip history, and tagging — from concept through Figma-based design.",
+          "Shaped the platform's first modules from zero: monitoring, events, unit detail, trip history, and tagging, taking them from concept and user flows through Figma designs that later carried into the AI-assisted phase.",
         ],
       },
     ],
@@ -44,18 +45,19 @@ const experience = [
   {
     company: 'Ekatena',
     location: 'Remote, Mexico',
-    description: 'Financial risk analysis platform — Product Design Lead',
+    description: 'Financial risk analysis platform',
     roles: [
       {
         title: 'Product Design Lead',
         period: 'Apr 2024 – Sept 2025',
         bullets: [
-          'Returned full-time as sole designer with product-owner-level responsibilities, overseeing complete design ownership of the platform.',
-          'Hired and mentored the designer who took over the role; continued as design advisor after the engagement ended.',
-          "Partnered with engineering to define and maintain the platform's design system, establishing reusable components and guidelines.",
-          'Designed a report-relationship system and a dedicated UBO report for deeper shareholder and risk analysis.',
-          'Redesigned report detail views to cut data load time and streamlined the roles and permissions system.',
-          "Defined the architecture and design of the platform's mobile version.",
+          'Returned full-time to take over complete design ownership of a platform I had helped shape as part of the founding product team in 2021, operating as the platform’s sole designer with product-owner-level responsibilities.',
+          'Hired and mentored the designer who took over the role, continuing on as a design advisor after the engagement ended.',
+          'The design system was a joint effort with engineering: I drove the component library and guidelines that kept the product consistent as it scaled.',
+          'Built out a report-relationship system plus a dedicated Ultimate Beneficial Owner (UBO) report for deeper shareholder and risk analysis.',
+          'That focus on report clarity paid off: the platform’s main risk report and the credit bureau report were repeatedly cited in client testimonials as the reason clients chose Ekatena over competitors.',
+          'Worked with engineering on the strategy to improve load performance on report detail views, reducing render time for heavy data sets, and streamlined the roles and permissions system to improve analyst workflow and operational scalability.',
+          "Took the platform to mobile, deciding what earns space on a small screen and what doesn't.",
         ],
       },
     ],
@@ -69,8 +71,8 @@ const experience = [
         title: 'Freelance Designer',
         period: 'Sept 2022 – Jun 2023',
         bullets: [
-          "Provided web and mobile design for US-based clients, including sections for New Era's mobile app and a redesign of the Grasshopper mobile application.",
-          'Designed eCommerce websites for US-based clients, covering web and mobile.',
+          "Web and mobile design for Neerva's US-based clients: sections of New Era's mobile app and website, plus a redesign of the Grasshopper mobile application.",
+          'Also delivered eCommerce sites for other US clients, web and mobile.',
         ],
       },
     ],
@@ -84,9 +86,11 @@ const experience = [
         title: 'Product Designer',
         period: 'Jan 2021 – Sept 2022',
         bullets: [
-          "Revamped the product's information architecture for larger organizations including Universal Media Group and the University of Oklahoma.",
-          'Redesigned onboarding for non-technical users into a self-guided flow taking 10–20 minutes, down from a week-long process.',
-          'Developed a customized cybersecurity playbook feature and a new notification system.',
+          "Reworked the product's information architecture (hierarchy and user roles) so it could serve larger organizations like Universal Media Group and the University of Oklahoma.",
+          'Onboarding went from a week-long install with partial developer support to a self-guided 10–20 minute flow non-technical users could finish alone, which helped grow the client base.',
+          'Added components to the design system and pushed clarity and accessibility improvements.',
+          'Shipped a customizable cybersecurity playbook feature: explicit rules and workflows for risk mitigation.',
+          'Rebuilt the notification system for scale and day-to-day usability.',
         ],
       },
     ],
@@ -100,9 +104,9 @@ const experience = [
         title: 'Product Designer',
         period: '2018 – 2020',
         bullets: [
-          "Designed a B2B eCommerce platform for Levi's Mexico via design sprint, cutting a multi-week shopping process to 30 minutes.",
+          "Ran the design sprint that produced Levi's Mexico's B2B eCommerce platform, cutting a multi-week shopping process to 30 minutes; also built a ticket management web/mobile app that replaced Eventbrite for regional events.",
           'Led product design sprints to ideate, validate, and build new startup mobile apps from scratch with real users.',
-          'Took on team management alongside individual design work, including career development and performance reviews.',
+          'Picked up team management alongside hands-on design work: career development and performance reviews for the design team.',
         ],
       },
     ],
@@ -116,9 +120,9 @@ const experience = [
         title: 'UX/UI Director',
         period: '2015 – 2018',
         bullets: [
-          "Designed the company's brand, website, and identity across channels.",
-          'Ran product design sprints and redesigned eCommerce websites, improving UX through best practices and A/B testing.',
-          'Led and grew the design team, defining career paths and managing performance reviews.',
+          "Owned the company's brand, website, and identity across channels, and ran product design sprints to build mobile and web apps for fintech clients.",
+          'Reworked eCommerce sites, validating UX changes through A/B testing.',
+          "Grew the design team and set up its career paths, performance reviews, and KPIs.",
         ],
       },
     ],
@@ -132,9 +136,9 @@ const experience = [
         title: 'UI Designer → UI Lead',
         period: '2009 – 2015',
         bullets: [
-          'Contributed to the FoxCommerce eCommerce platform — planning, branding, and design that helped support a $3.5M USD investment round.',
-          'Created concept and branding for MagmaConf (6 editions, international speakers).',
-          'Grew and led the design team as it scaled, progressing from UI Designer to UI Lead.',
+          'On FoxCommerce, handled branding, graphic structure, and design planning for the eCommerce platform that went on to raise a $3.5M USD round.',
+          'Created concept and branding for MagmaConf (6 editions, international speakers, sponsors including StickerMule, Engine Yard, Heroku, GitHub, CloudApp, Cookpad, DensityLabs, Travis CI, and OneLogin), and designed responsive eCommerce sites (Shopify, Spree/Solidus, Magento) for startups.',
+          'Promoted from UI Designer to UI Lead as the team scaled, taking on hiring and day-to-day direction of the design group.',
         ],
       },
     ],
@@ -155,9 +159,9 @@ const education = [
 const tools = ['Figma', 'Webflow', 'Adobe CS', 'Affinity Designer', 'HTML', 'CSS', 'Replit', 'Claude Code', 'Gemini CLI', 'ChatGPT Codex'];
 
 const skills = [
-  'Design team leadership', 'Career pathing & performance reviews', 'AI-assisted product design',
-  'Front-end prototyping with AI coding agents', 'PRD & user story writing', 'Product design sprint',
-  'Design thinking', 'Agile / Lean UX', 'Prototyping', 'UX/UI design', 'Design systems', 'Branding',
+  'Design team leadership', 'Career pathing and performance reviews', 'AI-assisted product design',
+  'Front-end prototyping with AI coding agents', 'PRD and user story writing', 'Product design sprint',
+  'Design thinking', 'Agile', 'Lean UX', 'Prototyping', 'UX/UI design', 'Design systems', 'Branding',
   'Cross-functional collaboration',
 ];
 
@@ -185,8 +189,10 @@ export default function AboutView() {
               <div className="ml-auto flex flex-wrap items-center justify-end gap-x-5 gap-y-2">
               {[
                 { label: 'jharolozano@gmail.com', href: 'mailto:jharolozano@gmail.com', Icon: Mail },
+                { label: 'haroknow.com', href: 'https://www.haroknow.com', Icon: Globe },
                 { label: 'linkedin', href: 'https://www.linkedin.com/in/jharolozano/', Icon: Linkedin },
                 { label: 'behance', href: 'https://www.behance.net/haroknow', Icon: Palette },
+                { label: '+52 312 124 8323', href: 'tel:+523121248323', Icon: Phone },
               ].map(link => (
                 <a
                   key={link.href}
@@ -220,7 +226,7 @@ export default function AboutView() {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08 }}>
             <p style={SECTION_LABEL}>Summary</p>
             <p style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '0.95rem', lineHeight: 1.7, color: 'rgba(255,255,255,0.6)' }}>
-              Senior Product Designer with 15+ years of experience across the IT industry, specializing in end-to-end product design — from research and information architecture through prototyping to engineering handoff. Track record leading and growing design teams and owning product decisions, with recent work applying AI tooling to accelerate feature design and prototyping. I thrive on cross-functional collaboration, translating customer feedback and technical constraints into intuitive, scalable interfaces.
+              Senior Product Designer with 15+ years shipping B2B products end-to-end: research, information architecture, prototyping, and engineering handoff. I've led and grown design teams, owned product decisions from concept through launch, and this past year used AI tooling to take features from concept to a working prototype in 2–4 days instead of weeks. I work directly with engineering to turn customer feedback and technical constraints into shipped interfaces, not just mockups.
             </p>
           </motion.div>
 
