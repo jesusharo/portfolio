@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Globe, Linkedin, Mail, Palette, Phone } from 'lucide-react';
+import { Globe, Linkedin, Mail, Palette } from 'lucide-react';
 import PageTransition from './PageTransition';
 import { useNetworkState } from '../context/NetworkStateContext';
 
@@ -192,7 +192,6 @@ export default function AboutView() {
                 { label: 'haroknow.com', href: 'https://www.haroknow.com', Icon: Globe },
                 { label: 'linkedin', href: 'https://www.linkedin.com/in/jharolozano/', Icon: Linkedin },
                 { label: 'behance', href: 'https://www.behance.net/haroknow', Icon: Palette },
-                { label: '+52 312 124 8323', href: 'tel:+523121248323', Icon: Phone },
               ].map(link => (
                 <a
                   key={link.href}
