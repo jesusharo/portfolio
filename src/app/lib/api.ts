@@ -31,10 +31,27 @@ export function logout() {
 }
 
 // Site settings
-export async function getSiteSettings(): Promise<{ favicon_url: string }> {
+export interface SiteSettings {
+  favicon_url: string;
+  case_studies_visible: boolean;
+  agent_visible: boolean;
+}
+
+export async function getSiteSettings(): Promise<SiteSettings> {
   const res = await fetch(`${BASE}/settings`);
   if (!res.ok) throw new Error('Settings fetch failed');
   return res.json();
+}
+
+export async function updateSiteSettings(settings: SiteSettings) {
+  const res = await fetch(`${BASE}/settings`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify(settings),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Site settings update failed');
+  return data as SiteSettings;
 }
 
 export async function updateFavicon(favicon_url: string) {
@@ -46,6 +63,20 @@ export async function updateFavicon(favicon_url: string) {
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Favicon update failed');
   return data as { favicon_url: string };
+}
+
+export async function updatePageVisibility(
+  case_studies_visible: boolean,
+  agent_visible: boolean,
+) {
+  const res = await fetch(`${BASE}/settings/visibility`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify({ case_studies_visible, agent_visible }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Visibility update failed');
+  return data as Pick<SiteSettings, 'case_studies_visible' | 'agent_visible'>;
 }
 
 // Projects (public)

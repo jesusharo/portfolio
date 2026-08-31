@@ -49,10 +49,16 @@ ALTER TABLE about_content ADD COLUMN IF NOT EXISTS resume_content TEXT DEFAULT '
 CREATE TABLE IF NOT EXISTS site_settings (
   id INTEGER PRIMARY KEY DEFAULT 1,
   favicon_url TEXT DEFAULT '',
+  case_studies_visible BOOLEAN NOT NULL DEFAULT true,
+  agent_visible BOOLEAN NOT NULL DEFAULT true,
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 INSERT INTO site_settings (id, favicon_url) VALUES (1, '') ON CONFLICT (id) DO NOTHING;
+
+-- Add public page visibility settings to existing installations.
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS case_studies_visible BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS agent_visible BOOLEAN NOT NULL DEFAULT true;
 
 CREATE TABLE IF NOT EXISTS images (
   id UUID PRIMARY KEY,

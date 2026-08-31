@@ -1,6 +1,7 @@
 import { BookMarked, Mail, Sparkles, PenTool } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router';
 import type { SVGProps } from 'react';
+import { useSiteVisibility } from '../hooks/useSiteVisibility';
 
 const CONTACT_MAILTO = 'mailto:jharolozano@gmail.com?subject=Hello%20from%20your%20portfolio';
 
@@ -30,6 +31,7 @@ function AboutMeIcon({ className, style }: SVGProps<SVGSVGElement>) {
 export default function MainMenu({ detailTextColor }: { detailTextColor?: string | null }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { case_studies_visible, agent_visible } = useSiteVisibility();
 
   const links = [
     { id: 'projects', label: 'UI projects',  icon: PenTool,     path: '/projects' },
@@ -37,7 +39,10 @@ export default function MainMenu({ detailTextColor }: { detailTextColor?: string
     { id: 'agent',    label: 'Agent',        icon: Sparkles,    path: '/agent' },
     { id: 'about',    label: 'About me',     icon: AboutMeIcon, path: '/about' },
     { id: 'contact',  label: 'Contact',      icon: Mail,        path: '/contact' },
-  ];
+  ].filter(link =>
+    (link.id !== 'cases' || case_studies_visible) &&
+    (link.id !== 'agent' || agent_visible)
+  );
 
   const isActive = (path: string) =>
     path === '/agent'

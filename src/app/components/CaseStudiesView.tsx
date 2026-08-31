@@ -5,6 +5,8 @@ import PageTransition from './PageTransition';
 import { getProjects } from '../lib/api';
 import { useNetworkState } from '../context/NetworkStateContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { Navigate } from 'react-router';
+import { useSiteVisibility } from '../hooks/useSiteVisibility';
 
 interface Project {
   id: string;
@@ -18,10 +20,14 @@ export default function CaseStudiesView() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const { dataVersion } = useNetworkState();
+  const { case_studies_visible, loading: visibilityLoading } = useSiteVisibility();
 
   useEffect(() => {
     getProjects('case_study').then(setProjects).catch(() => {});
   }, [dataVersion]);
+
+  if (visibilityLoading) return null;
+  if (!case_studies_visible) return <Navigate to="/projects" replace />;
 
   return (
     <PageTransition>

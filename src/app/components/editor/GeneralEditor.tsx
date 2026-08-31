@@ -1,11 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, Image as ImageIcon, Loader2, Trash2, Upload } from 'lucide-react';
-import { getSiteSettings, updateFavicon, uploadImage } from '../../lib/api';
+import { getSiteSettings, updateSiteSettings, uploadImage } from '../../lib/api';
 import { applyFavicon } from '../../lib/favicon';
+import { Switch } from '../ui/switch';
+import { useNetworkState } from '../../context/NetworkStateContext';
 
 export default function GeneralEditor() {
+  const { bumpDataVersion } = useNetworkState();
   const fileRef = useRef<HTMLInputElement>(null);
   const [faviconUrl, setFaviconUrl] = useState('');
+  const [caseStudiesVisible, setCaseStudiesVisible] = useState(true);
+  const [agentVisible, setAgentVisible] = useState(true);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -14,7 +19,11 @@ export default function GeneralEditor() {
 
   useEffect(() => {
     getSiteSettings()
-      .then(settings => setFaviconUrl(settings.favicon_url || ''))
+      .then(settings => {
+        setFaviconUrl(settings.favicon_url || '');
+        setCaseStudiesVisible(settings.case_studies_visible !== false);
+        setAgentVisible(settings.agent_visible !== false);
+      })
       .catch(() => setError('Could not load site settings.'))
       .finally(() => setLoading(false));
   }, []);
@@ -44,9 +53,16 @@ export default function GeneralEditor() {
     setError('');
     setSaved(false);
     try {
-      const result = await updateFavicon(faviconUrl);
+      const result = await updateSiteSettings({
+        favicon_url: faviconUrl,
+        case_studies_visible: caseStudiesVisible,
+        agent_visible: agentVisible,
+      });
       setFaviconUrl(result.favicon_url);
+      setCaseStudiesVisible(result.case_studies_visible);
+      setAgentVisible(result.agent_visible);
       applyFavicon(result.favicon_url);
+      bumpDataVersion();
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
@@ -122,6 +138,36 @@ export default function GeneralEditor() {
               Restore default favicon
             </button>
           )}
+        </section>
+
+        <section className="mt-4 rounded-[12px] border border-white/10 bg-white/[0.02] p-4">
+          <div className="text-white/75 text-[0.9rem] font-semibold font-['Source_Sans_3',sans-serif]">
+            Public pages
+          </div>
+          <p className="mt-1.5 text-white/35 text-[0.75rem] leading-relaxed font-['Source_Sans_3',sans-serif]">
+            Choose which pages visitors can see in the navigation.
+          </p>
+
+          <div className="mt-4 flex flex-col gap-3">
+            <label className="flex items-center justify-between gap-4 text-[0.82rem] text-white/60 font-['Source_Sans_3',sans-serif]">
+              <span>Case Studies</span>
+              <Switch
+                checked={caseStudiesVisible}
+                onCheckedChange={checked => { setCaseStudiesVisible(checked); setSaved(false); }}
+                aria-label="Show Case Studies page"
+                className="data-[state=checked]:bg-[#d25d5f] data-[state=unchecked]:bg-white/15"
+              />
+            </label>
+            <label className="flex items-center justify-between gap-4 text-[0.82rem] text-white/60 font-['Source_Sans_3',sans-serif]">
+              <span>Agent IA</span>
+              <Switch
+                checked={agentVisible}
+                onCheckedChange={checked => { setAgentVisible(checked); setSaved(false); }}
+                aria-label="Show AI Agent page"
+                className="data-[state=checked]:bg-[#d25d5f] data-[state=unchecked]:bg-white/15"
+              />
+            </label>
+          </div>
         </section>
 
         {error && (

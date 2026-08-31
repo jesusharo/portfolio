@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useBlocker } from 'react-router';
+import { Navigate, useBlocker } from 'react-router';
 import { useChat } from '../hooks/useChat';
 import MessageBubble from './MessageBubble';
 import ChatInput from './ChatInput';
@@ -7,6 +7,7 @@ import PageTransition from './PageTransition';
 import LeaveAgentModal from './LeaveAgentModal';
 import ProjectModal from './ProjectModal';
 import { useNetworkState } from '../context/NetworkStateContext';
+import { useSiteVisibility } from '../hooks/useSiteVisibility';
 
 interface SuggestionProject {
   id: string;
@@ -34,6 +35,7 @@ function buildSuggestions(projects: SuggestionProject[]): string[] {
 export default function ChatView() {
   const { activeConversation, sendMessage, loading } = useChat();
   const { setNetworkState } = useNetworkState();
+  const { agent_visible, loading: visibilityLoading } = useSiteVisibility();
   const [inputFocused, setInputFocused] = useState(false);
   const [modalProjectId, setModalProjectId] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -41,7 +43,7 @@ export default function ChatView() {
   const hasMessages = !!(activeConversation && activeConversation.messages.length > 0);
 
   const blocker = useBlocker(({ currentLocation, nextLocation }) =>
-    hasMessages && currentLocation.pathname !== nextLocation.pathname
+    agent_visible && hasMessages && currentLocation.pathname !== nextLocation.pathname
   );
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -65,6 +67,9 @@ export default function ChatView() {
     const container = messagesContainerRef.current;
     if (container) container.scrollTop = container.scrollHeight;
   }, [activeConversation?.messages]);
+
+  if (visibilityLoading) return null;
+  if (!agent_visible) return <Navigate to="/projects" replace />;
 
   return (
     <PageTransition>
