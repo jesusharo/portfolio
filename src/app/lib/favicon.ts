@@ -1,5 +1,11 @@
 const DEFAULT_FAVICON = '/favicon.png';
 
+function cacheBustedUrl(url: string) {
+  if (!url.startsWith('/api/images/') && !url.startsWith('/uploads/')) return url;
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}v=${Date.now().toString(36)}`;
+}
+
 export function applyFavicon(url?: string | null) {
   if (typeof document === 'undefined') return;
 
@@ -14,5 +20,8 @@ export function applyFavicon(url?: string | null) {
 
   link.rel = 'icon';
   link.dataset.siteFavicon = 'true';
-  link.href = url || DEFAULT_FAVICON;
+  // The static link in index.html declares PNG. Remove that hint so uploaded
+  // JPEG/WebP/AVIF favicons are selected from their response Content-Type.
+  link.removeAttribute('type');
+  link.href = cacheBustedUrl(url || DEFAULT_FAVICON);
 }
