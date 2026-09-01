@@ -83,6 +83,29 @@ function useIsMobile() {
   return isMobile;
 }
 
+const imagePreloadCache = new Map<string, Promise<void>>();
+
+function preloadCarouselImage(url: string): Promise<void> {
+  const cached = imagePreloadCache.get(url);
+  if (cached) return cached;
+
+  const preload = new Promise<void>(resolve => {
+    const image = new window.Image();
+    image.onload = () => {
+      if ('decode' in image) {
+        image.decode().catch(() => {}).finally(resolve);
+      } else {
+        resolve();
+      }
+    };
+    image.onerror = () => resolve();
+    image.src = url;
+  });
+
+  imagePreloadCache.set(url, preload);
+  return preload;
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function CarouselBlock({
   images,
@@ -101,6 +124,16 @@ export default function CarouselBlock({
     setCurrentIdx(index => Math.min(index, Math.max(0, images.length - 1)));
   }, [images.length]);
 
+  // Keep the next mobile slide ready before it is requested. The active image
+  // remains in place while a cold image is loading, preventing a height collapse.
+  useEffect(() => {
+    if (!isMobile || images.length < 2) return;
+    const nextIndex = safeStartIdx === images.length - 1 ? 0 : safeStartIdx + 1;
+    const previousIndex = safeStartIdx === 0 ? images.length - 1 : safeStartIdx - 1;
+    void preloadCarouselImage(images[nextIndex].url);
+    void preloadCarouselImage(images[previousIndex].url);
+  }, [images, isMobile, safeStartIdx]);
+
   function addImage(url: string) {
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2);
     onChange?.([...images, { id, url }]);
@@ -115,7 +148,10 @@ export default function CarouselBlock({
     onChange?.(images.map(img => img.id === id ? { ...img, caption } : img));
   }
 
-  function goTo(idx: number) {
+  async function goTo(idx: number) {
+    const target = images[idx];
+    if (!target) return;
+    if (isMobile) await preloadCarouselImage(target.url);
     setCurrentIdx(idx);
   }
 
