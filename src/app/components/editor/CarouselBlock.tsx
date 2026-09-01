@@ -223,7 +223,7 @@ export default function CarouselBlock({
                           <img
                             src={img.url}
                             alt=""
-                            className="block h-auto w-full object-contain"
+                            className="block h-auto w-full object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.24)]"
                           />
                         </div>
                       ))}
@@ -247,7 +247,7 @@ export default function CarouselBlock({
                       <img
                         src={img.url}
                         alt=""
-                        className="block h-auto w-full object-contain"
+                        className="block h-auto w-full object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.24)]"
                       />
                     </motion.div>
                   ))
@@ -347,7 +347,7 @@ export default function CarouselBlock({
                         <img
                           src={img.url}
                           alt={img.caption || ''}
-                          className="block h-auto w-full cursor-zoom-in object-contain"
+                          className="block h-auto w-full cursor-zoom-in object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.24)]"
                           onClick={() => setLightboxImage(img)}
                         />
                       </div>
@@ -372,7 +372,7 @@ export default function CarouselBlock({
                     <img
                       src={img.url}
                       alt={img.caption || ''}
-                      className="block h-auto w-full cursor-zoom-in object-contain"
+                      className="block h-auto w-full cursor-zoom-in object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.24)]"
                       onClick={() => setLightboxImage(img)}
                     />
                   </motion.div>
