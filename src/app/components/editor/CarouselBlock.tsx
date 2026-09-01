@@ -203,7 +203,7 @@ export default function CarouselBlock({
               </button>
             )}
             <div className="relative min-w-0 flex-1 overflow-hidden">
-              <div className="flex items-start pt-5 min-[900px]:py-8">
+              <div className="flex items-start pt-5 min-[900px]:pb-12 min-[900px]:pt-8">
                 {visibleCount <= 2 ? (
                   <AnimatePresence initial={false} mode="wait">
                     <motion.div
@@ -254,7 +254,7 @@ export default function CarouselBlock({
                 )}
               </div>
               {images.length > 1 && (
-                <div className="absolute bottom-2 left-1/2 hidden -translate-x-1/2 gap-1 min-[900px]:flex">
+                <div className="absolute bottom-3 left-1/2 z-20 hidden -translate-x-1/2 gap-1 min-[900px]:flex">
                   {images.map((img, i) => (
                     <button
                       key={img.id}
@@ -327,7 +327,7 @@ export default function CarouselBlock({
           </button>
         )}
         <div className="relative min-w-0 flex-1 overflow-hidden">
-          <div className="flex items-start pt-5 min-[900px]:py-8">
+          <div className="flex items-start pt-5 min-[900px]:pb-12 min-[900px]:pt-8">
               {visibleCount <= 2 ? (
                 <AnimatePresence initial={false} mode="wait">
                   <motion.div
@@ -382,7 +382,7 @@ export default function CarouselBlock({
 
           {/* Dots */}
           {images.length > 1 && (
-            <div className="absolute bottom-3 left-1/2 hidden -translate-x-1/2 gap-1.5 min-[900px]:flex">
+            <div className="absolute bottom-3 left-1/2 z-20 hidden -translate-x-1/2 gap-1.5 min-[900px]:flex">
               {images.map((img, i) => (
                 <button
                   key={img.id}
