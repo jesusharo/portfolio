@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Globe, Linkedin, Mail, Palette } from 'lucide-react';
+import { Linkedin, Mail, Palette } from 'lucide-react';
 import PageTransition from './PageTransition';
 import { useNetworkState } from '../context/NetworkStateContext';
 
@@ -189,7 +189,6 @@ export default function AboutView() {
               <div className="ml-auto flex flex-wrap items-center justify-end gap-x-5 gap-y-2">
               {[
                 { label: 'jharolozano@gmail.com', href: 'mailto:jharolozano@gmail.com', Icon: Mail },
-                { label: 'haroknow.com', href: 'https://www.haroknow.com', Icon: Globe },
                 { label: 'linkedin', href: 'https://www.linkedin.com/in/jharolozano/', Icon: Linkedin },
                 { label: 'behance', href: 'https://www.behance.net/haroknow', Icon: Palette },
               ].map(link => (
