@@ -1,7 +1,15 @@
-import { useEffect, useLayoutEffect, useState, useRef, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useState, useRef, type CSSProperties, type ReactNode } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, ArrowRight, Plus, AlignLeft, Image as ImageIcon, X, LayoutGrid, GalleryHorizontal, SeparatorHorizontal } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Plus, AlignLeft, Image as ImageIcon, X, LayoutGrid, GalleryHorizontal, SeparatorHorizontal, GripVertical } from 'lucide-react';
+import {
+  DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor,
+  useSensor, useSensors, type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext, useSortable, verticalListSortingStrategy, arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useNetworkState } from '../context/NetworkStateContext';
 import { getProjects, getEditorProjects, updateProject } from '../lib/api';
 import RichTextEditor from './editor/RichTextEditor';
@@ -109,6 +117,41 @@ function AddBlockButton({ onAdd }: { onAdd: (type: BlockType) => void }) {
   );
 }
 
+function SortableContentSection({ id, children }: { id: string; children: ReactNode }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.55 : 1,
+      }}
+      className={`relative group/block mb-1 ${isDragging ? 'z-20' : ''}`}
+    >
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        aria-label="Reorder section"
+        title="Drag to reorder section"
+        className="absolute -left-7 top-2 z-20 flex size-6 touch-none cursor-grab items-center justify-center rounded-[6px] text-white/35 opacity-60 transition-colors hover:bg-white/10 hover:text-white/80 focus-visible:bg-white/10 focus-visible:text-white active:cursor-grabbing md:opacity-0 md:group-hover/block:opacity-100"
+      >
+        <GripVertical size={15} strokeWidth={1.7} />
+      </button>
+      {children}
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function ProjectDetail({ mode }: { mode: Mode }) {
@@ -176,6 +219,11 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const blockSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 5 } }),
+    useSensor(KeyboardSensor),
+  );
   // Keep a ref to contentBlocks so the flush-save effect always has the latest value
   const contentBlocksRef = useRef<ContentBlock[]>([]);
   useEffect(() => { contentBlocksRef.current = contentBlocks; }, [contentBlocks]);
@@ -248,6 +296,19 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
 
   function updateBlock(blockId: string, data: Partial<ContentBlock>) {
     const next = contentBlocks.map(b => b.id === blockId ? { ...b, ...data } : b);
+    setContentBlocks(next);
+    scheduleAutoSave(next);
+  }
+
+  function handleBlockDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const from = contentBlocks.findIndex(block => block.id === active.id);
+    const to = contentBlocks.findIndex(block => block.id === over.id);
+    if (from < 0 || to < 0) return;
+
+    const next = arrayMove(contentBlocks, from, to);
     setContentBlocks(next);
     scheduleAutoSave(next);
   }
@@ -452,62 +513,73 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
                 </p>
               )}
 
-              {contentBlocks.map((block, idx) => (
-                <div key={block.id} className="relative group/block mb-1">
+              <DndContext
+                sensors={blockSensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleBlockDragEnd}
+              >
+                <SortableContext
+                  items={contentBlocks.map(block => block.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {contentBlocks.map((block, idx) => (
+                    <SortableContentSection key={block.id} id={block.id}>
 
-                  {/* Delete button */}
-                  <button
-                    onClick={() => removeBlock(block.id)}
-                    className="absolute top-2 right-2 z-10 size-[22px] flex items-center justify-center rounded-full bg-[rgba(10,10,10,0.7)] border border-white/10 text-white/30 hover:text-[#d25d5f] hover:border-[#d25d5f]/40 hover:bg-[rgba(10,10,10,0.9)] transition-all opacity-0 group-hover/block:opacity-100"
-                  >
-                    <X size={11} strokeWidth={2} />
-                  </button>
+                      {/* Delete button */}
+                      <button
+                        onClick={() => removeBlock(block.id)}
+                        className="absolute top-2 right-2 z-10 size-[22px] flex items-center justify-center rounded-full bg-[rgba(10,10,10,0.7)] border border-white/10 text-white/30 hover:text-[#d25d5f] hover:border-[#d25d5f]/40 hover:bg-[rgba(10,10,10,0.9)] transition-all opacity-0 group-hover/block:opacity-100"
+                      >
+                        <X size={11} strokeWidth={2} />
+                      </button>
 
-                  {/* Block content */}
-                  <div className="mb-1">
-                    {block.type === 'richtext' && (
-                      <RichTextEditor
-                        content={block.html || ''}
-                        onChange={html => updateBlock(block.id, { html })}
-                        placeholder="Write something…"
-                      />
-                    )}
-                    {block.type === 'image' && (
-                      <ImageDropZone
-                        value={block.url || ''}
-                        onChange={url => updateBlock(block.id, { url })}
-                        caption={block.caption}
-                        onCaptionChange={caption => updateBlock(block.id, { caption })}
-                      />
-                    )}
-                    {block.type === 'imagegrid' && (
-                      <ImageGridBlock
-                        images={block.images || []}
-                        columns={block.columns ?? 2}
-                        editorMode
-                        onChange={(images, columns) => updateBlock(block.id, { images, columns })}
-                      />
-                    )}
-                    {block.type === 'carousel' && (
-                      <CarouselBlock
-                        images={(block.images || []) as CarouselImageItem[]}
-                        visibleCount={block.visible_count ?? 3}
-                        editorMode
-                        onChange={images => updateBlock(block.id, { images })}
-                        onVisibleCountChange={visible_count => updateBlock(block.id, { visible_count })}
-                      />
-                    )}
-                    {block.type === 'divider' && (
-                      <div className="py-5 flex items-center px-2">
-                          <div className="flex-1 h-px rounded-full opacity-30" style={{ backgroundColor: textColor }} />
+                      {/* Block content */}
+                      <div className="mb-1">
+                        {block.type === 'richtext' && (
+                          <RichTextEditor
+                            content={block.html || ''}
+                            onChange={html => updateBlock(block.id, { html })}
+                            placeholder="Write something…"
+                          />
+                        )}
+                        {block.type === 'image' && (
+                          <ImageDropZone
+                            value={block.url || ''}
+                            onChange={url => updateBlock(block.id, { url })}
+                            caption={block.caption}
+                            onCaptionChange={caption => updateBlock(block.id, { caption })}
+                          />
+                        )}
+                        {block.type === 'imagegrid' && (
+                          <ImageGridBlock
+                            images={block.images || []}
+                            columns={block.columns ?? 2}
+                            editorMode
+                            onChange={(images, columns) => updateBlock(block.id, { images, columns })}
+                          />
+                        )}
+                        {block.type === 'carousel' && (
+                          <CarouselBlock
+                            images={(block.images || []) as CarouselImageItem[]}
+                            visibleCount={block.visible_count ?? 3}
+                            editorMode
+                            onChange={images => updateBlock(block.id, { images })}
+                            onVisibleCountChange={visible_count => updateBlock(block.id, { visible_count })}
+                          />
+                        )}
+                        {block.type === 'divider' && (
+                          <div className="py-5 flex items-center px-2">
+                            <div className="flex-1 h-px rounded-full opacity-30" style={{ backgroundColor: textColor }} />
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
 
-                  {/* Add-block button after this block */}
-                  <AddBlockButton onAdd={type => insertBlock(type, idx + 1)} />
-                </div>
-              ))}
+                      {/* Add-block button after this block */}
+                      <AddBlockButton onAdd={type => insertBlock(type, idx + 1)} />
+                    </SortableContentSection>
+                  ))}
+                </SortableContext>
+              </DndContext>
             </>
           ) : (
             /* ── Read-only mode ── */
