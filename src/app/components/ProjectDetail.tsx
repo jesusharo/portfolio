@@ -7,7 +7,7 @@ import {
   useSensor, useSensors, type DragEndEvent,
 } from '@dnd-kit/core';
 import {
-  SortableContext, useSortable, verticalListSortingStrategy, arrayMove,
+  SortableContext, useSortable, verticalListSortingStrategy, sortableKeyboardCoordinates, arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useNetworkState } from '../context/NetworkStateContext';
@@ -222,7 +222,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   const blockSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 5 } }),
-    useSensor(KeyboardSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
   // Keep a ref to contentBlocks so the flush-save effect always has the latest value
   const contentBlocksRef = useRef<ContentBlock[]>([]);
