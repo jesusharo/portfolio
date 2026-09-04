@@ -167,6 +167,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
     saveRequestVersion,
   } = useNetworkState();
   const [items, setItems] = useState<Project[]>([]);
+  const [loadedItemsSource, setLoadedItemsSource] = useState<'public' | 'editor' | null>(null);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -177,15 +178,26 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   // Fetch items — use editor API when in editor mode (includes hidden projects).
   // Guard against non-array responses (e.g. 401 error JSON) to prevent render crashes.
   useEffect(() => {
-    if (editorMode) {
-      getEditorProjects(apiType)
-        .then(data => { if (Array.isArray(data)) setItems(data as Project[]); })
-        .catch(() => {}); // auth failure: keep existing items list
-    } else {
-      getProjects(apiType)
-        .then(data => { if (Array.isArray(data)) setItems(data); })
-        .catch(() => {});
-    }
+    let cancelled = false;
+    const source = editorMode ? 'editor' : 'public';
+    setLoadedItemsSource(null);
+
+    const request = editorMode ? getEditorProjects(apiType) : getProjects(apiType);
+    request
+      .then(data => {
+        if (cancelled) return;
+        setItems(Array.isArray(data) ? data as Project[] : []);
+        setLoadedItemsSource(source);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setItems([]);
+        setLoadedItemsSource(source);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [apiType, editorMode, dataVersion]);
 
   const currentIndex = items.findIndex(p => p.id === id);
@@ -327,8 +339,11 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   }, [item?.accent_color, item?.background_color, item?.text_color]);
 
   useEffect(() => {
-    if (items.length > 0 && !item) navigate(listPath);
-  }, [item, items.length]);
+    const expectedSource = editorMode ? 'editor' : 'public';
+    if (loadedItemsSource === expectedSource && items.length > 0 && !item) {
+      navigate(listPath);
+    }
+  }, [editorMode, item, items.length, loadedItemsSource, listPath, navigate]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
