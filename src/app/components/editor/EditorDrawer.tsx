@@ -113,6 +113,9 @@ export default function EditorDrawer({ open, onClose }: Props) {
   function handleSelectProject(p: Project) {
     setSelectedProject(p);
     setView('detail');
+    // Projects selected from the editor must load through the authenticated
+    // detail path so hidden projects remain available for editing.
+    setEditorMode(true);
     const urlSection = p.type === 'case_study' ? 'cases' : 'projects';
     navigate(`/${urlSection}/${p.id}`);
   }
