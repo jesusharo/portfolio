@@ -162,6 +162,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
     setPageBackground,
     setDetailTextColor,
     editorMode,
+    editorAuthed,
     bumpDataVersion,
     dataVersion,
     saveRequestVersion,
@@ -175,14 +176,16 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   const listPath = mode === 'projects' ? '/projects' : '/cases';
   const detailPath = listPath;
 
-  // Fetch items — use editor API when in editor mode (includes hidden projects).
+  // Authenticated editors can resolve hidden project details even before the
+  // inline edit UI has finished activating. Public visitors still use the
+  // filtered public collection.
   // Guard against non-array responses (e.g. 401 error JSON) to prevent render crashes.
   useEffect(() => {
     let cancelled = false;
-    const source = editorMode ? 'editor' : 'public';
+    const source = editorAuthed ? 'editor' : 'public';
     setLoadedItemsSource(null);
 
-    const request = editorMode ? getEditorProjects(apiType) : getProjects(apiType);
+    const request = editorAuthed ? getEditorProjects(apiType) : getProjects(apiType);
     request
       .then(data => {
         if (cancelled) return;
@@ -198,7 +201,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
     return () => {
       cancelled = true;
     };
-  }, [apiType, editorMode, dataVersion]);
+  }, [apiType, editorAuthed, dataVersion]);
 
   const currentIndex = items.findIndex(p => p.id === id);
   const item = items[currentIndex] ?? null;
@@ -339,11 +342,11 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   }, [item?.accent_color, item?.background_color, item?.text_color]);
 
   useEffect(() => {
-    const expectedSource = editorMode ? 'editor' : 'public';
+    const expectedSource = editorAuthed ? 'editor' : 'public';
     if (loadedItemsSource === expectedSource && items.length > 0 && !item) {
       navigate(listPath);
     }
-  }, [editorMode, item, items.length, loadedItemsSource, listPath, navigate]);
+  }, [editorAuthed, item, items.length, loadedItemsSource, listPath, navigate]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
