@@ -10,11 +10,59 @@ export interface GridImageItem {
   caption?: string;
 }
 
+export type GridColumnCount = 1 | 2 | 3 | 4;
+
+export interface GridRow {
+  id: string;
+  columns: GridColumnCount;
+  images: GridImageItem[];
+}
+
 interface Props {
   images: GridImageItem[];
-  columns: 2 | 3;
+  columns: GridColumnCount;
+  rows?: GridRow[];
   editorMode?: boolean;
-  onChange?: (images: GridImageItem[], columns: 2 | 3) => void;
+  onChange?: (images: GridImageItem[], columns: GridColumnCount, rows: GridRow[]) => void;
+}
+
+const COLUMN_CLASSES: Record<GridColumnCount, string> = {
+  1: 'grid-cols-1',
+  2: 'grid-cols-2',
+  3: 'grid-cols-3',
+  4: 'grid-cols-4',
+};
+
+function createRowId() {
+  return `row-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function normalizeRows(
+  rows: GridRow[] | undefined,
+  images: GridImageItem[],
+  columns: GridColumnCount,
+): GridRow[] {
+  if (Array.isArray(rows) && rows.length > 0) {
+    return rows.map(row => ({
+      ...row,
+      columns: [1, 2, 3, 4].includes(row.columns) ? row.columns : columns,
+      images: Array.isArray(row.images) ? row.images : [],
+    }));
+  }
+
+  if (!images.length) {
+    return [{ id: 'legacy-row-0', columns, images: [] }];
+  }
+
+  const legacyRows: GridRow[] = [];
+  for (let index = 0; index < images.length; index += columns) {
+    legacyRows.push({
+      id: `legacy-row-${index / columns}`,
+      columns,
+      images: images.slice(index, index + columns),
+    });
+  }
+  return legacyRows;
 }
 
 // ─── Mini upload slot ─────────────────────────────────────────────────────────
@@ -90,23 +138,70 @@ function FilledSlot({
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export default function ImageGridBlock({ images, columns, editorMode, onChange }: Props) {
+export default function ImageGridBlock({ images, columns, rows, editorMode, onChange }: Props) {
   const [lightboxImage, setLightboxImage] = useState<GridImageItem | null>(null);
+  const normalizedRows = normalizeRows(rows, images, columns);
+  const allImages = normalizedRows.flatMap(row => row.images);
 
-  function setColumns(c: 2 | 3) {
-    onChange?.(images, c);
+  function emitRows(nextRows: GridRow[]) {
+    const nextColumns = nextRows[0]?.columns ?? 1;
+    onChange?.(nextRows.flatMap(row => row.images), nextColumns, nextRows);
   }
 
-  function addImage(url: string) {
+  function setRowColumns(rowId: string, nextColumns: GridColumnCount) {
+    const rowIndex = normalizedRows.findIndex(row => row.id === rowId);
+    if (rowIndex < 0) return;
+
+    const row = normalizedRows[rowIndex];
+    const replacementRows: GridRow[] = [];
+    for (let index = 0; index < Math.max(row.images.length, 1); index += nextColumns) {
+      replacementRows.push({
+        id: index === 0 ? row.id : createRowId(),
+        columns: nextColumns,
+        images: row.images.slice(index, index + nextColumns),
+      });
+    }
+
+    const nextRows = [...normalizedRows];
+    nextRows.splice(rowIndex, 1, ...replacementRows);
+    emitRows(nextRows);
+  }
+
+  function addRow() {
+    emitRows([
+      ...normalizedRows,
+      { id: createRowId(), columns: 1, images: [] },
+    ]);
+  }
+
+  function removeRow(rowId: string) {
+    const row = normalizedRows.find(current => current.id === rowId);
+    if (!row || row.images.length > 0 || normalizedRows.length === 1) return;
+    emitRows(normalizedRows.filter(current => current.id !== rowId));
+  }
+
+  function addImage(rowId: string, url: string) {
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2);
-    onChange?.([...images, { id, url }], columns);
+    emitRows(normalizedRows.map(row =>
+      row.id === rowId && row.images.length < row.columns
+        ? { ...row, images: [...row.images, { id, url }] }
+        : row
+    ));
   }
 
   function removeImage(id: string) {
-    onChange?.(images.filter(img => img.id !== id), columns);
+    emitRows(normalizedRows.map(row => ({
+      ...row,
+      images: row.images.filter(image => image.id !== id),
+    })));
   }
 
-  const colClass = columns === 3 ? 'grid-cols-3' : 'grid-cols-2';
+  function updateCaption(id: string, caption: string) {
+    emitRows(normalizedRows.map(row => ({
+      ...row,
+      images: row.images.map(image => image.id === id ? { ...image, caption } : image),
+    })));
+  }
 
   // ── Editor mode ──
   if (editorMode) {
@@ -118,82 +213,119 @@ export default function ImageGridBlock({ images, columns, editorMode, onChange }
             <LayoutGrid size={13} strokeWidth={1.5} />
             Image Grid
           </div>
-          {/* Column toggle */}
-          <div className="flex gap-1 bg-white/5 rounded-[8px] p-0.5">
-            {([2, 3] as const).map(n => (
-              <button
-                key={n}
-                onClick={() => setColumns(n)}
-                className={`px-2.5 py-1 rounded-[6px] text-[0.72rem] transition-colors ${
-                  columns === n
-                    ? 'bg-white/12 text-white'
-                    : 'text-white/30 hover:text-white'
-                }`}
-                style={{ fontFamily: "'Source Sans 3', sans-serif" }}
-              >
-                {n} col
-              </button>
-            ))}
-          </div>
+          <button
+            type="button"
+            onClick={addRow}
+            className="flex items-center gap-1 rounded-[7px] bg-white/5 px-2.5 py-1 text-[0.72rem] text-white/40 transition-colors hover:bg-white/10 hover:text-white"
+            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+          >
+            <Plus size={12} />
+            Add row
+          </button>
         </div>
 
-        {/* Grid */}
-        <div className={`grid ${colClass} gap-2`}>
-          {images.map(img => (
-            <FilledSlot
-              key={img.id}
-              item={img}
-              onRemove={() => removeImage(img.id)}
-              onCaptionChange={caption => onChange?.(
-                images.map(current => current.id === img.id ? { ...current, caption } : current),
-                columns,
-              )}
-            />
+        <div className="flex flex-col gap-3">
+          {normalizedRows.map((row, rowIndex) => (
+            <div key={row.id} className="rounded-[10px] border border-white/[0.07] bg-black/[0.06] p-2">
+              <div className="mb-2 flex items-center gap-2">
+                <span
+                  className="text-[0.68rem] text-white/25"
+                  style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                >
+                  Row {rowIndex + 1}
+                </span>
+                <div className="ml-auto flex gap-1 rounded-[8px] bg-white/5 p-0.5">
+                  {([1, 2, 3, 4] as const).map(count => (
+                    <button
+                      type="button"
+                      key={count}
+                      onClick={() => setRowColumns(row.id, count)}
+                      className={`rounded-[6px] px-2 py-1 text-[0.7rem] transition-colors ${
+                        row.columns === count
+                          ? 'bg-white/12 text-white'
+                          : 'text-white/30 hover:text-white'
+                      }`}
+                      style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+                    >
+                      {count} col
+                    </button>
+                  ))}
+                </div>
+                {row.images.length === 0 && normalizedRows.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeRow(row.id)}
+                    aria-label={`Remove row ${rowIndex + 1}`}
+                    title="Remove empty row"
+                    className="flex size-6 items-center justify-center rounded-full text-white/25 transition-colors hover:bg-white/10 hover:text-[#d25d5f]"
+                  >
+                    <X size={11} />
+                  </button>
+                )}
+              </div>
+
+              <div className={`grid ${COLUMN_CLASSES[row.columns]} gap-2`}>
+                {row.images.map(image => (
+                  <FilledSlot
+                    key={image.id}
+                    item={image}
+                    onRemove={() => removeImage(image.id)}
+                    onCaptionChange={caption => updateCaption(image.id, caption)}
+                  />
+                ))}
+                {row.images.length < row.columns && (
+                  <UploadSlot onUploaded={url => addImage(row.id, url)} />
+                )}
+              </div>
+            </div>
           ))}
-          <UploadSlot onUploaded={addImage} />
         </div>
       </div>
     );
   }
 
   // ── Read-only mode ──
-  if (!images.length) return null;
+  if (!allImages.length) return null;
   return (
     <>
-      <div className={`grid ${colClass} gap-2`}>
-        {images.map(img => (
-          <figure key={img.id} className="m-0">
-            <img
-              src={img.url}
-              alt={img.caption || ''}
-              className="block h-auto w-full cursor-zoom-in object-contain"
-              onClick={() => setLightboxImage(img)}
-            />
-            {img.caption && (
-              <figcaption
-                className="mt-1 text-center text-[0.75rem] whitespace-pre-line"
-                style={{
-                  fontFamily: "'Source Sans 3', sans-serif",
-                  color: 'rgba(255,255,255,0.35)',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                }}
-              >
-                {img.caption}
-              </figcaption>
-            )}
-          </figure>
+      <div className="flex flex-col gap-2">
+        {normalizedRows.filter(row => row.images.length > 0).map(row => (
+          <div key={row.id} className={`grid ${COLUMN_CLASSES[row.columns]} gap-2`}>
+            {row.images.map(image => (
+              <figure key={image.id} className="m-0">
+                <img
+                  src={image.url}
+                  alt={image.caption || ''}
+                  className="block h-auto w-full cursor-zoom-in object-contain"
+                  onClick={() => setLightboxImage(image)}
+                />
+                {image.caption && (
+                  <figcaption
+                    className="mt-1 text-center text-[0.75rem] whitespace-pre-line"
+                    style={{
+                      fontFamily: "'Source Sans 3', sans-serif",
+                      color: 'rgba(255,255,255,0.35)',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {image.caption}
+                  </figcaption>
+                )}
+              </figure>
+            ))}
+          </div>
         ))}
       </div>
       {lightboxImage && (
         <ImageLightbox
-          images={images.map(img => ({
-            src: img.url,
-            alt: img.caption || '',
+          images={allImages.map(image => ({
+            src: image.url,
+            alt: image.caption || '',
           }))}
-          initialIndex={Math.max(0, images.findIndex(img => img.id === lightboxImage.id))}
+          initialIndex={Math.max(0, allImages.findIndex(image => image.id === lightboxImage.id))}
           onClose={() => setLightboxImage(null)}
         />
       )}

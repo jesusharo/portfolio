@@ -14,7 +14,11 @@ import { useNetworkState } from '../context/NetworkStateContext';
 import { getProjects, getEditorProjects, updateProject } from '../lib/api';
 import RichTextEditor from './editor/RichTextEditor';
 import ImageDropZone from './editor/ImageDropZone';
-import ImageGridBlock, { type GridImageItem } from './editor/ImageGridBlock';
+import ImageGridBlock, {
+  type GridColumnCount,
+  type GridImageItem,
+  type GridRow,
+} from './editor/ImageGridBlock';
 import CarouselBlock, { type CarouselImageItem, type CarouselVisibleCount } from './editor/CarouselBlock';
 import ImageLightbox from './ImageLightbox';
 import HeroParallax from './HeroParallax';
@@ -32,7 +36,8 @@ interface ContentBlock {
   caption?: string;
   // imagegrid & carousel
   images?: GridImageItem[];
-  columns?: 2 | 3;
+  columns?: GridColumnCount;
+  rows?: GridRow[];
   visible_count?: CarouselVisibleCount;
 }
 
@@ -292,7 +297,14 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   function insertBlock(type: BlockType, atIndex: number) {
     const blockId = Date.now().toString(36) + Math.random().toString(36).slice(2);
     let newBlock: ContentBlock = { id: blockId, type };
-    if (type === 'imagegrid') newBlock = { ...newBlock, images: [], columns: 2 };
+    if (type === 'imagegrid') {
+      newBlock = {
+        ...newBlock,
+        images: [],
+        columns: 2,
+        rows: [{ id: `${blockId}-row-1`, columns: 2, images: [] }],
+      };
+    }
     if (type === 'carousel')  newBlock = { ...newBlock, images: [], visible_count: 3 };
     const next = [
       ...contentBlocks.slice(0, atIndex),
@@ -572,8 +584,9 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
                           <ImageGridBlock
                             images={block.images || []}
                             columns={block.columns ?? 2}
+                            rows={block.rows}
                             editorMode
-                            onChange={(images, columns) => updateBlock(block.id, { images, columns })}
+                            onChange={(images, columns, rows) => updateBlock(block.id, { images, columns, rows })}
                           />
                         )}
                         {block.type === 'carousel' && (
@@ -633,6 +646,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
                     <ImageGridBlock
                       images={block.images || []}
                       columns={block.columns ?? 2}
+                      rows={block.rows}
                     />
                   )}
                   {block.type === 'carousel' && (block.images?.length ?? 0) > 0 && (

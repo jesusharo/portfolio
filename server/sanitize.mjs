@@ -91,11 +91,24 @@ export function sanitizeContentBlocks(blocks) {
       return { ...block, images, visible_count: visibleCount };
     }
     if (block?.type === 'imagegrid' && Array.isArray(block.images)) {
+      const sanitizeGridImages = images => images.map(image =>
+        typeof image === 'object' && image !== null
+          ? { ...image, ...(typeof image.caption === 'string' ? { caption: sanitizeCaption(image.caption) } : {}) }
+          : image
+      );
+      const columns = [1, 2, 3, 4].includes(block.columns) ? block.columns : 2;
+      const rows = Array.isArray(block.rows)
+        ? block.rows.map((row, index) => ({
+            id: sanitizePlainText(row?.id) || `row-${index + 1}`,
+            columns: [1, 2, 3, 4].includes(row?.columns) ? row.columns : columns,
+            images: Array.isArray(row?.images) ? sanitizeGridImages(row.images) : [],
+          }))
+        : undefined;
       return {
         ...block,
-        images: block.images.map(image => typeof image === 'object' && image !== null
-          ? { ...image, ...(typeof image.caption === 'string' ? { caption: sanitizeCaption(image.caption) } : {}) }
-          : image),
+        columns,
+        images: sanitizeGridImages(block.images),
+        ...(rows ? { rows } : {}),
       };
     }
     return block;

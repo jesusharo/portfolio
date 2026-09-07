@@ -9,7 +9,12 @@ interface ContentBlock {
   url?: string;
   caption?: string;
   images?: { url: string; caption?: string }[];
-  columns?: 2 | 3;
+  columns?: 1 | 2 | 3 | 4;
+  rows?: {
+    id: string;
+    columns: 1 | 2 | 3 | 4;
+    images: { url: string; caption?: string }[];
+  }[];
 }
 
 interface Project {
@@ -48,14 +53,39 @@ function ImageBlock({ url, caption, textColor }: { url: string; caption?: string
   );
 }
 
-function ImageGridBlock({ images, columns = 2, textColor }: { images: { url: string; caption?: string }[]; columns?: 2 | 3; textColor: string }) {
+const GRID_COLUMN_CLASSES = {
+  1: 'grid-cols-1',
+  2: 'grid-cols-2',
+  3: 'grid-cols-3',
+  4: 'grid-cols-4',
+} as const;
+
+function ImageGridBlock({
+  images,
+  columns = 2,
+  rows,
+  textColor,
+}: {
+  images: { url: string; caption?: string }[];
+  columns?: 1 | 2 | 3 | 4;
+  rows?: { id: string; columns: 1 | 2 | 3 | 4; images: { url: string; caption?: string }[] }[];
+  textColor: string;
+}) {
+  const visibleRows = rows?.length
+    ? rows.filter(row => row.images.length > 0)
+    : [{ id: 'legacy-row', columns, images }];
+
   return (
-    <div className={`grid gap-3 my-4 ${columns === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
-      {images.map((img, i) => (
-        <figure key={i}>
-          <img src={img.url} alt={img.caption || ''} className="w-full rounded-[10px] object-cover" />
-          {img.caption && <figcaption className="mt-1 text-center text-[0.72rem] opacity-55 font-['Source_Sans_3',sans-serif]" style={{ color: textColor }}>{img.caption}</figcaption>}
-        </figure>
+    <div className="my-4 flex flex-col gap-3">
+      {visibleRows.map(row => (
+        <div key={row.id} className={`grid gap-3 ${GRID_COLUMN_CLASSES[row.columns]}`}>
+          {row.images.map((img, i) => (
+            <figure key={i}>
+              <img src={img.url} alt={img.caption || ''} className="w-full rounded-[10px] object-cover" />
+              {img.caption && <figcaption className="mt-1 text-center text-[0.72rem] opacity-55 font-['Source_Sans_3',sans-serif]" style={{ color: textColor }}>{img.caption}</figcaption>}
+            </figure>
+          ))}
+        </div>
       ))}
     </div>
   );
@@ -168,7 +198,7 @@ export default function ProjectModal({ projectId, onClose }: Props) {
                         {(project.content_blocks || []).map((block, i) => {
                           if (block.type === 'richtext' && block.html) return <RichTextBlock key={i} html={block.html} textColor={textColor} />;
                           if (block.type === 'image' && block.url) return <ImageBlock key={i} url={block.url} caption={block.caption} textColor={textColor} />;
-                          if (block.type === 'imagegrid' && block.images?.length) return <ImageGridBlock key={i} images={block.images} columns={block.columns} textColor={textColor} />;
+                          if (block.type === 'imagegrid' && block.images?.length) return <ImageGridBlock key={i} images={block.images} columns={block.columns} rows={block.rows} textColor={textColor} />;
                           if (block.type === 'divider') return <Divider key={i} textColor={textColor} />;
                           return null;
                         })}
