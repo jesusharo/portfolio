@@ -1,6 +1,14 @@
-import { useState } from 'react';
-import { GripVertical, Eye, EyeOff, ChevronRight, Plus, Loader2 } from 'lucide-react';
-import { createProject, updateProject, reorderProjects } from '../../lib/api';
+import { useEffect, useState } from 'react';
+import { GripVertical, Eye, EyeOff, ChevronRight, Plus, Loader2, LayoutGrid } from 'lucide-react';
+import {
+  createProject,
+  getSiteSettings,
+  reorderProjects,
+  updateProject,
+  updateSiteSettings,
+} from '../../lib/api';
+import type { SiteSettings } from '../../lib/api';
+import { useNetworkState } from '../../context/NetworkStateContext';
 import {
   DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent,
 } from '@dnd-kit/core';
@@ -64,9 +72,30 @@ function SortableItem({ project, onSelect, onToggleHide }: {
 }
 
 export default function ProjectList({ projects, type, onSelect, onListChange }: Props) {
+  const { bumpDataVersion } = useNetworkState();
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState('');
   const [createError, setCreateError] = useState('');
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
+  const [savingColumns, setSavingColumns] = useState(false);
+  const [columnsError, setColumnsError] = useState('');
+
+  const columnsKey = type === 'ui_project'
+    ? 'projects_grid_columns'
+    : 'case_studies_grid_columns';
+  const gridColumns = siteSettings?.[columnsKey] ?? 4;
+
+  useEffect(() => {
+    let active = true;
+    getSiteSettings()
+      .then(settings => {
+        if (active) setSiteSettings(settings);
+      })
+      .catch(() => {
+        if (active) setColumnsError('Could not load the grid setting.');
+      });
+    return () => { active = false; };
+  }, [type]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -88,6 +117,25 @@ export default function ProjectList({ projects, type, onSelect, onListChange }: 
     await updateProject(project.id, { hidden: !project.hidden });
   }
 
+  async function handleColumnsChange(columns: number) {
+    if (!siteSettings || columns === gridColumns) return;
+    const previous = siteSettings;
+    const next = { ...siteSettings, [columnsKey]: columns };
+    setSiteSettings(next);
+    setSavingColumns(true);
+    setColumnsError('');
+    try {
+      const saved = await updateSiteSettings(next);
+      setSiteSettings(saved);
+      bumpDataVersion();
+    } catch {
+      setSiteSettings(previous);
+      setColumnsError('Could not save the grid setting.');
+    } finally {
+      setSavingColumns(false);
+    }
+  }
+
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     if (!newName.trim()) return;
@@ -105,6 +153,32 @@ export default function ProjectList({ projects, type, onSelect, onListChange }: 
 
   return (
     <div className="flex flex-col gap-2 h-full">
+      <div className="mb-2 flex items-center justify-between gap-3 rounded-[12px] border border-white/[0.08] bg-white/[0.03] px-3 py-2.5">
+        <div className="flex items-center gap-2 text-[0.8rem] text-white/55 font-['Source_Sans_3',sans-serif]">
+          <LayoutGrid size={15} strokeWidth={1.5} />
+          <span>Desktop grid</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {savingColumns && <Loader2 size={13} className="animate-spin text-white/35" />}
+          <select
+            value={gridColumns}
+            onChange={event => handleColumnsChange(Number(event.target.value))}
+            disabled={!siteSettings || savingColumns}
+            className="rounded-[8px] border border-white/15 bg-[#202020] px-2.5 py-1.5 text-[0.78rem] text-white/75 outline-none focus:border-white/35 disabled:opacity-50"
+            aria-label={`${type === 'ui_project' ? 'UI Projects' : 'Case Studies'} desktop columns`}
+          >
+            {[2, 3, 4, 5].map(columns => (
+              <option key={columns} value={columns}>{columns} columns</option>
+            ))}
+          </select>
+        </div>
+      </div>
+      {columnsError && (
+        <p className="-mt-1 mb-1 text-[0.72rem] text-red-300 font-['Source_Sans_3',sans-serif]">
+          {columnsError}
+        </p>
+      )}
+
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={projects.map(p => p.id)} strategy={verticalListSortingStrategy}>
           <div className="flex flex-col gap-1.5 flex-1 overflow-y-auto pr-1">
