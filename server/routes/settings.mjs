@@ -30,16 +30,24 @@ function sanitizeFaviconUrl(value) {
   }
 }
 
+function sanitizeGridColumns(value) {
+  return Number.isInteger(value) && value >= 2 && value <= 5 ? value : null;
+}
+
 // Public — the app needs this value before the editor is available.
 router.get('/', async (_req, res) => {
   try {
     const result = await query(
-      'SELECT favicon_url, case_studies_visible, agent_visible FROM site_settings WHERE id = 1'
+      `SELECT favicon_url, case_studies_visible, agent_visible,
+              projects_grid_columns, case_studies_grid_columns
+       FROM site_settings WHERE id = 1`
     );
     res.json({
       favicon_url: result.rows[0]?.favicon_url || '',
       case_studies_visible: result.rows[0]?.case_studies_visible ?? true,
       agent_visible: result.rows[0]?.agent_visible ?? true,
+      projects_grid_columns: result.rows[0]?.projects_grid_columns ?? 4,
+      case_studies_grid_columns: result.rows[0]?.case_studies_grid_columns ?? 4,
     });
   } catch (err) {
     console.error(err);
@@ -51,10 +59,15 @@ router.get('/', async (_req, res) => {
 router.put('/', requireAuth, async (req, res) => {
   const faviconUrl = sanitizeFaviconUrl(req.body?.favicon_url);
   const { case_studies_visible, agent_visible } = req.body || {};
+  const projectsGridColumns = sanitizeGridColumns(req.body?.projects_grid_columns);
+  const caseStudiesGridColumns = sanitizeGridColumns(req.body?.case_studies_grid_columns);
 
   if (faviconUrl === null) return res.status(400).json({ error: 'Invalid favicon URL' });
   if (typeof case_studies_visible !== 'boolean' || typeof agent_visible !== 'boolean') {
     return res.status(400).json({ error: 'Visibility values must be booleans' });
+  }
+  if (projectsGridColumns === null || caseStudiesGridColumns === null) {
+    return res.status(400).json({ error: 'Grid columns must be an integer from 2 to 5' });
   }
 
   try {
@@ -63,15 +76,20 @@ router.put('/', requireAuth, async (req, res) => {
        SET favicon_url = $1,
            case_studies_visible = $2,
            agent_visible = $3,
+            projects_grid_columns = $4,
+            case_studies_grid_columns = $5,
            updated_at = NOW()
        WHERE id = 1
-       RETURNING favicon_url, case_studies_visible, agent_visible`,
-      [faviconUrl, case_studies_visible, agent_visible]
+       RETURNING favicon_url, case_studies_visible, agent_visible,
+                 projects_grid_columns, case_studies_grid_columns`,
+      [faviconUrl, case_studies_visible, agent_visible, projectsGridColumns, caseStudiesGridColumns]
     );
     res.json({
       favicon_url: result.rows[0]?.favicon_url || '',
       case_studies_visible: result.rows[0]?.case_studies_visible ?? true,
       agent_visible: result.rows[0]?.agent_visible ?? true,
+      projects_grid_columns: result.rows[0]?.projects_grid_columns ?? 4,
+      case_studies_grid_columns: result.rows[0]?.case_studies_grid_columns ?? 4,
     });
   } catch (err) {
     console.error(err);

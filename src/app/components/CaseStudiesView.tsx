@@ -8,6 +8,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 import { Navigate } from 'react-router';
 import { useSiteVisibility } from '../hooks/useSiteVisibility';
 
+const DESKTOP_GRID_CLASSES: Record<number, string> = {
+  2: 'md:grid-cols-2 md:w-[210px]',
+  3: 'md:grid-cols-3 md:w-[320px]',
+  4: 'md:grid-cols-4 md:w-[430px]',
+  5: 'md:grid-cols-5 md:w-[540px]',
+};
+
 interface Project {
   id: string;
   name: string;
@@ -20,7 +27,12 @@ export default function CaseStudiesView() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const { dataVersion } = useNetworkState();
-  const { case_studies_visible, loading: visibilityLoading } = useSiteVisibility();
+  const {
+    case_studies_visible,
+    case_studies_grid_columns,
+    loading: visibilityLoading,
+  } = useSiteVisibility();
+  const desktopGridClass = DESKTOP_GRID_CLASSES[case_studies_grid_columns] || DESKTOP_GRID_CLASSES[4];
 
   useEffect(() => {
     getProjects('case_study').then(setProjects).catch(() => {});
@@ -32,7 +44,7 @@ export default function CaseStudiesView() {
   return (
     <PageTransition>
       <div className="absolute inset-0 flex items-center justify-center p-8 md:pl-24">
-        <div className="flex flex-col items-center gap-5 w-[430px]">
+        <div className={`flex w-full max-w-[430px] flex-col items-center gap-5 ${desktopGridClass.split(' ').find(className => className.startsWith('md:w-'))}`}>
         <h2
           className="text-white/50 text-[0.72rem] font-semibold tracking-[0.22em] uppercase select-none"
           style={{ fontFamily: "'Source Sans 3', sans-serif" }}
@@ -40,14 +52,14 @@ export default function CaseStudiesView() {
           Case Studies
         </h2>
         <TooltipProvider delayDuration={150}>
-          <div className="flex w-full flex-wrap justify-center gap-3">
+          <div className={`grid w-full grid-cols-2 gap-3 ${desktopGridClass.split(' ').find(className => className.startsWith('md:grid-cols-'))}`}>
             {projects.map((project, i) => (
               <Tooltip key={project.id}>
                 <TooltipTrigger asChild>
                   <motion.button
                     onClick={() => navigate(`/cases/${project.id}`)}
                     aria-label={`Open ${project.name}`}
-                    className="aspect-square w-[calc((100%-0.75rem)/2)] shrink-0 rounded-[20px] flex items-center justify-center cursor-pointer relative overflow-hidden md:w-[calc((100%-2.25rem)/4)]"
+                    className="relative flex aspect-square w-full cursor-pointer items-center justify-center overflow-hidden rounded-[20px]"
                     style={{ backgroundColor: project.background_color || '#333' }}
                     initial={{ opacity: 0, scale: 0.92 }}
                     animate={{ opacity: 1, scale: 1 }}

@@ -11,6 +11,8 @@ export default function GeneralEditor() {
   const [faviconUrl, setFaviconUrl] = useState('');
   const [caseStudiesVisible, setCaseStudiesVisible] = useState(true);
   const [agentVisible, setAgentVisible] = useState(true);
+  const [projectsGridColumns, setProjectsGridColumns] = useState(4);
+  const [caseStudiesGridColumns, setCaseStudiesGridColumns] = useState(4);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -23,6 +25,8 @@ export default function GeneralEditor() {
         setFaviconUrl(settings.favicon_url || '');
         setCaseStudiesVisible(settings.case_studies_visible !== false);
         setAgentVisible(settings.agent_visible !== false);
+        setProjectsGridColumns(settings.projects_grid_columns ?? 4);
+        setCaseStudiesGridColumns(settings.case_studies_grid_columns ?? 4);
       })
       .catch(() => setError('Could not load site settings.'))
       .finally(() => setLoading(false));
@@ -57,10 +61,14 @@ export default function GeneralEditor() {
         favicon_url: faviconUrl,
         case_studies_visible: caseStudiesVisible,
         agent_visible: agentVisible,
+        projects_grid_columns: projectsGridColumns,
+        case_studies_grid_columns: caseStudiesGridColumns,
       });
       setFaviconUrl(result.favicon_url);
       setCaseStudiesVisible(result.case_studies_visible);
       setAgentVisible(result.agent_visible);
+      setProjectsGridColumns(result.projects_grid_columns);
+      setCaseStudiesGridColumns(result.case_studies_grid_columns);
       applyFavicon(result.favicon_url);
       bumpDataVersion();
       setSaved(true);
@@ -138,6 +146,42 @@ export default function GeneralEditor() {
               Restore default favicon
             </button>
           )}
+        </section>
+
+        <section className="mt-4 rounded-[12px] border border-white/10 bg-white/[0.02] p-4">
+          <div className="text-white/75 text-[0.9rem] font-semibold font-['Source_Sans_3',sans-serif]">
+            Desktop grid columns
+          </div>
+          <p className="mt-1.5 text-white/35 text-[0.75rem] leading-relaxed font-['Source_Sans_3',sans-serif]">
+            Set each overview grid independently. Mobile layouts are not affected.
+          </p>
+
+          <div className="mt-4 flex flex-col gap-3">
+            {[
+              { label: 'UI Projects', value: projectsGridColumns, setValue: setProjectsGridColumns },
+              { label: 'Case Studies', value: caseStudiesGridColumns, setValue: setCaseStudiesGridColumns },
+            ].map(setting => (
+              <label
+                key={setting.label}
+                className="flex items-center justify-between gap-4 text-[0.82rem] text-white/60 font-['Source_Sans_3',sans-serif]"
+              >
+                <span>{setting.label}</span>
+                <select
+                  value={setting.value}
+                  onChange={event => {
+                    setting.setValue(Number(event.target.value));
+                    setSaved(false);
+                  }}
+                  className="rounded-[8px] border border-white/15 bg-[#202020] px-3 py-1.5 text-[0.8rem] text-white/75 outline-none focus:border-white/35"
+                  aria-label={`${setting.label} desktop columns`}
+                >
+                  {[2, 3, 4, 5].map(columns => (
+                    <option key={columns} value={columns}>{columns} columns</option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </div>
         </section>
 
         <section className="mt-4 rounded-[12px] border border-white/10 bg-white/[0.02] p-4">

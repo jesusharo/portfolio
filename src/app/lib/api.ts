@@ -35,6 +35,8 @@ export interface SiteSettings {
   favicon_url: string;
   case_studies_visible: boolean;
   agent_visible: boolean;
+  projects_grid_columns: number;
+  case_studies_grid_columns: number;
 }
 
 export async function getSiteSettings(): Promise<SiteSettings> {
