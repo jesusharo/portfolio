@@ -59,12 +59,11 @@ export default function CaseStudiesView() {
                   <motion.button
                     onClick={() => navigate(`/cases/${project.id}`)}
                     aria-label={`Open ${project.name}`}
-                    className="relative flex aspect-square w-full origin-center cursor-pointer items-center justify-center overflow-hidden rounded-[20px] transition-[transform,box-shadow] duration-[350ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform md:hover:z-30 md:hover:scale-[1.35] md:hover:shadow-2xl"
+                    className="relative flex aspect-square w-full origin-center transform-gpu cursor-pointer items-center justify-center overflow-hidden rounded-[20px] transition-[transform,box-shadow] duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform md:hover:z-30 md:hover:scale-[1.35] md:hover:shadow-2xl"
                     style={{ backgroundColor: project.background_color || '#333' }}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.35, delay: i * 0.05 }}
-                    whileTap={{ scale: 0.97 }}
                   >
                     {project.logo_grid_image ? (
                       <img src={project.logo_grid_image} alt={project.name}
