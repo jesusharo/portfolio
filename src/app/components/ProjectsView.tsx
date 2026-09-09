@@ -6,6 +6,7 @@ import { getProjects } from '../lib/api';
 import { useNetworkState } from '../context/NetworkStateContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { useSiteVisibility } from '../hooks/useSiteVisibility';
+import { useDesktopHover } from '../hooks/useDesktopHover';
 
 const DESKTOP_GRID_CLASSES: Record<number, string> = {
   2: 'md:grid-cols-2 md:max-w-[210px]',
@@ -27,6 +28,7 @@ export default function ProjectsView() {
   const [projects, setProjects] = useState<Project[]>([]);
   const { dataVersion } = useNetworkState();
   const { projects_grid_columns } = useSiteVisibility();
+  const desktopHover = useDesktopHover();
   const desktopGridClass = DESKTOP_GRID_CLASSES[projects_grid_columns] || DESKTOP_GRID_CLASSES[4];
 
   useEffect(() => {
@@ -56,12 +58,16 @@ export default function ProjectsView() {
                         style={{ backgroundColor: project.background_color || '#333' }}
                         initial={{ opacity: 0, scale: 1, zIndex: 1 }}
                         animate={{ opacity: 1, scale: 1, zIndex: 1 }}
-                        whileHover={{
+                        whileHover={desktopHover ? {
                           scale: 1.35,
                           zIndex: 30,
                           transition: {
                             scale: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
                           },
+                        } : undefined}
+                        whileTap={{
+                          scale: desktopHover ? 1.22 : 0.96,
+                          transition: { duration: 0.12, ease: 'easeOut' },
                         }}
                         transition={{
                           opacity: { duration: 0.35, delay: i * 0.05 },

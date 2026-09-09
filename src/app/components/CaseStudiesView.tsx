@@ -7,6 +7,7 @@ import { useNetworkState } from '../context/NetworkStateContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { Navigate } from 'react-router';
 import { useSiteVisibility } from '../hooks/useSiteVisibility';
+import { useDesktopHover } from '../hooks/useDesktopHover';
 
 const DESKTOP_GRID_CLASSES: Record<number, string> = {
   2: 'md:grid-cols-2 md:w-[210px]',
@@ -32,6 +33,7 @@ export default function CaseStudiesView() {
     case_studies_grid_columns,
     loading: visibilityLoading,
   } = useSiteVisibility();
+  const desktopHover = useDesktopHover();
   const desktopGridClass = DESKTOP_GRID_CLASSES[case_studies_grid_columns] || DESKTOP_GRID_CLASSES[4];
 
   useEffect(() => {
@@ -63,12 +65,16 @@ export default function CaseStudiesView() {
                     style={{ backgroundColor: project.background_color || '#333' }}
                     initial={{ opacity: 0, scale: 1, zIndex: 1 }}
                     animate={{ opacity: 1, scale: 1, zIndex: 1 }}
-                    whileHover={{
+                    whileHover={desktopHover ? {
                       scale: 1.35,
                       zIndex: 30,
                       transition: {
                         scale: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
                       },
+                    } : undefined}
+                    whileTap={{
+                      scale: desktopHover ? 1.22 : 0.96,
+                      transition: { duration: 0.12, ease: 'easeOut' },
                     }}
                     transition={{
                       opacity: { duration: 0.35, delay: i * 0.05 },
