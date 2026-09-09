@@ -52,11 +52,22 @@ export default function ProjectsView() {
                       <motion.button
                         onClick={() => navigate(`/projects/${project.id}`)}
                         aria-label={`Open ${project.name}`}
-                        className="relative flex aspect-square w-full origin-center transform-gpu cursor-pointer items-center justify-center overflow-hidden rounded-[20px] transition-[transform,box-shadow] duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform md:hover:z-30 md:hover:scale-[1.35] md:hover:shadow-2xl"
+                        className="relative flex aspect-square w-full origin-center cursor-pointer items-center justify-center overflow-hidden rounded-[20px] will-change-transform md:hover:shadow-2xl"
                         style={{ backgroundColor: project.background_color || '#333' }}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.35, delay: i * 0.05 }}
+                        initial={{ opacity: 0, scale: 1, zIndex: 1 }}
+                        animate={{ opacity: 1, scale: 1, zIndex: 1 }}
+                        whileHover={{
+                          scale: 1.35,
+                          zIndex: 30,
+                          transition: {
+                            scale: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
+                          },
+                        }}
+                        transition={{
+                          opacity: { duration: 0.35, delay: i * 0.05 },
+                          scale: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
+                          zIndex: { duration: 0 },
+                        }}
                       >
                         {project.logo_grid_image ? (
                           <img src={project.logo_grid_image} alt={project.name}
