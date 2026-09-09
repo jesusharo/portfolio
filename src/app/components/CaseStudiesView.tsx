@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 import { Navigate } from 'react-router';
 import { useSiteVisibility } from '../hooks/useSiteVisibility';
 import { useDesktopHover } from '../hooks/useDesktopHover';
+import { withAlpha } from '../lib/color';
 
 const DESKTOP_GRID_CLASSES: Record<number, string> = {
   2: 'md:grid-cols-2 md:w-[210px]',
@@ -61,15 +62,17 @@ export default function CaseStudiesView() {
                   <motion.button
                     onClick={() => navigate(`/cases/${project.id}`)}
                     aria-label={`Open ${project.name}`}
-                    className="relative flex aspect-square w-full origin-center cursor-pointer items-center justify-center overflow-hidden rounded-[20px] will-change-transform md:hover:shadow-2xl"
+                    className="relative flex aspect-square w-full origin-center cursor-pointer items-center justify-center overflow-hidden rounded-[20px] border border-transparent backdrop-blur-0 transition-[backdrop-filter,border-color] duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform md:hover:border-white/20 md:hover:backdrop-blur-md md:hover:shadow-2xl"
                     style={{ backgroundColor: project.background_color || '#333' }}
                     initial={{ opacity: 0, scale: 1, zIndex: 1 }}
                     animate={{ opacity: 1, scale: 1, zIndex: 1 }}
                     whileHover={desktopHover ? {
                       scale: 1.35,
                       zIndex: 30,
+                      backgroundColor: withAlpha(project.background_color || '#333', 0.78),
                       transition: {
                         scale: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
+                        backgroundColor: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
                       },
                     } : undefined}
                     whileTap={{
@@ -79,6 +82,7 @@ export default function CaseStudiesView() {
                     transition={{
                       opacity: { duration: 0.35, delay: i * 0.05 },
                       scale: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
+                      backgroundColor: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
                       zIndex: { duration: 0 },
                     }}
                   >
