@@ -52,12 +52,11 @@ export default function ProjectsView() {
                       <motion.button
                         onClick={() => navigate(`/projects/${project.id}`)}
                         aria-label={`Open ${project.name}`}
-                        className="relative flex aspect-square w-full cursor-pointer items-center justify-center overflow-hidden rounded-[20px]"
+                        className="relative flex aspect-square w-full cursor-pointer items-center justify-center overflow-hidden rounded-[20px] transition-[transform,box-shadow] duration-200 ease-out md:hover:z-30 md:hover:scale-[1.35] md:hover:shadow-2xl"
                         style={{ backgroundColor: project.background_color || '#333' }}
-                        initial={{ opacity: 0, scale: 0.92 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         transition={{ duration: 0.35, delay: i * 0.05 }}
-                        whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
                       >
                         {project.logo_grid_image ? (
