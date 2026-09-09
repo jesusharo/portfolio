@@ -52,7 +52,7 @@ export default function ProjectsView() {
                       <motion.button
                         onClick={() => navigate(`/projects/${project.id}`)}
                         aria-label={`Open ${project.name}`}
-                        className="relative flex aspect-square w-full cursor-pointer items-center justify-center overflow-hidden rounded-[20px] transition-[transform,box-shadow] duration-200 ease-out md:hover:z-30 md:hover:scale-[1.35] md:hover:shadow-2xl"
+                        className="relative flex aspect-square w-full origin-center cursor-pointer items-center justify-center overflow-hidden rounded-[20px] transition-[transform,box-shadow] duration-[350ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform md:hover:z-30 md:hover:scale-[1.35] md:hover:shadow-2xl"
                         style={{ backgroundColor: project.background_color || '#333' }}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
