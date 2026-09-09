@@ -11,7 +11,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useNetworkState } from '../context/NetworkStateContext';
-import { getProjects, getEditorProjects, updateProject } from '../lib/api';
+import { getProjects, getEditorProjects, getReviewProject, updateProject } from '../lib/api';
 import RichTextEditor from './editor/RichTextEditor';
 import ImageDropZone from './editor/ImageDropZone';
 import ImageGridBlock, {
@@ -159,8 +159,8 @@ function SortableContentSection({ id, children }: { id: string; children: ReactN
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function ProjectDetail({ mode }: { mode: Mode }) {
-  const { id } = useParams<{ id: string }>();
+export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode; reviewMode?: boolean }) {
+  const { id, token } = useParams<{ id: string; token: string }>();
   const navigate = useNavigate();
   const {
     setNetworkState,
@@ -173,13 +173,14 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
     saveRequestVersion,
   } = useNetworkState();
   const [items, setItems] = useState<Project[]>([]);
-  const [loadedItemsSource, setLoadedItemsSource] = useState<'public' | 'editor' | null>(null);
+  const [loadedItemsSource, setLoadedItemsSource] = useState<'public' | 'editor' | 'review' | null>(null);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const apiType = mode === 'projects' ? 'ui_project' : 'case_study';
   const listPath = mode === 'projects' ? '/projects' : '/cases';
   const detailPath = listPath;
+  const canEdit = editorMode && !reviewMode;
 
   // Authenticated editors can resolve hidden project details even before the
   // inline edit UI has finished activating. Public visitors still use the
@@ -187,10 +188,14 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   // Guard against non-array responses (e.g. 401 error JSON) to prevent render crashes.
   useEffect(() => {
     let cancelled = false;
-    const source = editorAuthed ? 'editor' : 'public';
+    const source = reviewMode ? 'review' : editorAuthed ? 'editor' : 'public';
     setLoadedItemsSource(null);
 
-    const request = editorAuthed ? getEditorProjects(apiType) : getProjects(apiType);
+    const request = reviewMode
+      ? getReviewProject(token || '').then(project => project ? [project] : [])
+      : editorAuthed
+        ? getEditorProjects(apiType)
+        : getProjects(apiType);
     request
       .then(data => {
         if (cancelled) return;
@@ -206,9 +211,9 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
     return () => {
       cancelled = true;
     };
-  }, [apiType, editorAuthed, dataVersion]);
+  }, [apiType, editorAuthed, dataVersion, reviewMode, token]);
 
-  const currentIndex = items.findIndex(p => p.id === id);
+  const currentIndex = reviewMode ? (items.length ? 0 : -1) : items.findIndex(p => p.id === id);
   const item = items[currentIndex] ?? null;
   const prevItem = currentIndex > 0 ? items[currentIndex - 1] : null;
   const nextItem = currentIndex < items.length - 1 ? items[currentIndex + 1] : null;
@@ -282,7 +287,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   }
 
   async function doSave(blocks: ContentBlock[]) {
-    if (!item) return;
+    if (!item || reviewMode) return;
     setSaveStatus('saving');
     try {
       await updateProject(item.id, { content_blocks: blocks });
@@ -354,11 +359,11 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
   }, [item?.accent_color, item?.background_color, item?.text_color]);
 
   useEffect(() => {
-    const expectedSource = editorAuthed ? 'editor' : 'public';
-    if (loadedItemsSource === expectedSource && items.length > 0 && !item) {
-      navigate(listPath);
+    const expectedSource = reviewMode ? 'review' : editorAuthed ? 'editor' : 'public';
+    if (loadedItemsSource === expectedSource && !item) {
+      navigate(reviewMode ? '/' : listPath, { replace: true });
     }
-  }, [editorAuthed, item, items.length, loadedItemsSource, listPath, navigate]);
+  }, [editorAuthed, item, loadedItemsSource, listPath, navigate, reviewMode]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -373,13 +378,14 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
       const tag = el.tagName.toLowerCase();
       if (tag === 'input' || tag === 'textarea' || el.contentEditable === 'true') return;
 
+      if (reviewMode) return;
       if (e.key === 'Escape') navigate(listPath);
       if (e.key === 'ArrowLeft' && prevItem) navigate(`${detailPath}/${prevItem.id}`);
       if (e.key === 'ArrowRight' && nextItem) navigate(`${detailPath}/${nextItem.id}`);
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [prevItem, nextItem, navigate, listPath, detailPath]);
+  }, [prevItem, nextItem, navigate, listPath, detailPath, reviewMode]);
 
   if (!item) return null;
 
@@ -431,7 +437,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           <motion.button
             whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
             onClick={() => prevItem ? navigate(`${detailPath}/${prevItem.id}`) : navigate(listPath)}
-            className="relative z-10 hidden md:flex size-[36px] items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
+            className={`relative z-10 size-[36px] items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors ${reviewMode ? 'hidden' : 'hidden md:flex'}`}
           >
             <ArrowLeft size={20} strokeWidth={1.5} style={{ color: textColor }} />
           </motion.button>
@@ -456,7 +462,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
           <motion.button
             whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
             onClick={() => nextItem ? navigate(`${detailPath}/${nextItem.id}`) : navigate(listPath)}
-            className="relative z-10 hidden md:flex size-[36px] items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors"
+            className={`relative z-10 size-[36px] items-center justify-center rounded-full border border-white/30 text-white/70 hover:text-white hover:bg-[rgba(255,255,255,0.15)] transition-colors ${reviewMode ? 'hidden' : 'hidden md:flex'}`}
           >
             <ArrowRight size={20} strokeWidth={1.5} style={{ color: textColor }} />
           </motion.button>
@@ -531,7 +537,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
 
         {/* ── Content blocks ────────────────────────────────────────────── */}
         <div className="px-8 pb-20 max-w-[760px] mx-auto">
-          {editorMode ? (
+          {canEdit ? (
             /* ── Edit mode ── */
             <>
               <AddBlockButton onAdd={type => insertBlock(type, 0)} />
@@ -675,7 +681,7 @@ export default function ProjectDetail({ mode }: { mode: Mode }) {
 
         {/* ── Auto-save status toast ─────────────────────────────────────── */}
         <AnimatePresence>
-          {editorMode && saveStatus !== 'idle' && (
+          {canEdit && saveStatus !== 'idle' && (
             <motion.div
               key="save-status"
               initial={{ opacity: 0, y: 10 }}

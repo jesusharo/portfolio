@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS projects (
   content_blocks JSONB NOT NULL DEFAULT '[]',
   description TEXT DEFAULT '',
   description_alignment TEXT DEFAULT 'center',
+  review_token_hash TEXT DEFAULT NULL,
+  review_token_created_at TIMESTAMPTZ DEFAULT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -25,6 +27,8 @@ ALTER TABLE projects ADD COLUMN IF NOT EXISTS subtitle TEXT DEFAULT '';
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS hero_foreground_image TEXT DEFAULT '';
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS text_color TEXT DEFAULT '#ffffff';
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS description_alignment TEXT DEFAULT 'center';
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS review_token_hash TEXT DEFAULT NULL;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS review_token_created_at TIMESTAMPTZ DEFAULT NULL;
 
 CREATE TABLE IF NOT EXISTS images (
   id UUID PRIMARY KEY,

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { AlignCenter, AlignJustify, AlignLeft, AlignRight, ArrowLeft, Trash2 } from 'lucide-react';
-import { updateProject, deleteProject } from '../../lib/api';
+import { AlignCenter, AlignJustify, AlignLeft, AlignRight, ArrowLeft, Check, Copy, Loader2, Share2, Trash2, X } from 'lucide-react';
+import { createProjectReviewLink, updateProject, deleteProject } from '../../lib/api';
 import ImageUploadField from './ImageUploadField';
 
 interface Project {
@@ -33,6 +33,11 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [shareOpen, setShareOpen] = useState(false);
+  const [reviewUrl, setReviewUrl] = useState('');
+  const [sharing, setSharing] = useState(false);
+  const [shareError, setShareError] = useState('');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => { setDraft({ ...project }); setSaveError(''); }, [project.id]);
 
@@ -76,6 +81,40 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
     }
   }
 
+  async function openShareModal() {
+    setShareOpen(true);
+    setReviewUrl('');
+    setShareError('');
+    setCopied(false);
+    setSharing(true);
+    try {
+      const result = await createProjectReviewLink(draft.id);
+      setReviewUrl(`${window.location.origin}${result.path}`);
+    } catch (err) {
+      setShareError(err instanceof Error ? err.message : 'Could not create review link.');
+    } finally {
+      setSharing(false);
+    }
+  }
+
+  async function copyReviewLink() {
+    if (!reviewUrl) return;
+    try {
+      await navigator.clipboard.writeText(reviewUrl);
+    } catch {
+      const field = document.createElement('textarea');
+      field.value = reviewUrl;
+      field.style.position = 'fixed';
+      field.style.opacity = '0';
+      document.body.appendChild(field);
+      field.select();
+      document.execCommand('copy');
+      field.remove();
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  }
+
   const inputCls = 'w-full bg-white/5 border border-white/10 rounded-[10px] px-3 py-2 text-white/80 text-[0.85rem] outline-none focus:border-white/25 placeholder:text-white/25 font-["Source_Sans_3",sans-serif]';
   const labelCls = 'text-white/40 text-[0.72rem] uppercase tracking-wider font-["Source_Sans_3",sans-serif] mb-1 block';
 
@@ -89,6 +128,17 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
         <h2 className="text-white text-[0.95rem] font-semibold font-['Source_Sans_3',sans-serif] flex-1 truncate">
           {draft.name || 'Untitled'}
         </h2>
+        {draft.hidden && (
+          <button
+            type="button"
+            onClick={openShareModal}
+            className="text-white/30 hover:text-white transition-colors"
+            title="Share private review link"
+            aria-label="Share private review link"
+          >
+            <Share2 size={16} />
+          </button>
+        )}
         <button onClick={confirmDelete} disabled={deleting} className="text-white/20 hover:text-[#d25d5f] transition-colors disabled:opacity-50">
           <Trash2 size={16} />
         </button>
@@ -245,6 +295,78 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
           {saving ? 'Saving…' : 'Save changes'}
         </button>
       </div>
+
+      {shareOpen && (
+        <div
+          className="absolute inset-0 z-[70] flex items-center justify-center bg-black/65 p-5 backdrop-blur-sm"
+          onMouseDown={event => {
+            if (event.target === event.currentTarget) setShareOpen(false);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="review-link-title"
+            className="w-full max-w-[360px] rounded-[16px] border border-white/12 bg-[#171717] p-5 shadow-2xl"
+          >
+            <div className="flex items-start gap-3">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/[0.07] text-white/60">
+                <Share2 size={16} strokeWidth={1.5} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 id="review-link-title" className="text-[0.95rem] font-semibold text-white/90 font-['Source_Sans_3',sans-serif]">
+                  Private review link
+                </h3>
+                <p className="mt-1 text-[0.75rem] leading-relaxed text-white/40 font-['Source_Sans_3',sans-serif]">
+                  Anyone with this link can view this hidden project, but cannot edit it.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShareOpen(false)}
+                className="text-white/30 transition-colors hover:text-white"
+                aria-label="Close"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="mt-5">
+              {sharing ? (
+                <div className="flex h-10 items-center justify-center rounded-[10px] border border-white/10 bg-white/[0.03] text-white/35">
+                  <Loader2 size={15} className="animate-spin" />
+                </div>
+              ) : reviewUrl ? (
+                <input
+                  readOnly
+                  value={reviewUrl}
+                  onFocus={event => event.currentTarget.select()}
+                  className="h-10 w-full rounded-[10px] border border-white/10 bg-white/[0.04] px-3 text-[0.75rem] text-white/65 outline-none focus:border-white/25 font-['Source_Sans_3',sans-serif]"
+                  aria-label="Private review link"
+                />
+              ) : (
+                <div className="rounded-[10px] border border-red-300/20 bg-red-300/[0.05] px-3 py-2.5 text-[0.75rem] text-red-300 font-['Source_Sans_3',sans-serif]">
+                  {shareError || 'Could not create review link.'}
+                </div>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={copyReviewLink}
+              disabled={!reviewUrl || sharing}
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-[24px] bg-[#d25d5f] py-2.5 text-[0.85rem] font-semibold text-white transition-colors hover:bg-[#c25052] disabled:opacity-40 font-['Source_Sans_3',sans-serif]"
+            >
+              {copied ? <Check size={15} /> : <Copy size={15} />}
+              {copied ? 'Link copied' : 'Copy private link'}
+            </button>
+
+            <p className="mt-3 text-center text-[0.68rem] leading-relaxed text-white/25 font-['Source_Sans_3',sans-serif]">
+              Creating a new link invalidates the previous one.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

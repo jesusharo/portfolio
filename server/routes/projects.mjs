@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { query } from '../db.mjs';
 import jwt from 'jsonwebtoken';
+import { createHash, randomBytes } from 'crypto';
 import { sanitizePlainText, sanitizeContentBlocks, sanitizeHexColor, sanitizeTextAlign } from '../sanitize.mjs';
 
 const router = Router();
@@ -21,6 +22,16 @@ function toSlug(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
+function serializeProject(row) {
+  if (!row) return row;
+  const { review_token_hash: _reviewTokenHash, review_token_created_at: _reviewTokenCreatedAt, ...project } = row;
+  return project;
+}
+
+function hashReviewToken(token) {
+  return createHash('sha256').update(token).digest('hex');
+}
+
 // Public — list visible projects by type
 router.get('/', async (req, res) => {
   const { type } = req.query;
@@ -31,7 +42,7 @@ router.get('/', async (req, res) => {
       `SELECT * FROM projects ${cond} ORDER BY sort_order ASC, created_at ASC`,
       params
     );
-    res.json(result.rows);
+    res.json(result.rows.map(serializeProject));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'DB error' });
@@ -46,7 +57,26 @@ router.get('/:id', async (req, res) => {
       [req.params.id]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Not found' });
-    res.json(result.rows[0]);
+    res.json(serializeProject(result.rows[0]));
+  } catch (err) {
+    res.status(500).json({ error: 'DB error' });
+  }
+});
+
+// Private review — read-only access to one hidden project via a high-entropy token.
+// This token is never accepted by editor endpoints.
+router.get('/review/:token', async (req, res) => {
+  const token = String(req.params.token || '');
+  if (!/^[a-f0-9]{64}$/.test(token)) return res.status(404).json({ error: 'Not found' });
+
+  try {
+    const result = await query(
+      'SELECT * FROM projects WHERE review_token_hash = $1 AND hidden = true',
+      [hashReviewToken(token)]
+    );
+    if (!result.rows.length) return res.status(404).json({ error: 'Not found' });
+    res.set('Cache-Control', 'no-store');
+    res.json(serializeProject(result.rows[0]));
   } catch (err) {
     res.status(500).json({ error: 'DB error' });
   }
@@ -62,7 +92,7 @@ router.get('/editor/all', requireAuth, async (req, res) => {
       `SELECT * FROM projects ${cond} ORDER BY sort_order ASC, created_at ASC`,
       params
     );
-    res.json(result.rows);
+    res.json(result.rows.map(serializeProject));
   } catch (err) {
     res.status(500).json({ error: 'DB error' });
   }
@@ -83,7 +113,7 @@ router.post('/editor', requireAuth, async (req, res) => {
       `INSERT INTO projects (id, type, name, slug, sort_order) VALUES ($1,$2,$3,$4,$5) RETURNING *`,
       [id, type, name, slug, order]
     );
-    res.json(result.rows[0]);
+    res.json(serializeProject(result.rows[0]));
   } catch (err) {
     res.status(500).json({ error: 'DB error' });
   }
@@ -121,6 +151,27 @@ router.put('/editor/:id', requireAuth, async (req, res) => {
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Not found' });
     res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'DB error' });
+  }
+});
+
+// Editor — create or rotate a read-only review link for a hidden project.
+router.post('/editor/:id/review-link', requireAuth, async (req, res) => {
+  const token = randomBytes(32).toString('hex');
+  try {
+    const result = await query(
+      `UPDATE projects
+       SET review_token_hash = $1, review_token_created_at = NOW()
+       WHERE id = $2 AND hidden = true
+       RETURNING id`,
+      [hashReviewToken(token), req.params.id]
+    );
+    if (!result.rows.length) {
+      return res.status(400).json({ error: 'Only hidden projects can have a private review link' });
+    }
+    res.set('Cache-Control', 'no-store');
+    res.json({ token, path: `/review/${token}` });
   } catch (err) {
     res.status(500).json({ error: 'DB error' });
   }

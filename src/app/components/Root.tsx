@@ -43,6 +43,7 @@ function RootInner() {
   }, [location.pathname]);
 
   const isDetailRoute = /^\/(projects|cases)\/.+/.test(location.pathname);
+  const isReviewRoute = location.pathname.startsWith('/review/');
   const listPath = location.pathname.startsWith('/cases') ? '/cases' : '/projects';
 
   // Clear background when leaving detail pages
@@ -52,8 +53,8 @@ function RootInner() {
 
   // Reset editorMode when navigating away from a detail page
   useEffect(() => {
-    if (!isDetailRoute) setEditorMode(false);
-  }, [isDetailRoute]);
+    if (!isDetailRoute || isReviewRoute) setEditorMode(false);
+  }, [isDetailRoute, isReviewRoute]);
 
   // Auto-activate editorMode after auth completes (when "Edit" triggered the login)
   useEffect(() => {
@@ -143,7 +144,7 @@ function RootInner() {
       <div className="fixed top-5 right-5 z-40 flex items-center gap-2">
 
         {/* Edit / Save changes — only for authenticated editors on detail pages */}
-        {editorAuthed && isDetailRoute && (
+        {editorAuthed && isDetailRoute && !isReviewRoute && (
           <motion.button
             onClick={handleEditToggle}
             className={`${pillBase} ${editorMode ? pillActive : pillDefault}`}
@@ -158,7 +159,7 @@ function RootInner() {
         )}
 
         {/* Content Editor — only visible after authentication */}
-        {editorAuthed && (
+        {editorAuthed && !isReviewRoute && (
           <motion.button
             onClick={openDrawer}
             className={`${pillBase} ${pillDefault}`}

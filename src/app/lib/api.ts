@@ -94,6 +94,14 @@ export async function getProject(id: string) {
   return res.json();
 }
 
+export async function getReviewProject(token: string) {
+  const res = await fetch(`${BASE}/projects/review/${encodeURIComponent(token)}`, {
+    cache: 'no-store',
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
 // Projects (editor)
 export async function getEditorProjects(type?: string): Promise<unknown[]> {
   const url = type ? `${BASE}/projects/editor/all?type=${type}` : `${BASE}/projects/editor/all`;
@@ -121,6 +129,16 @@ export async function updateProject(id: string, fields: Record<string, unknown>)
   });
   if (!res.ok) throw new Error('Update failed');
   return res.json();
+}
+
+export async function createProjectReviewLink(id: string): Promise<{ token: string; path: string }> {
+  const res = await fetch(`${BASE}/projects/editor/${encodeURIComponent(id)}/review-link`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Could not create review link');
+  return data;
 }
 
 export async function deleteProject(id: string) {
