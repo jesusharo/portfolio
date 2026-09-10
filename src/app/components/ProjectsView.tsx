@@ -55,14 +55,14 @@ export default function ProjectsView() {
                       <motion.button
                         onClick={() => navigate(`/projects/${project.id}`)}
                         aria-label={`Open ${project.name}`}
-                        className="relative flex aspect-square w-full origin-center cursor-pointer items-center justify-center overflow-hidden rounded-[20px] border border-transparent backdrop-blur-0 transition-[backdrop-filter,border-color] duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform md:hover:border-white/20 md:hover:backdrop-blur-md md:hover:shadow-2xl"
+                        className="relative flex aspect-square w-full origin-center cursor-pointer items-center justify-center overflow-hidden rounded-[20px] border border-transparent backdrop-blur-0 transition-[backdrop-filter,border-color] duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform md:hover:border-white/25 md:hover:backdrop-blur-[20px] md:hover:backdrop-saturate-150 md:hover:shadow-2xl md:hover:ring-1 md:hover:ring-white/20"
                         style={{ backgroundColor: project.background_color || '#333' }}
                         initial={{ opacity: 0, scale: 1, zIndex: 1 }}
                         animate={{ opacity: 1, scale: 1, zIndex: 1 }}
                         whileHover={desktopHover ? {
                           scale: 1.35,
                           zIndex: 30,
-                          backgroundColor: withAlpha(project.background_color || '#333', 0.78),
+                          backgroundColor: withAlpha(project.background_color || '#333', 0.55),
                           transition: {
                             scale: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
                             backgroundColor: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
