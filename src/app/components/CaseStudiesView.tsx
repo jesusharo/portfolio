@@ -62,7 +62,7 @@ export default function CaseStudiesView() {
                   <motion.button
                     onClick={() => navigate(`/cases/${project.id}`)}
                     aria-label={`Open ${project.name}`}
-                    className="group relative flex aspect-square w-full origin-center cursor-pointer items-center justify-center overflow-visible rounded-[20px] border border-transparent transition-[border-color,box-shadow] duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform md:hover:border-white/25 md:hover:shadow-2xl md:hover:ring-1 md:hover:ring-white/20"
+                    className="group relative flex aspect-square w-full origin-center cursor-pointer items-center justify-center overflow-visible rounded-[20px] will-change-transform"
                     initial={{ opacity: 0, scale: 1, zIndex: 1 }}
                     animate={{ opacity: 1, scale: 1, zIndex: 1 }}
                     whileHover={desktopHover ? {
@@ -89,8 +89,10 @@ export default function CaseStudiesView() {
                     />
                     <span
                       aria-hidden="true"
-                      className="pointer-events-none absolute -inset-[17.5%] origin-center scale-[0.74074] rounded-[27px] opacity-0 backdrop-blur-[24px] backdrop-saturate-150 transition-opacity duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:opacity-100"
-                      style={{ backgroundColor: withAlpha(project.background_color || '#333', 0.78) }}
+                      className="pointer-events-none absolute -inset-[17.5%] origin-center scale-[0.74074] rounded-[32px] border border-white/10 opacity-0 shadow-[0_-6px_34px_rgba(0,0,0,0.25)] backdrop-blur-[37px] transition-opacity duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:opacity-100"
+                      style={{
+                        background: `linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), ${withAlpha(project.background_color || '#333', 0.6)}`,
+                      }}
                     />
                     <span className="relative z-10 flex h-full w-full items-center justify-center overflow-hidden rounded-[20px]">
                       {project.logo_grid_image ? (
