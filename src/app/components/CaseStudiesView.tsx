@@ -91,7 +91,7 @@ export default function CaseStudiesView() {
                       aria-hidden="true"
                       className="pointer-events-none absolute -inset-[17.5%] origin-center scale-[0.74074] rounded-[32px] border border-white/10 opacity-0 shadow-[0_-6px_34px_rgba(0,0,0,0.25)] backdrop-blur-[37px] transition-opacity duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:opacity-100"
                       style={{
-                        background: withAlpha(project.background_color || '#333', 0.82),
+                        background: withAlpha(project.background_color || '#333', 0.95),
                       }}
                     />
                     <span className="relative z-10 flex h-full w-full items-center justify-center overflow-hidden rounded-[20px]">
