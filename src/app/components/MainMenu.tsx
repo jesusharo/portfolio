@@ -112,6 +112,10 @@ export default function MainMenu({ detailTextColor }: { detailTextColor?: string
       {/* Desktop left vertical bar */}
       <div className="hidden md:flex absolute flex-col gap-[16px] items-center left-[24px] top-1/2 -translate-y-1/2 w-[64px] z-30">
         {links.map(link => renderBtn(link, true))}
+      </div>
+
+      {/* Desktop language control — aligned with the menu, fully separated */}
+      <div className="hidden md:block fixed left-[34px] bottom-[24px] z-30">
         {languageBtn(true)}
       </div>
     </>
