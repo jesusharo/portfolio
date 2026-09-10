@@ -293,7 +293,7 @@ export default function CarouselBlock({
                 )}
               </div>
               {images.length > 1 && (
-                <div className="absolute bottom-3 left-1/2 z-20 hidden -translate-x-1/2 gap-1 min-[900px]:flex">
+                <div className="absolute bottom-3 left-1/2 z-0 hidden -translate-x-1/2 gap-1 min-[900px]:flex">
                   {images.map((img, i) => (
                     <button
                       key={img.id}
@@ -421,7 +421,7 @@ export default function CarouselBlock({
 
           {/* Dots */}
           {images.length > 1 && (
-            <div className="absolute bottom-3 left-1/2 z-20 hidden -translate-x-1/2 gap-1.5 min-[900px]:flex">
+            <div className="absolute bottom-3 left-1/2 z-0 hidden -translate-x-1/2 gap-1.5 min-[900px]:flex">
               {images.map((img, i) => (
                 <button
                   key={img.id}
