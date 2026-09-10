@@ -2,10 +2,12 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { motion } from 'motion/react';
 import { useNetworkState } from '../context/NetworkStateContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function WelcomeView() {
   const navigate = useNavigate();
   const { setNetworkState } = useNetworkState();
+  const { language } = useLanguage();
 
   useEffect(() => {
     setNetworkState('conversation');
@@ -36,7 +38,7 @@ export default function WelcomeView() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.7 }}
         >
-          Welcome
+          {language === 'es' ? 'Bienvenido' : 'Welcome'}
         </motion.h1>
       </motion.div>
     </div>

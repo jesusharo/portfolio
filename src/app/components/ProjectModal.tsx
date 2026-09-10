@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback, type CSSProperties } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
-import { getProject } from '../lib/api';
+import { getProject, translateContent } from '../lib/api';
+import { useLanguage } from '../context/LanguageContext';
 
 interface ContentBlock {
   type: 'richtext' | 'image' | 'imagegrid' | 'carousel' | 'divider';
@@ -97,16 +98,47 @@ function Divider({ textColor }: { textColor: string }) {
 
 export default function ProjectModal({ projectId, onClose }: Props) {
   const [project, setProject] = useState<Project | null>(null);
+  const [originalProject, setOriginalProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(false);
+  const { language } = useLanguage();
 
   useEffect(() => {
-    if (!projectId) { setProject(null); return; }
+    let cancelled = false;
+    if (!projectId) {
+      setProject(null);
+      setOriginalProject(null);
+      return;
+    }
     setLoading(true);
     getProject(projectId).then(p => {
+      if (cancelled) return;
+      setOriginalProject(p);
       setProject(p);
       setLoading(false);
+    }).catch(() => {
+      if (!cancelled) setLoading(false);
     });
+    return () => {
+      cancelled = true;
+    };
   }, [projectId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!originalProject) return;
+    if (language === 'en') {
+      setProject(originalProject);
+      return;
+    }
+    translateContent(originalProject, 'es')
+      .then(translated => {
+        if (!cancelled) setProject(translated);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [language, originalProject]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') onClose();
@@ -153,6 +185,7 @@ export default function ProjectModal({ projectId, onClose }: Props) {
               {/* Close button */}
               <button
                 onClick={onClose}
+                aria-label={language === 'es' ? 'Cerrar proyecto' : 'Close project'}
                 className="absolute top-4 right-4 z-10 size-[36px] flex items-center justify-center rounded-full bg-black/30 text-white/60 hover:text-white transition-colors"
               >
                 <X size={18} />
@@ -162,7 +195,7 @@ export default function ProjectModal({ projectId, onClose }: Props) {
               <div className="flex-1 overflow-y-auto">
                 {loading && (
                   <div className="flex items-center justify-center h-full text-white/30 text-[0.9rem] font-['Source_Sans_3',sans-serif]">
-                    Loading…
+                     {language === 'es' ? 'Cargando…' : 'Loading…'}
                   </div>
                 )}
 

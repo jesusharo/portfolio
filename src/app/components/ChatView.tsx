@@ -8,6 +8,7 @@ import LeaveAgentModal from './LeaveAgentModal';
 import ProjectModal from './ProjectModal';
 import { useNetworkState } from '../context/NetworkStateContext';
 import { useSiteVisibility } from '../hooks/useSiteVisibility';
+import { useLanguage } from '../context/LanguageContext';
 
 interface SuggestionProject {
   id: string;
@@ -15,8 +16,14 @@ interface SuggestionProject {
   name: string;
 }
 
-function buildSuggestions(projects: SuggestionProject[]): string[] {
-  const general = [
+function buildSuggestions(projects: SuggestionProject[], language: 'en' | 'es'): string[] {
+  const general = language === 'es' ? [
+    '¿Cuál es tu trayectoria y experiencia?',
+    '¿Qué tipo de proyectos disfrutas?',
+    '¿Estás disponible para nuevos proyectos?',
+    '¿Cómo puedo contactarte?',
+    '¿Qué herramientas y software utilizas?',
+  ] : [
     "What's your background and experience?",
     "What kind of projects do you enjoy working on?",
     "Are you available for new projects?",
@@ -24,7 +31,10 @@ function buildSuggestions(projects: SuggestionProject[]): string[] {
     "What tools and software do you use?",
   ];
 
-  const projectSuggestions = projects.flatMap(p => [
+  const projectSuggestions = projects.flatMap(p => language === 'es' ? [
+    `¿De qué trató ${p.name}?`,
+    `¿Qué problema resolvió ${p.name}?`,
+  ] : [
     `What was ${p.name} about?`,
     `What problem did ${p.name} solve?`,
   ]).slice(0, 6);
@@ -36,6 +46,7 @@ export default function ChatView() {
   const { activeConversation, sendMessage, loading } = useChat();
   const { setNetworkState } = useNetworkState();
   const { agent_visible, loading: visibilityLoading } = useSiteVisibility();
+  const { language } = useLanguage();
   const [inputFocused, setInputFocused] = useState(false);
   const [modalProjectId, setModalProjectId] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -51,9 +62,9 @@ export default function ChatView() {
   useEffect(() => {
     fetch('/api/agent/suggestions')
       .then(r => r.json())
-      .then(data => setSuggestions(buildSuggestions(data.projects || [])))
+      .then(data => setSuggestions(buildSuggestions(data.projects || [], language)))
       .catch(() => setSuggestions([]));
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     if (hasMessages) setNetworkState('conversation');

@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface Props {
   open: boolean;
@@ -7,6 +8,9 @@ interface Props {
 }
 
 export default function LeaveAgentModal({ open, onConfirm, onCancel }: Props) {
+  const { language } = useLanguage();
+  const es = language === 'es';
+
   return (
     <AnimatePresence>
       {open && (
@@ -36,10 +40,12 @@ export default function LeaveAgentModal({ open, onConfirm, onCancel }: Props) {
               {/* Text */}
               <div className="flex flex-col gap-1">
                 <h2 className="text-white text-[1rem] font-semibold font-['Source_Sans_3',sans-serif]">
-                  Leave the conversation?
+                   {es ? '¿Salir de la conversación?' : 'Leave the conversation?'}
                 </h2>
                 <p className="text-white/50 text-[0.85rem] leading-[1.5] font-['Source_Sans_3',sans-serif]">
-                  Navigating away will reset the current chat session. This cannot be undone.
+                   {es
+                     ? 'Si sales, se reiniciará la sesión actual del chat. Esta acción no se puede deshacer.'
+                     : 'Navigating away will reset the current chat session. This cannot be undone.'}
                 </p>
               </div>
 
@@ -49,13 +55,13 @@ export default function LeaveAgentModal({ open, onConfirm, onCancel }: Props) {
                   onClick={onCancel}
                   className="flex-1 py-[10px] rounded-[32px] border border-white/15 text-white/60 text-[0.85rem] font-['Source_Sans_3',sans-serif] hover:text-white hover:border-white/30 transition-colors"
                 >
-                  Stay
+                   {es ? 'Quedarme' : 'Stay'}
                 </button>
                 <button
                   onClick={onConfirm}
                   className="flex-1 py-[10px] rounded-[32px] bg-[#d25d5f] text-white text-[0.85rem] font-['Source_Sans_3',sans-serif] hover:bg-[#c25052] transition-colors"
                 >
-                  Leave
+                   {es ? 'Salir' : 'Leave'}
                 </button>
               </div>
             </div>

@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface ChatInputProps {
   onSendMessage: (message: string, isSuggestion?: boolean) => void;
@@ -8,21 +9,31 @@ interface ChatInputProps {
   suggestions?: string[];
 }
 
-const DEFAULT_SUGGESTIONS = [
+const DEFAULT_SUGGESTIONS_EN = [
   "What's your background and experience?",
   "What kind of projects do you enjoy working on?",
   "Are you available for new projects?",
   "How can I contact you?",
   "What tools and software do you use?",
 ];
+const DEFAULT_SUGGESTIONS_ES = [
+  '¿Cuál es tu trayectoria y experiencia?',
+  '¿Qué tipo de proyectos disfrutas?',
+  '¿Estás disponible para nuevos proyectos?',
+  '¿Cómo puedo contactarte?',
+  '¿Qué herramientas y software utilizas?',
+];
 
 export default function ChatInput({ onSendMessage, disabled, centered = false, onFocusChange, suggestions }: ChatInputProps) {
   const [input, setInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const { language } = useLanguage();
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
-  const pool = suggestions && suggestions.length > 0 ? suggestions : DEFAULT_SUGGESTIONS;
+  const pool = suggestions && suggestions.length > 0
+    ? suggestions
+    : language === 'es' ? DEFAULT_SUGGESTIONS_ES : DEFAULT_SUGGESTIONS_EN;
 
   useEffect(() => {
     const handleOutsidePointerDown = (event: PointerEvent) => {
@@ -76,7 +87,8 @@ export default function ChatInput({ onSendMessage, disabled, centered = false, o
             }}
             onFocus={() => { setShowSuggestions(true); onFocusChange?.(true); }}
             onBlur={() => onFocusChange?.(false)}
-            placeholder="Do you want to know anything in particular?"
+             placeholder={language === 'es' ? '¿Quieres saber algo en particular?' : 'Do you want to know anything in particular?'}
+             aria-label={language === 'es' ? 'Escribe tu mensaje' : 'Type your message'}
             disabled={disabled}
             maxLength={300}
             className="font-['Source_Sans_3',sans-serif] font-normal leading-[1.4] relative flex-1 text-[16px] text-white bg-transparent outline-none placeholder:text-[rgba(255,255,255,0.3)] disabled:opacity-50"
@@ -119,7 +131,9 @@ export default function ChatInput({ onSendMessage, disabled, centered = false, o
 
       {/* Disclaimer */}
       <p className="mt-3 text-center text-[0.85rem] leading-[1.5] font-['Source_Sans_3',sans-serif] text-[rgba(255,255,255,0.25)] px-2">
-        This agent is here to help you explore my projects — it's not a replacement for an interview.
+         {language === 'es'
+           ? 'Este agente te ayuda a explorar mis proyectos; no reemplaza una entrevista.'
+           : "This agent is here to help you explore my projects — it's not a replacement for an interview."}
       </p>
     </div>
   );

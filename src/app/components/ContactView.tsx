@@ -2,11 +2,13 @@ import { useEffect } from 'react';
 import { motion } from 'motion/react';
 import PageTransition from './PageTransition';
 import { useNetworkState } from '../context/NetworkStateContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const CONTACT_EMAIL = 'jharolozano@gmail.com';
 
 export default function ContactView() {
   const { setNetworkState } = useNetworkState();
+  const { language } = useLanguage();
 
   useEffect(() => {
     setNetworkState('conversation');
@@ -22,7 +24,7 @@ export default function ContactView() {
             className="text-white/50 text-[0.72rem] font-semibold tracking-[0.22em] uppercase select-none mb-6"
             style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           >
-            Contact
+            {language === 'es' ? 'Contacto' : 'Contact'}
           </h1>
           <motion.div
             initial={{ opacity: 0, y: 8 }}
@@ -33,7 +35,7 @@ export default function ContactView() {
               className="text-white/60"
               style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '1rem' }}
             >
-              Have a project in mind? Send me an email.
+              {language === 'es' ? '¿Tienes un proyecto en mente? Envíame un correo.' : 'Have a project in mind? Send me an email.'}
             </p>
             <span
               className="text-white/35 text-[0.85rem]"

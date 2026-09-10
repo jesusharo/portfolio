@@ -1,8 +1,10 @@
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function NotFound() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 select-none">
@@ -16,13 +18,13 @@ export default function NotFound() {
           404
         </span>
         <p className="text-white/30 text-[0.9rem] font-['Source_Sans_3',sans-serif] -mt-2">
-          This page doesn't exist.
+          {language === 'es' ? 'Esta página no existe.' : "This page doesn't exist."}
         </p>
         <button
           onClick={() => navigate('/', { replace: true })}
           className="mt-2 px-5 py-2 rounded-full bg-white/8 hover:bg-white/14 text-white/60 hover:text-white text-[0.85rem] font-['Source_Sans_3',sans-serif] transition-colors"
         >
-          Go home
+          {language === 'es' ? 'Ir al inicio' : 'Go home'}
         </button>
       </motion.div>
     </div>

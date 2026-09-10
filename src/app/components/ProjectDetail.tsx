@@ -11,7 +11,8 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useNetworkState } from '../context/NetworkStateContext';
-import { getProjects, getEditorProjects, getReviewProject, updateProject } from '../lib/api';
+import { getProjects, getEditorProjects, getReviewProject, updateProject, translateContent } from '../lib/api';
+import { useLanguage } from '../context/LanguageContext';
 import RichTextEditor from './editor/RichTextEditor';
 import ImageDropZone from './editor/ImageDropZone';
 import ImageGridBlock, {
@@ -173,9 +174,11 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
     saveRequestVersion,
   } = useNetworkState();
   const [items, setItems] = useState<Project[]>([]);
+  const [originalItems, setOriginalItems] = useState<Project[]>([]);
   const [loadedItemsSource, setLoadedItemsSource] = useState<'public' | 'editor' | 'review' | null>(null);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const { language, t } = useLanguage();
 
   const apiType = mode === 'projects' ? 'ui_project' : 'case_study';
   const listPath = mode === 'projects' ? '/projects' : '/cases';
@@ -199,7 +202,9 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
     request
       .then(data => {
         if (cancelled) return;
-        setItems(Array.isArray(data) ? data as Project[] : []);
+        const next = Array.isArray(data) ? data as Project[] : [];
+        setOriginalItems(next);
+        setItems(next);
         setLoadedItemsSource(source);
       })
       .catch(() => {
@@ -212,6 +217,23 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
       cancelled = true;
     };
   }, [apiType, editorAuthed, dataVersion, reviewMode, token]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (editorAuthed) return;
+    if (language === 'en') {
+      setItems(originalItems);
+    } else if (originalItems.length) {
+      translateContent(originalItems, 'es')
+        .then(translated => {
+          if (!cancelled) setItems(translated);
+        })
+        .catch(() => {});
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [language, originalItems, editorAuthed]);
 
   const currentIndex = reviewMode ? (items.length ? 0 : -1) : items.findIndex(p => p.id === id);
   const item = items[currentIndex] ?? null;
@@ -251,17 +273,22 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
   );
   // Keep a ref to contentBlocks so the flush-save effect always has the latest value
   const contentBlocksRef = useRef<ContentBlock[]>([]);
+  const initializedItemIdRef = useRef<string | null>(null);
   useEffect(() => { contentBlocksRef.current = contentBlocks; }, [contentBlocks]);
   // Track previous saveRequestVersion so we only act on new increments
   const prevSaveReqRef = useRef(saveRequestVersion);
 
-  // Reset content blocks only when project ID changes (not on re-fetches)
+  // Editors keep unsaved blocks across refetches. Read-only visitors must
+  // refresh blocks when the selected language replaces the project payload.
   useEffect(() => {
     if (!item) return;
+    const itemChanged = initializedItemIdRef.current !== item.id;
+    if (editorAuthed && !itemChanged) return;
+    initializedItemIdRef.current = item.id;
     setContentBlocks(parseBlocks(item.content_blocks));
     setSaveStatus('idle');
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-  }, [item?.id]);
+  }, [item?.id, item?.content_blocks, language, editorAuthed]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -675,8 +702,8 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
           className="px-8 pb-32 pt-2 text-center text-[0.7rem] uppercase tracking-[0.16em] opacity-45 md:pb-12"
           style={{ fontFamily: "'Source Sans 3', sans-serif", color: textColor }}
         >
-          <p className="hidden md:block">Press next/previous keys to change between projects.</p>
-          <p className="md:hidden">Swipe left/right to change project.</p>
+           <p className="hidden md:block">{t('nextPrevious')}</p>
+           <p className="md:hidden">{t('swipe')}</p>
         </div>
 
         {/* ── Auto-save status toast ─────────────────────────────────────── */}
@@ -691,10 +718,10 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
               className="fixed bottom-7 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-[rgba(8,8,8,0.88)] backdrop-blur-sm border border-white/10 text-[0.75rem] pointer-events-none"
               style={{ fontFamily: "'Source Sans 3', sans-serif" }}
             >
-              {saveStatus === 'unsaved' && <span className="text-white/40">● Unsaved changes</span>}
-              {saveStatus === 'saving'  && <span className="text-white/50">↑ Saving…</span>}
-              {saveStatus === 'saved'   && <span className="text-white/60">✓ Saved</span>}
-              {saveStatus === 'error'   && <span className="text-[#d25d5f]">⚠ Save failed</span>}
+               {saveStatus === 'unsaved' && <span className="text-white/40">● {t('unsaved')}</span>}
+               {saveStatus === 'saving'  && <span className="text-white/50">↑ {t('saving')}</span>}
+               {saveStatus === 'saved'   && <span className="text-white/60">✓ {t('saved')}</span>}
+               {saveStatus === 'error'   && <span className="text-[#d25d5f]">⚠ {t('saveFailed')}</span>}
             </motion.div>
           )}
         </AnimatePresence>

@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Conversation, Message } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 // Strip [[PROJECT:...]] markers from text before sending to API
 function stripProjectMarkers(text: string): string {
@@ -17,13 +18,29 @@ function buildHistory(messages: Message[]): { role: 'user' | 'assistant'; conten
 }
 
 export const useChat = () => {
+  const { language } = useLanguage();
   const [conversations, setConversations] = useState<Conversation[]>([
-    { id: '1', title: 'New conversation', messages: [], createdAt: new Date() }
+    { id: '1', title: language === 'es' ? 'Nueva conversación' : 'New conversation', messages: [], createdAt: new Date() }
   ]);
   const [activeConversationId, setActiveConversationId] = useState<string>('1');
   const [loading, setLoading] = useState(false);
+  const requestGenerationRef = useRef(0);
 
   const activeConversation = conversations.find(c => c.id === activeConversationId);
+
+  useEffect(() => {
+    requestGenerationRef.current += 1;
+    setLoading(false);
+    setConversations(current => current.map(conversation =>
+      ({
+        ...conversation,
+        title: conversation.messages.length === 0
+          ? (language === 'es' ? 'Nueva conversación' : 'New conversation')
+          : conversation.title,
+        messages: conversation.messages.filter(message => !message.isLoading),
+      })
+    ));
+  }, [language]);
 
   const sendMessage = useCallback(async (content: string, isSuggestion = false) => {
     if (!content.trim() || !activeConversationId || loading) return;
@@ -57,6 +74,7 @@ export const useChat = () => {
     }));
 
     setLoading(true);
+    const requestGeneration = ++requestGenerationRef.current;
 
     try {
       // Build message history for the API (user + previous assistant messages)
@@ -65,11 +83,14 @@ export const useChat = () => {
       const res = await fetch('/api/agent/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: apiHistory, isSuggestion }),
+        body: JSON.stringify({ messages: apiHistory, isSuggestion, language }),
       });
 
       const data = await res.json();
-      const reply = data.reply || 'Sorry, I had trouble responding. Please try again.';
+      if (requestGeneration !== requestGenerationRef.current) return;
+      const reply = data.reply || (language === 'es'
+        ? 'Lo siento, tuve problemas para responder. Inténtalo de nuevo.'
+        : 'Sorry, I had trouble responding. Please try again.');
 
       const assistantMessage: Message = {
         id: `assistant-${Date.now()}`,
@@ -87,10 +108,13 @@ export const useChat = () => {
         return conv;
       }));
     } catch {
+      if (requestGeneration !== requestGenerationRef.current) return;
       // Replace loading placeholder with error message
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
-        content: "I'm having trouble connecting. Please try again.",
+        content: language === 'es'
+          ? 'Tengo problemas para conectarme. Inténtalo de nuevo.'
+          : "I'm having trouble connecting. Please try again.",
         sender: 'assistant',
         timestamp: new Date(),
       };
@@ -102,9 +126,9 @@ export const useChat = () => {
         return conv;
       }));
     } finally {
-      setLoading(false);
+      if (requestGeneration === requestGenerationRef.current) setLoading(false);
     }
-  }, [activeConversationId, loading]);
+  }, [activeConversationId, language, loading]);
 
   return {
     conversations,

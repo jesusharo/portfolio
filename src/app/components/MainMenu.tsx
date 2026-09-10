@@ -2,8 +2,7 @@ import { BookMarked, Mail, Sparkles, PenTool } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router';
 import type { SVGProps } from 'react';
 import { useSiteVisibility } from '../hooks/useSiteVisibility';
-
-const CONTACT_MAILTO = 'mailto:jharolozano@gmail.com?subject=Hello%20from%20your%20portfolio';
+import { useLanguage } from '../context/LanguageContext';
 
 function AboutMeIcon({ className, style }: SVGProps<SVGSVGElement>) {
   return (
@@ -32,13 +31,14 @@ export default function MainMenu({ detailTextColor }: { detailTextColor?: string
   const navigate = useNavigate();
   const location = useLocation();
   const { case_studies_visible, agent_visible } = useSiteVisibility();
+  const { language, toggleLanguage, t } = useLanguage();
 
   const links = [
-    { id: 'projects', label: 'UI projects',  icon: PenTool,     path: '/projects' },
-    { id: 'cases',    label: 'Case studies', icon: BookMarked,  path: '/cases' },
-    { id: 'agent',    label: 'Agent',        icon: Sparkles,    path: '/agent' },
-    { id: 'about',    label: 'About me',     icon: AboutMeIcon, path: '/about' },
-    { id: 'contact',  label: 'Contact',      icon: Mail,        path: '/contact' },
+    { id: 'projects', label: t('projects'),  icon: PenTool,     path: '/projects' },
+    { id: 'cases',    label: t('cases'), icon: BookMarked,  path: '/cases' },
+    { id: 'agent',    label: t('agent'),        icon: Sparkles,    path: '/agent' },
+    { id: 'about',    label: t('about'),     icon: AboutMeIcon, path: '/about' },
+    { id: 'contact',  label: t('contact'),      icon: Mail,        path: '/contact' },
   ].filter(link =>
     (link.id !== 'cases' || case_studies_visible) &&
     (link.id !== 'agent' || agent_visible)
@@ -53,10 +53,13 @@ export default function MainMenu({ detailTextColor }: { detailTextColor?: string
     const Icon = link.icon;
     const active = isActive(link.path);
     const isContact = link.id === 'contact';
+    const contactMailto = `mailto:jharolozano@gmail.com?subject=${encodeURIComponent(
+      language === 'es' ? 'Hola desde tu portafolio' : 'Hello from your portfolio',
+    )}`;
     return (
       <button
         key={link.id}
-        onClick={() => isContact ? window.location.href = CONTACT_MAILTO : navigate(link.path)}
+        onClick={() => isContact ? window.location.href = contactMailto : navigate(link.path)}
         aria-label={link.label}
         className={`${desktop ? 'group relative' : ''} cursor-pointer flex items-center justify-center rounded-full transition-all duration-200 ${
           active
@@ -78,16 +81,38 @@ export default function MainMenu({ detailTextColor }: { detailTextColor?: string
     );
   }
 
+  function languageBtn(desktop: boolean) {
+    const tooltip = language === 'en' ? 'English' : 'Español';
+    return (
+      <button
+        key="language"
+        onClick={toggleLanguage}
+        aria-label={tooltip}
+        title={!desktop ? tooltip : undefined}
+        className={`${desktop ? 'group relative' : ''} cursor-pointer flex items-center justify-center rounded-full size-[44px] border border-white/20 bg-[rgba(255,255,255,0.15)] text-white hover:bg-[rgba(255,255,255,0.25)] transition-all`}
+      >
+        <span className="text-[0.72rem] font-semibold tracking-wide">{language.toUpperCase()}</span>
+        {desktop && (
+          <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            <p className="text-white/70 text-sm whitespace-nowrap font-['Source_Sans_3',sans-serif]">{tooltip}</p>
+          </div>
+        )}
+      </button>
+    );
+  }
+
   return (
     <>
       {/* Mobile bottom bar */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 flex flex-row justify-around items-center px-4 pt-3 pb-6 z-30 bg-[rgba(0,0,0,0.2)] backdrop-blur-md">
         {links.map(link => renderBtn(link, false))}
+        {languageBtn(false)}
       </div>
 
       {/* Desktop left vertical bar */}
       <div className="hidden md:flex absolute flex-col gap-[16px] items-center left-[24px] top-1/2 -translate-y-1/2 w-[64px] z-30">
         {links.map(link => renderBtn(link, true))}
+        {languageBtn(true)}
       </div>
     </>
   );

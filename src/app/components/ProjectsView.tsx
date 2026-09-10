@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { motion } from 'motion/react';
 import PageTransition from './PageTransition';
-import { getProjects } from '../lib/api';
+import { getProjects, translateContent } from '../lib/api';
+import { useLanguage } from '../context/LanguageContext';
 import { useNetworkState } from '../context/NetworkStateContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { useSiteVisibility } from '../hooks/useSiteVisibility';
@@ -27,14 +28,41 @@ interface Project {
 export default function ProjectsView() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [originalProjects, setOriginalProjects] = useState<Project[]>([]);
   const { dataVersion } = useNetworkState();
   const { projects_grid_columns } = useSiteVisibility();
   const desktopHover = useDesktopHover();
+  const { language, t } = useLanguage();
   const desktopGridClass = DESKTOP_GRID_CLASSES[projects_grid_columns] || DESKTOP_GRID_CLASSES[4];
 
   useEffect(() => {
-    getProjects('ui_project').then(setProjects).catch(() => {});
+    let cancelled = false;
+    getProjects('ui_project').then(data => {
+      if (cancelled) return;
+      const next = Array.isArray(data) ? data : [];
+      setOriginalProjects(next);
+      setProjects(next);
+    }).catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, [dataVersion]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (language === 'en') {
+      setProjects(originalProjects);
+    } else if (originalProjects.length) {
+      translateContent(originalProjects, 'es')
+        .then(translated => {
+          if (!cancelled) setProjects(translated);
+        })
+        .catch(() => {});
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [language, originalProjects]);
 
   return (
     <PageTransition>
@@ -45,7 +73,7 @@ export default function ProjectsView() {
               className="text-white/50 text-[0.72rem] font-semibold tracking-[0.22em] uppercase select-none"
               style={{ fontFamily: "'Source Sans 3', sans-serif" }}
             >
-              UI Projects
+              {t('uiProjects')}
             </h2>
             <TooltipProvider delayDuration={150}>
               <div className={`grid w-full grid-cols-3 gap-3 ${desktopGridClass.split(' ').find(className => className.startsWith('md:grid-cols-'))}`}>
@@ -54,7 +82,7 @@ export default function ProjectsView() {
                     <TooltipTrigger asChild>
                       <motion.button
                         onClick={() => navigate(`/projects/${project.id}`)}
-                        aria-label={`Open ${project.name}`}
+                         aria-label={`${t('open')} ${project.name}`}
                         className="group relative flex aspect-square w-full origin-center cursor-pointer items-center justify-center overflow-visible rounded-[20px] will-change-transform"
                         initial={{ opacity: 0, scale: 1, zIndex: 1 }}
                         animate={{ opacity: 1, scale: 1, zIndex: 1 }}

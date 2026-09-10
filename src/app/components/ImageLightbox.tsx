@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export interface LightboxImage {
   src: string;
@@ -21,6 +22,10 @@ export default function ImageLightbox({
   initialIndex = 0,
   onClose,
 }: Props) {
+  const { language } = useLanguage();
+  const labels = language === 'es'
+    ? { preview: 'Vista previa de imagen', close: 'Cerrar vista previa', previous: 'Imagen anterior', next: 'Imagen siguiente' }
+    : { preview: 'Image preview', close: 'Close image preview', previous: 'Previous image', next: 'Next image' };
   const items = images?.length ? images : src ? [{ src, alt }] : [];
   const [currentIndex, setCurrentIndex] = useState(() =>
     Math.min(Math.max(initialIndex, 0), Math.max(items.length - 1, 0))
@@ -70,7 +75,7 @@ export default function ImageLightbox({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Image preview"
+      aria-label={labels.preview}
       data-image-lightbox="true"
       className="fixed inset-0 z-[100] overflow-y-auto bg-black/90 p-4 sm:p-8"
       onClick={event => {
@@ -80,8 +85,8 @@ export default function ImageLightbox({
       <button
         type="button"
         onClick={onClose}
-        aria-label="Close image preview"
-        title="Close"
+        aria-label={labels.close}
+        title={labels.close}
         className="fixed right-4 top-4 z-10 flex size-10 items-center justify-center rounded-full border border-white/20 bg-black/50 text-white/75 backdrop-blur-sm transition-colors hover:bg-white/15 hover:text-white"
       >
         <X size={20} strokeWidth={1.5} />
@@ -92,8 +97,8 @@ export default function ImageLightbox({
           <button
             type="button"
             onClick={() => setCurrentIndex(index => (index - 1 + items.length) % items.length)}
-            aria-label="Previous image"
-            title="Previous image"
+            aria-label={labels.previous}
+            title={labels.previous}
             className="fixed left-3 top-1/2 z-10 flex size-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/50 text-white/75 backdrop-blur-sm transition-colors hover:bg-white/15 hover:text-white sm:left-6"
           >
             <ChevronLeft size={22} strokeWidth={1.5} />
@@ -101,8 +106,8 @@ export default function ImageLightbox({
           <button
             type="button"
             onClick={() => setCurrentIndex(index => (index + 1) % items.length)}
-            aria-label="Next image"
-            title="Next image"
+            aria-label={labels.next}
+            title={labels.next}
             className="fixed right-3 top-1/2 z-10 flex size-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/50 text-white/75 backdrop-blur-sm transition-colors hover:bg-white/15 hover:text-white sm:right-6"
           >
             <ChevronRight size={22} strokeWidth={1.5} />

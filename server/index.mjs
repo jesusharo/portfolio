@@ -12,12 +12,16 @@ import settingsRoutes from './routes/settings.mjs';
 import uploadRoutes from './routes/upload.mjs';
 import imageRoutes from './routes/images.mjs';
 import agentRoutes from './routes/agent.mjs';
+import translateRoutes from './routes/translate.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || process.env.API_PORT || 3001;
 const isProd = process.env.NODE_ENV === 'production';
 
+// Replit places one reverse proxy in front of the app. Trust only that hop so
+// req.ip cannot be spoofed by supplying an arbitrary x-forwarded-for header.
+app.set('trust proxy', 1);
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 
@@ -39,6 +43,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/agent', agentRoutes);
+app.use('/api/translate', translateRoutes);
 
 // Serve uploaded files as static
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));

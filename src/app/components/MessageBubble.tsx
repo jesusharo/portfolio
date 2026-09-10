@@ -1,4 +1,5 @@
 import { Message } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 // Parse [[PROJECT:id:name]] markers from text
 interface TextSegment { kind: 'text'; content: string }
@@ -87,9 +88,11 @@ function TypingDots() {
 }
 
 function ProjectCard({ id, name, onOpen }: { id: string; name: string; onOpen?: (id: string) => void }) {
+  const { language } = useLanguage();
   return (
     <button
       onClick={() => onOpen?.(id)}
+      aria-label={language === 'es' ? `Abrir proyecto ${name}` : `Open project ${name}`}
       className="inline-flex items-center gap-[7px] mt-2 mb-1 px-[14px] py-[8px] rounded-[20px] bg-white/8 border border-white/12 text-white/80 text-[0.78rem] font-['Source_Sans_3',sans-serif] leading-tight hover:bg-white/12 hover:text-white transition-colors group"
     >
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="shrink-0 opacity-50 group-hover:opacity-80 transition-opacity">

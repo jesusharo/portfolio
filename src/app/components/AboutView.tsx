@@ -1,8 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Linkedin, Mail, Palette } from 'lucide-react';
 import PageTransition from './PageTransition';
 import { useNetworkState } from '../context/NetworkStateContext';
+import { useLanguage } from '../context/LanguageContext';
+import { translateContent } from '../lib/api';
 
 const SECTION_LABEL: React.CSSProperties = {
   fontFamily: "'Source Sans 3', sans-serif",
@@ -167,10 +169,74 @@ const skills = [
 
 export default function AboutView() {
   const { setNetworkState } = useNetworkState();
+  const { language } = useLanguage();
+  const es = language === 'es';
+  const [localizedExperience, setLocalizedExperience] = useState<typeof experience>(experience);
+  const [localizedEducation, setLocalizedEducation] = useState<typeof education>(education);
+  const labels = {
+    summary: es ? 'Resumen' : 'Summary',
+    experience: es ? 'Experiencia' : 'Experience',
+    education: es ? 'Formación' : 'Education',
+    tools: es ? 'Herramientas' : 'Tools',
+    skills: es ? 'Habilidades' : 'Skills',
+    role: es ? 'Diseñador sénior de producto' : 'Senior Product Designer',
+  };
+  const descriptions: Record<string, string> = es ? {
+    Numaris: 'Plataforma mexicana de telemática/IoT para la gestión de flotas y activos',
+    Ekatena: 'Plataforma de análisis de riesgo financiero',
+    Neerva: 'Diseñador freelance',
+    'Cymatic.io': 'Diseñador de producto',
+    'michelada.io': 'Diseñador de producto',
+    MagmaLabs: 'Director de UX/UI',
+    'Crowd Interactive': 'Diseñador de UI → Líder de UI',
+  } : {};
+  const skillLabels: Record<string, string> = es ? {
+    'Design team leadership': 'Liderazgo de equipos de diseño',
+    'Career pathing and performance reviews': 'Planes de carrera y evaluaciones de desempeño',
+    'AI-assisted product design': 'Diseño de producto asistido por IA',
+    'Front-end prototyping with AI coding agents': 'Prototipado front-end con agentes de código de IA',
+    'PRD and user story writing': 'Redacción de PRD e historias de usuario',
+    'Product design sprint': 'Sprint de diseño de producto',
+    'Design thinking': 'Design thinking',
+    Agile: 'Agile',
+    'Lean UX': 'Lean UX',
+    Prototyping: 'Prototipado',
+    'UX/UI design': 'Diseño UX/UI',
+    'Design systems': 'Sistemas de diseño',
+    Branding: 'Branding',
+    'Cross-functional collaboration': 'Colaboración multifuncional',
+  } : {};
+  const titleLabels: Record<string, string> = es ? {
+    'Senior Product Designer (AI)': 'Diseñador sénior de producto (IA)',
+    'Product Designer': 'Diseñador de producto',
+    'Product Design Lead': 'Líder de diseño de producto',
+    'Freelance Designer': 'Diseñador freelance',
+    'UX/UI Director': 'Director de UX/UI',
+    'UI Designer → UI Lead': 'Diseñador de UI → Líder de UI',
+  } : {};
   useEffect(() => {
     setNetworkState('conversation');
     return () => setNetworkState('idle');
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!es) {
+      setLocalizedExperience(experience);
+      setLocalizedEducation(education);
+      return;
+    }
+    translateContent({ experience, education }, 'es')
+      .then((translated) => {
+        if (cancelled) return;
+        setLocalizedExperience(translated.experience);
+        setLocalizedEducation(translated.education);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [es]);
 
   return (
     <PageTransition>
@@ -184,7 +250,7 @@ export default function AboutView() {
             </h1>
             <div className="mb-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
               <p style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '1rem', color: '#d25d5f' }}>
-                Senior Product Designer
+                {labels.role}
               </p>
               <div className="ml-auto flex flex-wrap items-center justify-end gap-x-5 gap-y-2">
               {[
@@ -222,9 +288,11 @@ export default function AboutView() {
 
           {/* Summary */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08 }}>
-            <p style={SECTION_LABEL}>Summary</p>
+             <p style={SECTION_LABEL}>{labels.summary}</p>
             <p style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '0.95rem', lineHeight: 1.7, color: 'rgba(255,255,255,0.6)' }}>
-              Senior Product Designer with 15+ years shipping B2B products end-to-end: research, information architecture, prototyping, and engineering handoff. I've led and grown design teams, owned product decisions from concept through launch, and this past year used AI tooling to take features from concept to a working prototype in 2–4 days instead of weeks. I work directly with engineering to turn customer feedback and technical constraints into shipped interfaces, not just mockups.
+               {es
+                 ? 'Diseñador sénior de producto con más de 15 años creando productos B2B de principio a fin: investigación, arquitectura de información, prototipado y entrega a ingeniería. He liderado y hecho crecer equipos de diseño, tomado decisiones de producto desde el concepto hasta el lanzamiento y, durante el último año, he usado herramientas de IA para convertir funcionalidades en prototipos funcionales en 2–4 días en lugar de semanas. Trabajo directamente con ingeniería para transformar los comentarios de clientes y las restricciones técnicas en interfaces reales, no solo maquetas.'
+                 : "Senior Product Designer with 15+ years shipping B2B products end-to-end: research, information architecture, prototyping, and engineering handoff. I've led and grown design teams, owned product decisions from concept through launch, and this past year used AI tooling to take features from concept to a working prototype in 2–4 days instead of weeks. I work directly with engineering to turn customer feedback and technical constraints into shipped interfaces, not just mockups."}
             </p>
           </motion.div>
 
@@ -232,9 +300,9 @@ export default function AboutView() {
 
           {/* Experience */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.14 }}>
-            <p style={SECTION_LABEL}>Experience</p>
+             <p style={SECTION_LABEL}>{labels.experience}</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-              {experience.map((job) => (
+               {localizedExperience.map((job) => (
                 <div key={job.company}>
                   <div style={{ marginBottom: '12px' }}>
                     <span style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '1rem', fontWeight: 600, color: 'white' }}>
@@ -244,14 +312,14 @@ export default function AboutView() {
                       {job.location}
                     </span>
                     <p style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '0.82rem', color: 'rgba(255,255,255,0.3)', marginTop: '2px' }}>
-                      {job.description}
+                       {descriptions[job.company] || job.description}
                     </p>
                   </div>
                   {job.roles.map((role) => (
                     <div key={role.title} style={{ marginBottom: '16px', paddingLeft: '12px', borderLeft: '1px solid rgba(255,255,255,0.08)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px', flexWrap: 'wrap', gap: '4px' }}>
                         <span style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '0.9rem', fontWeight: 600, color: '#d25d5f' }}>
-                          {role.title}
+                          {titleLabels[role.title] || role.title}
                         </span>
                         <span style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '0.78rem', color: 'rgba(255,255,255,0.3)' }}>
                           {role.period}
@@ -261,7 +329,7 @@ export default function AboutView() {
                         {role.bullets.map((b, i) => (
                           <li key={i} style={{ display: 'flex', gap: '10px', fontFamily: "'Source Sans 3', sans-serif", fontSize: '0.85rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.5)' }}>
                             <span style={{ color: 'rgba(255,255,255,0.2)', flexShrink: 0, marginTop: '2px' }}>—</span>
-                            <span>{b}</span>
+                              <span>{b}</span>
                           </li>
                         ))}
                       </ul>
@@ -276,12 +344,12 @@ export default function AboutView() {
 
           {/* Education */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
-            <p style={SECTION_LABEL}>Education</p>
+             <p style={SECTION_LABEL}>{labels.education}</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {education.map((ed) => (
+               {localizedEducation.map((ed) => (
                 <div key={ed.degree}>
                   <p style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '0.9rem', fontWeight: 600, color: 'rgba(255,255,255,0.7)', marginBottom: '2px' }}>
-                    {ed.degree}
+                      {ed.degree}
                   </p>
                   <p style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '0.82rem', color: 'rgba(255,255,255,0.35)' }}>
                     {ed.school}
@@ -297,7 +365,7 @@ export default function AboutView() {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.26 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
               <div>
-                <p style={SECTION_LABEL}>Tools</p>
+                 <p style={SECTION_LABEL}>{labels.tools}</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                   {tools.map(t => (
                     <span key={t} style={{
@@ -313,11 +381,11 @@ export default function AboutView() {
                 </div>
               </div>
               <div>
-                <p style={SECTION_LABEL}>Skills</p>
+                 <p style={SECTION_LABEL}>{labels.skills}</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   {skills.map(s => (
                     <p key={s} style={{ fontFamily: "'Source Sans 3', sans-serif", fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)', margin: 0 }}>
-                      {s}
+                       {skillLabels[s] || s}
                     </p>
                   ))}
                 </div>

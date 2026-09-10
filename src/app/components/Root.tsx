@@ -9,10 +9,13 @@ import { NetworkStateProvider, useNetworkState } from '../context/NetworkStateCo
 import { triggerHaptic } from '../lib/haptics';
 import { getSiteSettings } from '../lib/api';
 import { applyFavicon } from '../lib/favicon';
+import { useLanguage } from '../context/LanguageContext';
 
 function RootInner() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const es = language === 'es';
   const {
     pageBackground, setPageBackground,
     detailTextColor,
@@ -152,8 +155,8 @@ function RootInner() {
             whileTap={{ scale: 0.96 }}
           >
             {editorMode
-              ? <><Check size={14} strokeWidth={2} style={detailTextColor ? { color: detailTextColor } : undefined} /> Save changes</>
-              : <><PenLine size={14} strokeWidth={1.5} style={detailTextColor ? { color: detailTextColor } : undefined} /> Edit</>
+              ? <><Check size={14} strokeWidth={2} style={detailTextColor ? { color: detailTextColor } : undefined} /> {es ? 'Guardar cambios' : 'Save changes'}</>
+              : <><PenLine size={14} strokeWidth={1.5} style={detailTextColor ? { color: detailTextColor } : undefined} /> {es ? 'Editar' : 'Edit'}</>
             }
           </motion.button>
         )}
@@ -165,10 +168,10 @@ function RootInner() {
             className={`${pillBase} ${pillDefault}`}
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.96 }}
-            title="Content Editor"
+            title={es ? 'Editor de contenido' : 'Content Editor'}
           >
             <SquarePen size={15} strokeWidth={1.5} style={detailTextColor ? { color: detailTextColor } : undefined} />
-            {!isDetailRoute && <span>Content Editor</span>}
+            {!isDetailRoute && <span>{es ? 'Editor de contenido' : 'Content Editor'}</span>}
           </motion.button>
         )}
 
@@ -179,7 +182,7 @@ function RootInner() {
             className={iconBtn}
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.96 }}
-            title="Close"
+            title={es ? 'Cerrar' : 'Close'}
           >
             <X size={16} strokeWidth={1.5} style={detailTextColor ? { color: detailTextColor } : undefined} />
           </motion.button>

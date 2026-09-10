@@ -1,4 +1,5 @@
 import { Message } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface SidebarProps {
   questions: Message[];
@@ -9,11 +10,12 @@ export default function Sidebar({
   questions,
   onQuestionClick
 }: SidebarProps) {
+  const { language } = useLanguage();
   return (
     <div className="absolute content-stretch flex flex-col gap-[20px] items-start left-[120px] top-[120px] w-[200px] z-10 max-h-[calc(100vh-200px)] overflow-y-auto">
       {questions.length > 0 && (
         <h3 className="font-['Source_Sans_Pro',sans-serif] text-[12px] uppercase text-[#686868] tracking-wider font-semibold mb-2">
-          Historial
+          {language === 'es' ? 'Historial' : 'History'}
         </h3>
       )}
       {questions.map((msg) => (
