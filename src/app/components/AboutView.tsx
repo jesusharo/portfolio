@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Linkedin, Mail, Palette } from 'lucide-react';
 import PageTransition from './PageTransition';
 import { useNetworkState } from '../context/NetworkStateContext';
 import { useLanguage } from '../context/LanguageContext';
-import { translateContent } from '../lib/api';
 
 const SECTION_LABEL: React.CSSProperties = {
   fontFamily: "'Source Sans 3', sans-serif",
@@ -158,6 +157,146 @@ const education = [
   },
 ];
 
+const experienceEs = [
+  {
+    company: 'Numaris',
+    location: 'Remoto, México',
+    description: 'Plataforma mexicana de telemática/IoT para la gestión de flotas y activos',
+    roles: [
+      {
+        title: 'Diseñador sénior de producto (IA)',
+        period: 'Oct 2025 – Ago 2026',
+        bullets: [
+          'Usé Replit y herramientas de IA para crear desde cero funcionalidades de la plataforma NEXT, poniendo una primera versión funcional frente a las partes interesadas en 2–4 días en lugar de las semanas que requería un proceso basado en Figma.',
+          'Lideré el alcance funcional, los PRD y las historias de usuario en más de 20 módulos: administración de dispositivos y organizaciones, tickets de soporte, notificaciones y operaciones de flota (geocercas, reportes de combustible y alias de comandos).',
+          'Resolví la proliferación de perfiles habitual en sistemas heredados con un modelo de acceso basado en relaciones: un conjunto reducido de perfiles principales (hasta 10) se combina dinámicamente para cubrir una amplia variedad de configuraciones de permisos y visibilidad.',
+          'Cada prototipo se ejecutaba sobre el sistema de diseño existente de la plataforma, así que los nuevos módulos mantuvieron la coherencia y los equipos de front-end y back-end pudieron construir directamente a partir de ellos.',
+          'También exploré un concepto de soporte técnico basado primero en IA: ¿podría la IA resolver de forma autónoma las consultas de soporte de los usuarios en lugar de derivarlas a un agente?',
+        ],
+      },
+      {
+        title: 'Diseñador de producto',
+        period: 'Jun 2023 – Abr 2024',
+        bullets: [
+          'Diseñé desde cero los primeros módulos de la plataforma: monitoreo, eventos, detalle de unidades, historial de viajes y etiquetado, llevándolos desde el concepto y los flujos de usuario hasta diseños en Figma que después continuaron en la fase asistida por IA.',
+        ],
+      },
+    ],
+  },
+  {
+    company: 'Ekatena',
+    location: 'Remoto, México',
+    description: 'Plataforma de análisis de riesgo financiero',
+    roles: [
+      {
+        title: 'Líder de diseño de producto',
+        period: 'Abr 2024 – Sept 2025',
+        bullets: [
+          'Volví a tiempo completo para asumir la responsabilidad total del diseño de una plataforma que había ayudado a dar forma como parte del equipo fundador de producto en 2021, operando como su único diseñador y con responsabilidades de nivel de product owner.',
+          'Contraté y acompañé al diseñador que tomó el relevo, y continué como asesor de diseño después de terminar la colaboración.',
+          'El sistema de diseño fue un esfuerzo conjunto con ingeniería: lideré la biblioteca de componentes y las guías que mantuvieron la coherencia del producto al crecer.',
+          'Construí un sistema de relaciones entre reportes y un reporte dedicado de Ultimate Beneficial Owner (UBO) para profundizar en el análisis de accionistas y riesgos.',
+          'Ese enfoque en la claridad de los reportes dio resultados: clientes citaron repetidamente el reporte principal de riesgo y el reporte del buró de crédito en sus testimonios como la razón para elegir Ekatena frente a sus competidores.',
+          'Trabajé con ingeniería en la estrategia para mejorar el rendimiento de carga de las vistas de detalle de reportes, reduciendo el tiempo de renderizado de grandes conjuntos de datos, y simplifiqué el sistema de roles y permisos para mejorar el flujo de trabajo de analistas y la escalabilidad operativa.',
+          'Llevé la plataforma a móvil, decidiendo qué merece espacio en una pantalla pequeña y qué no.',
+        ],
+      },
+    ],
+  },
+  {
+    company: 'Neerva',
+    location: 'Remoto, México',
+    description: 'Diseñador freelance',
+    roles: [
+      {
+        title: 'Diseñador freelance',
+        period: 'Sept 2022 – Jun 2023',
+        bullets: [
+          'Diseño web y móvil para clientes de Neerva en Estados Unidos: secciones de la aplicación móvil y el sitio web de New Era, además de un rediseño de la aplicación móvil de Grasshopper.',
+          'También entregué sitios de eCommerce para otros clientes estadounidenses, en web y móvil.',
+        ],
+      },
+    ],
+  },
+  {
+    company: 'Cymatic.io',
+    location: 'Remoto, México (sede: Raleigh, Carolina del Norte)',
+    description: 'Diseñador de producto',
+    roles: [
+      {
+        title: 'Diseñador de producto',
+        period: 'Ene 2021 – Sept 2022',
+        bullets: [
+          'Reestructuré la arquitectura de información del producto (jerarquía y roles de usuario) para servir a organizaciones más grandes como Universal Media Group y la University of Oklahoma.',
+          'La instalación, que antes requería una semana y apoyo parcial de desarrollo, se convirtió en un flujo autodirigido de 10–20 minutos que usuarios no técnicos podían completar por su cuenta, lo que ayudó a aumentar la base de clientes.',
+          'Añadí componentes al sistema de diseño e impulsé mejoras de claridad y accesibilidad.',
+          'Lancé una funcionalidad personalizable de manual de ciberseguridad: reglas y flujos de trabajo explícitos para mitigar riesgos.',
+          'Reconstruí el sistema de notificaciones para hacerlo escalable y útil en el día a día.',
+        ],
+      },
+    ],
+  },
+  {
+    company: 'michelada.io',
+    location: 'Colima, MX',
+    description: 'Diseñador de producto',
+    roles: [
+      {
+        title: 'Diseñador de producto',
+        period: '2018 – 2020',
+        bullets: [
+          'Dirigí el design sprint que produjo la plataforma de eCommerce B2B de Levi’s Mexico, reduciendo un proceso de compra de varias semanas a 30 minutos; también creé una aplicación web/móvil de gestión de tickets que sustituyó a Eventbrite para eventos regionales.',
+          'Lideré sprints de diseño de producto para idear, validar y crear desde cero nuevas aplicaciones móviles para startups con usuarios reales.',
+          'Sumé la gestión de equipos al trabajo práctico de diseño: desarrollo profesional y evaluaciones de desempeño para el equipo de diseño.',
+        ],
+      },
+    ],
+  },
+  {
+    company: 'MagmaLabs',
+    location: 'Colima, MX',
+    description: 'Director de UX/UI',
+    roles: [
+      {
+        title: 'Director de UX/UI',
+        period: '2015 – 2018',
+        bullets: [
+          'Me encargué de la marca, el sitio web y la identidad de la empresa en todos los canales, y dirigí sprints de diseño de producto para crear aplicaciones móviles y web para clientes fintech.',
+          'Rediseñé sitios de eCommerce y validé los cambios de UX mediante pruebas A/B.',
+          'Hice crecer el equipo de diseño y establecí sus planes de carrera, evaluaciones de desempeño y KPI.',
+        ],
+      },
+    ],
+  },
+  {
+    company: 'Crowd Interactive',
+    location: 'Colima, MX',
+    description: 'Diseñador de UI → Líder de UI',
+    roles: [
+      {
+        title: 'Diseñador de UI → Líder de UI',
+        period: '2009 – 2015',
+        bullets: [
+          'En FoxCommerce, me encargué de la marca, la estructura gráfica y la planificación de diseño de la plataforma de eCommerce que posteriormente recaudó una ronda de 3.5 millones de USD.',
+          'Creé el concepto y la marca de MagmaConf (6 ediciones, ponentes internacionales y patrocinadores como StickerMule, Engine Yard, Heroku, GitHub, CloudApp, Cookpad, DensityLabs, Travis CI y OneLogin), y diseñé sitios de eCommerce responsivos (Shopify, Spree/Solidus, Magento) para startups.',
+          'Pasé de Diseñador de UI a Líder de UI a medida que crecía el equipo, asumiendo la contratación y la dirección diaria del grupo de diseño.',
+        ],
+      },
+    ],
+  },
+];
+
+const educationEs = [
+  {
+    degree: 'Maestría en Diseño Web y Frontend para Múltiples Dispositivos',
+    school: 'Escuela Superior de Diseño de Barcelona',
+  },
+  {
+    degree: 'Licenciatura en Diseño Gráfico',
+    school: 'Facultad de Arquitectura y Diseño, Universidad de Colima',
+  },
+];
+
 const tools = ['Figma', 'Webflow', 'Adobe CS', 'Affinity Designer', 'HTML', 'CSS', 'Replit', 'Claude Code', 'Gemini CLI', 'ChatGPT Codex'];
 
 const skills = [
@@ -171,8 +310,8 @@ export default function AboutView() {
   const { setNetworkState } = useNetworkState();
   const { language } = useLanguage();
   const es = language === 'es';
-  const [localizedExperience, setLocalizedExperience] = useState<typeof experience>(experience);
-  const [localizedEducation, setLocalizedEducation] = useState<typeof education>(education);
+  const localizedExperience = es ? experienceEs : experience;
+  const localizedEducation = es ? educationEs : education;
   const labels = {
     summary: es ? 'Resumen' : 'Summary',
     experience: es ? 'Experiencia' : 'Experience',
@@ -218,25 +357,6 @@ export default function AboutView() {
     setNetworkState('conversation');
     return () => setNetworkState('idle');
   }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!es) {
-      setLocalizedExperience(experience);
-      setLocalizedEducation(education);
-      return;
-    }
-    translateContent({ experience, education }, 'es')
-      .then((translated) => {
-        if (cancelled) return;
-        setLocalizedExperience(translated.experience);
-        setLocalizedEducation(translated.education);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [es]);
 
   return (
     <PageTransition>

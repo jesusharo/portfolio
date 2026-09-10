@@ -11,7 +11,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useNetworkState } from '../context/NetworkStateContext';
-import { getProjects, getEditorProjects, getReviewProject, updateProject, translateContent } from '../lib/api';
+import { getProjects, getEditorProjects, getReviewProject, updateProject } from '../lib/api';
 import { useLanguage } from '../context/LanguageContext';
 import RichTextEditor from './editor/RichTextEditor';
 import ImageDropZone from './editor/ImageDropZone';
@@ -32,9 +32,11 @@ interface ContentBlock {
   type: 'richtext' | 'image' | 'imagegrid' | 'carousel' | 'divider';
   // richtext
   html?: string;
+  html_es?: string;
   // image (single)
   url?: string;
   caption?: string;
+  caption_es?: string;
   // imagegrid & carousel
   images?: GridImageItem[];
   columns?: GridColumnCount;
@@ -46,10 +48,12 @@ interface Project {
   id: string;
   name: string;
   subtitle?: string;
+  subtitle_es?: string;
   background_color: string;
   accent_color: string;
   text_color?: string;
   description: string;
+  description_es?: string;
   description_alignment?: 'left' | 'center' | 'right' | 'justify';
   hero_image: string;
   hero_foreground_image?: string;
@@ -218,22 +222,8 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
     };
   }, [apiType, editorAuthed, dataVersion, reviewMode, token]);
 
-  useEffect(() => {
-    let cancelled = false;
-    if (editorAuthed) return;
-    if (language === 'en') {
-      setItems(originalItems);
-    } else if (originalItems.length) {
-      translateContent(originalItems, 'es')
-        .then(translated => {
-          if (!cancelled) setItems(translated);
-        })
-        .catch(() => {});
-    }
-    return () => {
-      cancelled = true;
-    };
-  }, [language, originalItems, editorAuthed]);
+  const localized = (english?: string, spanish?: string) =>
+    language === 'es' ? (spanish?.trim() ? spanish : english || '') : (english?.trim() ? english : spanish || '');
 
   const currentIndex = reviewMode ? (items.length ? 0 : -1) : items.findIndex(p => p.id === id);
   const item = items[currentIndex] ?? null;
@@ -264,6 +254,7 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
 
   // ── Inline content editing state ──────────────────────────────────────────
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
+  const [blockLanguages, setBlockLanguages] = useState<Record<string, 'en' | 'es'>>({});
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const blockSensors = useSensors(
@@ -359,6 +350,22 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
     scheduleAutoSave(next);
   }
 
+  function localizeBlock(block: ContentBlock): ContentBlock {
+    const localizedBlock = { ...block, html: localized(block.html, block.html_es), caption: localized(block.caption, block.caption_es) };
+    if (localizedBlock.images) localizedBlock.images = localizedBlock.images.map(image => ({
+      ...image,
+      caption: localized(image.caption, (image as GridImageItem & { caption_es?: string }).caption_es),
+    }));
+    if (localizedBlock.rows) localizedBlock.rows = localizedBlock.rows.map(row => ({
+      ...row,
+      images: row.images.map(image => ({
+        ...image,
+        caption: localized(image.caption, (image as GridImageItem & { caption_es?: string }).caption_es),
+      })),
+    }));
+    return localizedBlock;
+  }
+
   function handleBlockDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -416,7 +423,8 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
 
   if (!item) return null;
 
-  const paragraphs = (item.description ?? '').split('\n\n').filter(Boolean);
+  const description = localized(item.description, (item as Project & { description_es?: string }).description_es);
+  const paragraphs = description.split('\n\n').filter(Boolean);
   const accentColor = item.accent_color || item.background_color || '#1c1c1c';
   const textColor = /^#[0-9a-f]{6}$/i.test(item.text_color || '') ? item.text_color! : '#ffffff';
   const descriptionAlignment = ['left', 'center', 'right', 'justify'].includes(item.description_alignment || '')
@@ -476,12 +484,12 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
             >
               {item.name}
             </h1>
-            {item.subtitle?.trim() && (
+             {localized(item.subtitle, (item as Project & { subtitle_es?: string }).subtitle_es).trim() && (
               <p
                 className="mt-0.5 hidden truncate text-[0.72rem] leading-tight md:block opacity-55"
                 style={{ fontFamily: "'Source Sans 3', sans-serif", color: textColor }}
               >
-                {item.subtitle}
+                 {localized(item.subtitle, (item as Project & { subtitle_es?: string }).subtitle_es)}
               </p>
             )}
           </div>
@@ -497,13 +505,13 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
 
         {/* Keep the mobile subtitle out of the navigation row so it cannot
             overlap the next/close controls on narrow screens. */}
-        {item.subtitle?.trim() && (
+         {localized(item.subtitle, (item as Project & { subtitle_es?: string }).subtitle_es).trim() && (
           <div className="px-8 pt-3 md:hidden">
             <p
               className="text-center text-[0.78rem] leading-snug opacity-55"
               style={{ fontFamily: "'Source Sans 3', sans-serif", color: textColor }}
             >
-              {item.subtitle}
+               {localized(item.subtitle, (item as Project & { subtitle_es?: string }).subtitle_es)}
             </p>
           </div>
         )}
@@ -598,10 +606,24 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
 
                       {/* Block content */}
                       <div className="mb-1">
+                        {block.type !== 'divider' && (
+                          <div className="mb-2 flex justify-end">
+                            <div className="flex rounded-[7px] border border-white/10 bg-white/[0.03] p-0.5">
+                              {(['en', 'es'] as const).map(lang => (
+                                <button key={lang} type="button"
+                                  onClick={() => setBlockLanguages(current => ({ ...current, [block.id]: lang }))}
+                                  className={`rounded-[5px] px-2 py-1 text-[0.65rem] ${(blockLanguages[block.id] || 'en') === lang ? 'bg-white/15 text-white' : 'text-white/35 hover:text-white'}`}>
+                                  {lang === 'en' ? 'English' : 'Español'}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                         {block.type === 'richtext' && (
                           <RichTextEditor
-                            content={block.html || ''}
-                            onChange={html => updateBlock(block.id, { html })}
+                            key={`${block.id}-${blockLanguages[block.id] || 'en'}`}
+                            content={((blockLanguages[block.id] || 'en') === 'es' ? block.html_es : block.html) || ''}
+                            onChange={html => updateBlock(block.id, (blockLanguages[block.id] || 'en') === 'es' ? { html_es: html } : { html })}
                             placeholder="Write something…"
                           />
                         )}
@@ -609,25 +631,44 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
                           <ImageDropZone
                             value={block.url || ''}
                             onChange={url => updateBlock(block.id, { url })}
-                            caption={block.caption}
-                            onCaptionChange={caption => updateBlock(block.id, { caption })}
+                            caption={(blockLanguages[block.id] || 'en') === 'es' ? block.caption_es || '' : block.caption || ''}
+                            onCaptionChange={caption => updateBlock(block.id, (blockLanguages[block.id] || 'en') === 'es' ? { caption_es: caption } : { caption })}
                           />
                         )}
                         {block.type === 'imagegrid' && (
                           <ImageGridBlock
-                            images={block.images || []}
+                            images={(block.images || []).map(image => (blockLanguages[block.id] || 'en') === 'es'
+                              ? { ...image, caption: image.caption_es || '' }
+                              : image)}
                             columns={block.columns ?? 2}
-                            rows={block.rows}
+                            rows={block.rows?.map(row => (blockLanguages[block.id] || 'en') === 'es'
+                              ? { ...row, images: row.images.map(image => ({ ...image, caption: image.caption_es || '' })) }
+                              : row)}
                             editorMode
-                            onChange={(images, columns, rows) => updateBlock(block.id, { images, columns, rows })}
+                            onChange={(images, columns, rows) => updateBlock(block.id, {
+                              images: images.map(image => (blockLanguages[block.id] || 'en') === 'es'
+                                ? { ...((block.images || []).find(source => source.id === image.id)), ...image, caption: ((block.images || []).find(source => source.id === image.id)?.caption || ''), caption_es: image.caption }
+                                : image),
+                              columns,
+                              rows: rows.map(row => ({
+                                ...row,
+                                images: row.images.map(image => (blockLanguages[block.id] || 'en') === 'es'
+                                  ? { ...((block.rows || []).flatMap(sourceRow => sourceRow.images).find(source => source.id === image.id)), ...image, caption: ((block.rows || []).flatMap(sourceRow => sourceRow.images).find(source => source.id === image.id)?.caption || ''), caption_es: image.caption }
+                                  : image),
+                              })),
+                            })}
                           />
                         )}
                         {block.type === 'carousel' && (
                           <CarouselBlock
-                            images={(block.images || []) as CarouselImageItem[]}
+                            images={(block.images || []).map(image => (blockLanguages[block.id] || 'en') === 'es'
+                              ? { ...image, caption: image.caption_es || '' }
+                              : image) as CarouselImageItem[]}
                             visibleCount={block.visible_count ?? 3}
                             editorMode
-                            onChange={images => updateBlock(block.id, { images })}
+                            onChange={images => updateBlock(block.id, { images: images.map(image => (blockLanguages[block.id] || 'en') === 'es'
+                              ? { ...((block.images || []).find(source => source.id === image.id)), ...image, caption: ((block.images || []).find(source => source.id === image.id)?.caption || ''), caption_es: image.caption }
+                              : image) })}
                             onVisibleCountChange={visible_count => updateBlock(block.id, { visible_count })}
                           />
                         )}
@@ -648,7 +689,9 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
           ) : (
             /* ── Read-only mode ── */
             <>
-              {contentBlocks.map(block => (
+              {contentBlocks.map(rawBlock => {
+                const block = localizeBlock(rawBlock);
+                return (
                 <div key={block.id} className="mb-8">
                   {block.type === 'richtext' && block.html && (
                     <div
@@ -692,7 +735,8 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
                     <hr className="border-0 border-t my-2 opacity-30" style={{ borderColor: textColor }} />
                   )}
                 </div>
-              ))}
+                );
+              })}
             </>
           )}
         </div>

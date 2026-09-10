@@ -9,6 +9,7 @@ export interface CarouselImageItem {
   id: string;
   url: string;
   caption?: string;
+  caption_es?: string;
 }
 
 export type CarouselVisibleCount = 1 | 2 | 3;
@@ -17,6 +18,7 @@ interface Props {
   images: CarouselImageItem[];
   visibleCount?: CarouselVisibleCount;
   editorMode?: boolean;
+  language?: 'en' | 'es';
   onChange?: (images: CarouselImageItem[]) => void;
   onVisibleCountChange?: (count: CarouselVisibleCount) => void;
 }
@@ -113,6 +115,7 @@ export default function CarouselBlock({
   editorMode,
   onChange,
   onVisibleCountChange,
+  language = 'en',
 }: Props) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [lightboxImage, setLightboxImage] = useState<CarouselImageItem | null>(null);
@@ -145,7 +148,7 @@ export default function CarouselBlock({
   }
 
   function updateCaption(id: string, caption: string) {
-    onChange?.(images.map(img => img.id === id ? { ...img, caption } : img));
+    onChange?.(images.map(img => img.id === id ? { ...img, [language === 'es' ? 'caption_es' : 'caption']: caption } : img));
   }
 
   async function goTo(idx: number) {
@@ -217,9 +220,9 @@ export default function CarouselBlock({
                 </button>
               </div>
               <ImageCaptionField
-                value={img.caption}
+                 value={language === 'es' ? img.caption_es : img.caption}
                 onChange={caption => updateCaption(img.id, caption)}
-                placeholder="Caption"
+                 placeholder={language === 'es' ? 'Pie' : 'Caption'}
               />
             </div>
           ))}

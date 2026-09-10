@@ -2,7 +2,13 @@ import { Router } from 'express';
 import { query } from '../db.mjs';
 import jwt from 'jsonwebtoken';
 import { createHash, randomBytes } from 'crypto';
-import { sanitizePlainText, sanitizeContentBlocks, sanitizeHexColor, sanitizeTextAlign } from '../sanitize.mjs';
+import {
+  sanitizePlainText,
+  sanitizeMultilinePlainText,
+  sanitizeContentBlocks,
+  sanitizeHexColor,
+  sanitizeTextAlign,
+} from '../sanitize.mjs';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
@@ -123,9 +129,9 @@ router.post('/editor', requireAuth, async (req, res) => {
 router.put('/editor/:id', requireAuth, async (req, res) => {
   const fields = req.body;
   const allowed = [
-    'name','subtitle','slug','sort_order','hidden','background_color','accent_color','text_color',
+    'name','subtitle','subtitle_es','slug','sort_order','hidden','background_color','accent_color','text_color',
     'logo_grid_image','logo_header_image','hero_image','hero_foreground_image','content_blocks','description',
-    'description_alignment'
+    'description_es','description_alignment'
   ];
   const sets = [];
   const vals = [];
@@ -133,7 +139,8 @@ router.put('/editor/:id', requireAuth, async (req, res) => {
   for (const [k, v] of Object.entries(fields)) {
     if (!allowed.includes(k)) continue;
     let sanitized;
-    if (k === 'name' || k === 'subtitle') sanitized = sanitizePlainText(String(v));
+    if (k === 'name' || k === 'subtitle' || k === 'subtitle_es') sanitized = sanitizePlainText(String(v));
+    else if (k === 'description' || k === 'description_es') sanitized = sanitizeMultilinePlainText(v);
     else if (k === 'text_color') sanitized = sanitizeHexColor(v);
     else if (k === 'description_alignment') sanitized = sanitizeTextAlign(v);
     else if (k === 'content_blocks') sanitized = JSON.stringify(sanitizeContentBlocks(v));

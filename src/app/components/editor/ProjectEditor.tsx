@@ -7,6 +7,7 @@ interface Project {
   id: string;
   name: string;
   subtitle: string;
+  subtitle_es?: string;
   type: string;
   slug: string;
   background_color: string;
@@ -17,6 +18,7 @@ interface Project {
   hero_image: string;
   hero_foreground_image: string;
   description: string;
+  description_es?: string;
   description_alignment?: 'left' | 'center' | 'right' | 'justify';
   hidden: boolean;
 }
@@ -38,6 +40,7 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
   const [sharing, setSharing] = useState(false);
   const [shareError, setShareError] = useState('');
   const [copied, setCopied] = useState(false);
+  const [contentLanguage, setContentLanguage] = useState<'en' | 'es'>('en');
 
   useEffect(() => { setDraft({ ...project }); setSaveError(''); }, [project.id]);
 
@@ -50,6 +53,7 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
       const updated = await updateProject(draft.id, {
         name: draft.name,
         subtitle: draft.subtitle,
+        subtitle_es: draft.subtitle_es || '',
         slug: draft.slug,
         hidden: draft.hidden,
         background_color: draft.background_color,
@@ -60,6 +64,7 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
         hero_image: draft.hero_image,
         hero_foreground_image: draft.hero_foreground_image,
         description: draft.description,
+        description_es: draft.description_es || '',
         description_alignment: draft.description_alignment || 'center',
       });
       onSaved(updated);
@@ -153,12 +158,17 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
             <label className={labelCls}>Name</label>
             <input className={inputCls} value={draft.name} onChange={e => set({ name: e.target.value })} />
           </div>
-          <div>
-            <label className={labelCls}>What I did</label>
+           <div>
+             <div className="mb-1 flex items-center justify-between">
+             <label className={`${labelCls} mb-0`}>What I did</label>
+             <div className="flex rounded-[7px] border border-white/10 bg-white/[0.03] p-0.5">
+               {(['en', 'es'] as const).map(lang => <button key={lang} type="button" onClick={() => setContentLanguage(lang)} className={`rounded-[5px] px-2 py-1 text-[0.65rem] ${contentLanguage === lang ? 'bg-white/15 text-white' : 'text-white/35 hover:text-white'}`}>{lang === 'en' ? 'English' : 'Español'}</button>)}
+             </div>
+             </div>
             <input
               className={inputCls}
-              value={draft.subtitle || ''}
-              onChange={e => set({ subtitle: e.target.value })}
+               value={contentLanguage === 'en' ? draft.subtitle || '' : draft.subtitle_es || ''}
+               onChange={e => set(contentLanguage === 'en' ? { subtitle: e.target.value } : { subtitle_es: e.target.value })}
               placeholder="e.g. Product design, UX strategy & visual direction"
             />
           </div>
@@ -169,8 +179,12 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
           <div>
             <div className="mb-1 flex items-center justify-between gap-3">
               <label className={`${labelCls} mb-0`}>Description</label>
-              <div className="flex items-center gap-0.5 rounded-[8px] border border-white/10 bg-white/[0.03] p-0.5">
-                {([
+              <div className="flex items-center gap-2">
+                <div className="flex rounded-[7px] border border-white/10 bg-white/[0.03] p-0.5">
+                  {(['en', 'es'] as const).map(lang => <button key={lang} type="button" onClick={() => setContentLanguage(lang)} className={`rounded-[5px] px-2 py-1 text-[0.65rem] ${contentLanguage === lang ? 'bg-white/15 text-white' : 'text-white/35 hover:text-white'}`}>{lang === 'en' ? 'English' : 'Español'}</button>)}
+                </div>
+                <div className="flex items-center gap-0.5 rounded-[8px] border border-white/10 bg-white/[0.03] p-0.5">
+                  {([
                   ['left', 'Align left', AlignLeft],
                   ['center', 'Align center', AlignCenter],
                   ['right', 'Align right', AlignRight],
@@ -193,11 +207,13 @@ export default function ProjectEditor({ project, onBack, onDeleted, onSaved }: P
                     </button>
                   );
                 })}
+                </div>
               </div>
             </div>
             <textarea
               className={`${inputCls} resize-none`} rows={4}
-              value={draft.description} onChange={e => set({ description: e.target.value })}
+               value={contentLanguage === 'en' ? draft.description : draft.description_es || ''}
+               onChange={e => set(contentLanguage === 'en' ? { description: e.target.value } : { description_es: e.target.value })}
               style={{ textAlign: draft.description_alignment || 'center' }}
             />
           </div>

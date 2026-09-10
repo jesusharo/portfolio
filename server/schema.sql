@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS projects (
   type TEXT NOT NULL CHECK (type IN ('ui_project', 'case_study')),
   name TEXT NOT NULL,
   subtitle TEXT DEFAULT '',
+  subtitle_es TEXT DEFAULT '',
   slug TEXT NOT NULL,
   sort_order INTEGER NOT NULL DEFAULT 0,
   hidden BOOLEAN NOT NULL DEFAULT false,
@@ -15,6 +16,7 @@ CREATE TABLE IF NOT EXISTS projects (
   hero_foreground_image TEXT DEFAULT '',
   content_blocks JSONB NOT NULL DEFAULT '[]',
   description TEXT DEFAULT '',
+  description_es TEXT DEFAULT '',
   description_alignment TEXT DEFAULT 'center',
   review_token_hash TEXT DEFAULT NULL,
   review_token_created_at TIMESTAMPTZ DEFAULT NULL,
@@ -24,9 +26,11 @@ CREATE TABLE IF NOT EXISTS projects (
 
 -- Add subtitle to existing projects without affecting stored content.
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS subtitle TEXT DEFAULT '';
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS subtitle_es TEXT DEFAULT '';
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS hero_foreground_image TEXT DEFAULT '';
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS text_color TEXT DEFAULT '#ffffff';
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS description_alignment TEXT DEFAULT 'center';
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS description_es TEXT DEFAULT '';
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS review_token_hash TEXT DEFAULT NULL;
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS review_token_created_at TIMESTAMPTZ DEFAULT NULL;
 

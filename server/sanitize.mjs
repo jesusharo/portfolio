@@ -54,6 +54,12 @@ export function sanitizePlainText(text) {
   return sanitizeHtml(text, { allowedTags: [], allowedAttributes: {} }).trim();
 }
 
+/** Strip HTML from multiline plain text while retaining intentional newlines. */
+export function sanitizeMultilinePlainText(text) {
+  if (typeof text !== 'string') return '';
+  return sanitizePlainText(text).replace(/\r\n?/g, '\n');
+}
+
 /** Allow project-scoped colors only in standard six-digit hex notation. */
 export function sanitizeHexColor(value, fallback = '#ffffff') {
   const color = typeof value === 'string' ? value.trim() : '';
@@ -77,37 +83,47 @@ export function sanitizeCaption(value) {
  */
 export function sanitizeContentBlocks(blocks) {
   if (!Array.isArray(blocks)) return [];
+  const sanitizeCaptionFields = value => {
+    if (!value || typeof value !== 'object') return value;
+    return {
+      ...value,
+      ...(typeof value.caption === 'string' ? { caption: sanitizeCaption(value.caption) } : {}),
+      ...(typeof value.caption_es === 'string' ? { caption_es: sanitizeCaption(value.caption_es) } : {}),
+    };
+  };
+  const sanitizeImages = images => Array.isArray(images)
+    ? images.map(sanitizeCaptionFields)
+    : images;
+
   return blocks.map(block => {
-    if (block?.type === 'richtext' && typeof block.html === 'string') {
-      return { ...block, html: sanitizeRichText(block.html) };
+    if (block?.type === 'richtext') {
+      return {
+        ...block,
+        ...(typeof block.html === 'string' ? { html: sanitizeRichText(block.html) } : {}),
+        ...(typeof block.html_es === 'string' ? { html_es: sanitizeRichText(block.html_es) } : {}),
+      };
+    }
+    if (block?.type === 'image') {
+      return sanitizeCaptionFields(block);
     }
     if (block?.type === 'carousel') {
       const visibleCount = [1, 2, 3].includes(block.visible_count) ? block.visible_count : 3;
-      const images = Array.isArray(block.images)
-        ? block.images.map(image => typeof image === 'object' && image !== null
-          ? { ...image, ...(typeof image.caption === 'string' ? { caption: sanitizeCaption(image.caption) } : {}) }
-          : image)
-        : block.images;
-      return { ...block, images, visible_count: visibleCount };
+      return { ...block, images: sanitizeImages(block.images), visible_count: visibleCount };
     }
     if (block?.type === 'imagegrid' && Array.isArray(block.images)) {
-      const sanitizeGridImages = images => images.map(image =>
-        typeof image === 'object' && image !== null
-          ? { ...image, ...(typeof image.caption === 'string' ? { caption: sanitizeCaption(image.caption) } : {}) }
-          : image
-      );
       const columns = [1, 2, 3, 4].includes(block.columns) ? block.columns : 2;
       const rows = Array.isArray(block.rows)
         ? block.rows.map((row, index) => ({
+            ...row,
             id: sanitizePlainText(row?.id) || `row-${index + 1}`,
             columns: [1, 2, 3, 4].includes(row?.columns) ? row.columns : columns,
-            images: Array.isArray(row?.images) ? sanitizeGridImages(row.images) : [],
+            images: sanitizeImages(row?.images) || [],
           }))
         : undefined;
       return {
         ...block,
         columns,
-        images: sanitizeGridImages(block.images),
+        images: sanitizeImages(block.images),
         ...(rows ? { rows } : {}),
       };
     }

@@ -1,46 +1,5 @@
 const BASE = '/api';
 
-const translationCache = new Map<string, unknown>();
-
-function compactCacheKey(value: string) {
-  let hash = 2166136261;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-  return (hash >>> 0).toString(36);
-}
-
-export async function translateContent<T>(content: T, targetLanguage: 'en' | 'es' = 'es'): Promise<T> {
-  if (targetLanguage === 'en') return content;
-  const serialized = JSON.stringify([targetLanguage, content]);
-  const storageKey = `${compactCacheKey(serialized)}:${serialized.length}`;
-  if (translationCache.has(serialized)) return translationCache.get(serialized) as T;
-  try {
-    const stored = sessionStorage.getItem(`translation:${storageKey}`);
-    if (stored) {
-      const entry = JSON.parse(stored);
-      if (entry.source === serialized) {
-        translationCache.set(serialized, entry.value);
-        return entry.value as T;
-      }
-    }
-  } catch { /* session storage is optional */ }
-  const res = await fetch(`${BASE}/translate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content, targetLanguage }),
-  });
-  if (!res.ok) throw new Error('Translation failed');
-  const data = await res.json();
-  const value = (data.translated ?? data.content ?? data) as T;
-  translationCache.set(serialized, value);
-  try {
-    sessionStorage.setItem(`translation:${storageKey}`, JSON.stringify({ source: serialized, value }));
-  } catch { /* optional */ }
-  return value;
-}
-
 function getToken() {
   return localStorage.getItem('editor_token') || '';
 }

@@ -8,6 +8,7 @@ export interface GridImageItem {
   id: string;
   url: string;
   caption?: string;
+  caption_es?: string;
 }
 
 export type GridColumnCount = 1 | 2 | 3 | 4;
@@ -23,6 +24,7 @@ interface Props {
   columns: GridColumnCount;
   rows?: GridRow[];
   editorMode?: boolean;
+  language?: 'en' | 'es';
   onChange?: (images: GridImageItem[], columns: GridColumnCount, rows: GridRow[]) => void;
 }
 
@@ -116,10 +118,12 @@ function FilledSlot({
   item,
   onRemove,
   onCaptionChange,
+  language = 'en',
 }: {
   item: GridImageItem;
   onRemove: () => void;
   onCaptionChange: (caption: string) => void;
+  language?: 'en' | 'es';
 }) {
   return (
     <div className="relative group/slot min-w-0">
@@ -132,13 +136,13 @@ function FilledSlot({
           <X size={11} strokeWidth={2} />
         </button>
       </div>
-      <ImageCaptionField value={item.caption} onChange={onCaptionChange} placeholder="Caption" />
+      <ImageCaptionField value={(language === 'es' ? item.caption_es : item.caption)} onChange={onCaptionChange} placeholder={language === 'es' ? 'Pie' : 'Caption'} />
     </div>
   );
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export default function ImageGridBlock({ images, columns, rows, editorMode, onChange }: Props) {
+export default function ImageGridBlock({ images, columns, rows, editorMode, language = 'en', onChange }: Props) {
   const [lightboxImage, setLightboxImage] = useState<GridImageItem | null>(null);
   const normalizedRows = normalizeRows(rows, images, columns);
   const allImages = normalizedRows.flatMap(row => row.images);
@@ -199,7 +203,7 @@ export default function ImageGridBlock({ images, columns, rows, editorMode, onCh
   function updateCaption(id: string, caption: string) {
     emitRows(normalizedRows.map(row => ({
       ...row,
-      images: row.images.map(image => image.id === id ? { ...image, caption } : image),
+      images: row.images.map(image => image.id === id ? { ...image, [language === 'es' ? 'caption_es' : 'caption']: caption } : image),
     })));
   }
 
@@ -271,6 +275,7 @@ export default function ImageGridBlock({ images, columns, rows, editorMode, onCh
                     item={image}
                     onRemove={() => removeImage(image.id)}
                     onCaptionChange={caption => updateCaption(image.id, caption)}
+                    language={language}
                   />
                 ))}
                 {row.images.length < row.columns && (

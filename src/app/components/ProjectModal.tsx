@@ -1,20 +1,25 @@
 import { useEffect, useState, useCallback, type CSSProperties } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
-import { getProject, translateContent } from '../lib/api';
+import { getProject } from '../lib/api';
+import { localized } from '../lib/localizedContent';
 import { useLanguage } from '../context/LanguageContext';
+import CarouselBlock, { type CarouselVisibleCount } from './editor/CarouselBlock';
 
 interface ContentBlock {
   type: 'richtext' | 'image' | 'imagegrid' | 'carousel' | 'divider';
   html?: string;
+  html_es?: string;
   url?: string;
   caption?: string;
-  images?: { url: string; caption?: string }[];
+  caption_es?: string;
+  images?: { id?: string; url: string; caption?: string; caption_es?: string }[];
   columns?: 1 | 2 | 3 | 4;
+  visible_count?: CarouselVisibleCount;
   rows?: {
     id: string;
     columns: 1 | 2 | 3 | 4;
-    images: { url: string; caption?: string }[];
+    images: { id?: string; url: string; caption?: string; caption_es?: string }[];
   }[];
 }
 
@@ -22,6 +27,7 @@ interface Project {
   id: string;
   name: string;
   description: string;
+  description_es?: string;
   background_color: string;
   accent_color: string;
   text_color?: string;
@@ -123,22 +129,7 @@ export default function ProjectModal({ projectId, onClose }: Props) {
     };
   }, [projectId]);
 
-  useEffect(() => {
-    let cancelled = false;
-    if (!originalProject) return;
-    if (language === 'en') {
-      setProject(originalProject);
-      return;
-    }
-    translateContent(originalProject, 'es')
-      .then(translated => {
-        if (!cancelled) setProject(translated);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [language, originalProject]);
+  useEffect(() => { setProject(originalProject); }, [language, originalProject]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') onClose();
@@ -217,21 +208,32 @@ export default function ProjectModal({ projectId, onClose }: Props) {
                       <h2 className="text-[1.6rem] font-bold leading-tight mb-2 font-['Source_Sans_3',sans-serif]" style={{ color: textColor }}>
                         {project.name}
                       </h2>
-                      {project.description && (
+                      {localized(project, 'description', language) && (
                         <p
                           className="text-[0.95rem] leading-[1.6] mb-6 font-['Source_Sans_3',sans-serif] opacity-65"
                           style={{ color: textColor, textAlign: descriptionAlignment }}
                         >
-                          {project.description}
+                          {localized(project, 'description', language)}
                         </p>
                       )}
 
                       {/* Content blocks */}
                       <div className="space-y-2">
                         {(project.content_blocks || []).map((block, i) => {
-                          if (block.type === 'richtext' && block.html) return <RichTextBlock key={i} html={block.html} textColor={textColor} />;
-                          if (block.type === 'image' && block.url) return <ImageBlock key={i} url={block.url} caption={block.caption} textColor={textColor} />;
-                          if (block.type === 'imagegrid' && block.images?.length) return <ImageGridBlock key={i} images={block.images} columns={block.columns} rows={block.rows} textColor={textColor} />;
+                          if (block.type === 'richtext' && localized(block, 'html', language)) return <RichTextBlock key={i} html={localized(block, 'html', language)} textColor={textColor} />;
+                          if (block.type === 'image' && block.url) return <ImageBlock key={i} url={block.url} caption={localized(block, 'caption', language)} textColor={textColor} />;
+                          if (block.type === 'imagegrid' && block.images?.length) return <ImageGridBlock key={i} images={block.images.map(img => ({ ...img, caption: localized(img, 'caption', language) }))} columns={block.columns} rows={block.rows?.map(row => ({ ...row, images: row.images.map(img => ({ ...img, caption: localized(img, 'caption', language) })) }))} textColor={textColor} />;
+                           if (block.type === 'carousel' && block.images?.length) return (
+                             <CarouselBlock
+                               key={i}
+                               images={block.images.map((img, imageIndex) => ({
+                                 id: img.id || `${i}-${imageIndex}`,
+                                 url: img.url,
+                                 caption: localized(img, 'caption', language),
+                               }))}
+                               visibleCount={block.visible_count || 3}
+                             />
+                           );
                           if (block.type === 'divider') return <Divider key={i} textColor={textColor} />;
                           return null;
                         })}

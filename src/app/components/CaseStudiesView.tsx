@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { motion } from 'motion/react';
 import PageTransition from './PageTransition';
-import { getProjects, translateContent } from '../lib/api';
+import { getProjects } from '../lib/api';
+import { localized } from '../lib/localizedContent';
 import { useLanguage } from '../context/LanguageContext';
 import { useNetworkState } from '../context/NetworkStateContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
@@ -23,13 +24,13 @@ interface Project {
   name: string;
   background_color: string;
   logo_grid_image: string;
-  description: string;
+  description?: string;
+  description_es?: string;
 }
 
 export default function CaseStudiesView() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
-  const [originalProjects, setOriginalProjects] = useState<Project[]>([]);
   const { dataVersion } = useNetworkState();
   const {
     case_studies_visible,
@@ -39,35 +40,22 @@ export default function CaseStudiesView() {
   const desktopHover = useDesktopHover();
   const { language, t } = useLanguage();
   const desktopGridClass = DESKTOP_GRID_CLASSES[case_studies_grid_columns] || DESKTOP_GRID_CLASSES[4];
+  const displayProjects = projects.map(project => ({
+    ...project,
+    description: localized(project, 'description', language),
+  }));
 
   useEffect(() => {
     let cancelled = false;
     getProjects('case_study').then(data => {
       if (cancelled) return;
       const next = Array.isArray(data) ? data : [];
-      setOriginalProjects(next);
       setProjects(next);
     }).catch(() => {});
     return () => {
       cancelled = true;
     };
   }, [dataVersion]);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (language === 'en') {
-      setProjects(originalProjects);
-    } else if (originalProjects.length) {
-      translateContent(originalProjects, 'es')
-        .then(translated => {
-          if (!cancelled) setProjects(translated);
-        })
-        .catch(() => {});
-    }
-    return () => {
-      cancelled = true;
-    };
-  }, [language, originalProjects]);
 
   if (visibilityLoading) return null;
   if (!case_studies_visible) return <Navigate to="/projects" replace />;
@@ -84,7 +72,7 @@ export default function CaseStudiesView() {
         </h2>
         <TooltipProvider delayDuration={150}>
           <div className={`grid w-full grid-cols-2 gap-3 ${desktopGridClass.split(' ').find(className => className.startsWith('md:grid-cols-'))}`}>
-            {projects.map((project, i) => (
+            {displayProjects.map((project, i) => (
               <Tooltip key={project.id}>
                 <TooltipTrigger asChild>
                   <motion.button

@@ -3,4 +3,4 @@
 - [DB Schema](db-schema.md) — projects + about_content + images tables; DATABASE_URL is runtime-managed by Replit
 - [Image uploads](image-uploads.md) — images stored as bytea in Postgres `images` table; upload at POST /api/images/editor/upload; served at GET /api/images/:id; 8 MB limit
 - [Backdrop blur on scaled cards](backdrop-blur-scaled-cards.md) — sample neighboring cards with an oversized counter-scaled glass layer; filtering the scaled card itself samples the wrong area
-- [Automatic translation](automatic-translation.md) — use rate-limited Lingva/MyMemory for dynamic EN→ES content; protect non-human values and validate provider-level errors
+- [Manual bilingual content](manual-bilingual-content.md) — projects store EN/ES prose separately; shared titles/media never translate; empty selected-language fields fall back per field

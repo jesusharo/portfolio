@@ -6,10 +6,12 @@ interface Props {
   value: string;
   onChange: (url: string) => void;
   caption?: string;
-  onCaptionChange?: (caption: string) => void;
+  caption_es?: string;
+  language?: 'en' | 'es';
+  onCaptionChange?: (caption: string, language?: 'en' | 'es') => void;
 }
 
-export default function ImageDropZone({ value, onChange, caption, onCaptionChange }: Props) {
+export default function ImageDropZone({ value, onChange, caption, caption_es, language = 'en', onCaptionChange }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
@@ -94,9 +96,9 @@ export default function ImageDropZone({ value, onChange, caption, onCaptionChang
         {onCaptionChange !== undefined && (
           <input
             type="text"
-            value={caption || ''}
-            onChange={e => onCaptionChange(e.target.value)}
-            placeholder="Caption (optional)"
+            value={(language === 'es' ? caption_es : caption) || ''}
+            onChange={e => onCaptionChange(e.target.value, language)}
+            placeholder={language === 'es' ? 'Pie de imagen (opcional)' : 'Caption (optional)'}
             className="bg-transparent text-white/40 text-[0.8rem] outline-none placeholder:text-white/20 w-full border-b border-white/[0.06] pb-1 focus:border-white/20 transition-colors"
             style={{ fontFamily: "'Source Sans 3', sans-serif" }}
           />
@@ -170,9 +172,9 @@ export default function ImageDropZone({ value, onChange, caption, onCaptionChang
       {onCaptionChange !== undefined && (
         <input
           type="text"
-          value={caption || ''}
-          onChange={e => onCaptionChange(e.target.value)}
-          placeholder="Caption (optional)"
+          value={(language === 'es' ? caption_es : caption) || ''}
+          onChange={e => onCaptionChange(e.target.value, language)}
+          placeholder={language === 'es' ? 'Pie de imagen (opcional)' : 'Caption (optional)'}
           className="bg-transparent text-white/40 text-[0.8rem] outline-none placeholder:text-white/20 w-full border-b border-white/[0.06] pb-1 focus:border-white/20 transition-colors"
           style={{ fontFamily: "'Source Sans 3', sans-serif" }}
         />
