@@ -62,17 +62,14 @@ export default function CaseStudiesView() {
                   <motion.button
                     onClick={() => navigate(`/cases/${project.id}`)}
                     aria-label={`Open ${project.name}`}
-                    className="relative flex aspect-square w-full origin-center cursor-pointer items-center justify-center overflow-hidden rounded-[20px] border border-transparent backdrop-blur-0 transition-[backdrop-filter,border-color] duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform md:hover:border-white/25 md:hover:backdrop-blur-[20px] md:hover:backdrop-saturate-150 md:hover:shadow-2xl md:hover:ring-1 md:hover:ring-white/20"
-                    style={{ backgroundColor: project.background_color || '#333' }}
+                    className="group relative flex aspect-square w-full origin-center cursor-pointer items-center justify-center overflow-visible rounded-[20px] border border-transparent transition-[border-color,box-shadow] duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform md:hover:border-white/25 md:hover:shadow-2xl md:hover:ring-1 md:hover:ring-white/20"
                     initial={{ opacity: 0, scale: 1, zIndex: 1 }}
                     animate={{ opacity: 1, scale: 1, zIndex: 1 }}
                     whileHover={desktopHover ? {
                       scale: 1.35,
                       zIndex: 30,
-                      backgroundColor: withAlpha(project.background_color || '#333', 0.55),
                       transition: {
                         scale: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
-                        backgroundColor: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
                       },
                     } : undefined}
                     whileTap={{
@@ -82,19 +79,30 @@ export default function CaseStudiesView() {
                     transition={{
                       opacity: { duration: 0.35, delay: i * 0.05 },
                       scale: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
-                      backgroundColor: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
                       zIndex: { duration: 0 },
                     }}
                   >
-                    {project.logo_grid_image ? (
-                      <img src={project.logo_grid_image} alt={project.name}
-                        className="max-w-[60%] max-h-[60%] object-contain" />
-                    ) : (
-                      <span className="text-[2rem] font-bold opacity-40"
-                        style={{ color: 'white', fontFamily: "'Source Sans 3', sans-serif" }}>
-                        {project.name[0]}
-                      </span>
-                    )}
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-0 rounded-[20px] opacity-100 transition-opacity duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:opacity-0"
+                      style={{ backgroundColor: project.background_color || '#333' }}
+                    />
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -inset-[17.5%] origin-center scale-[0.74074] rounded-[27px] opacity-0 backdrop-blur-[24px] backdrop-saturate-150 transition-opacity duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] md:group-hover:opacity-100"
+                      style={{ backgroundColor: withAlpha(project.background_color || '#333', 0.78) }}
+                    />
+                    <span className="relative z-10 flex h-full w-full items-center justify-center overflow-hidden rounded-[20px]">
+                      {project.logo_grid_image ? (
+                        <img src={project.logo_grid_image} alt={project.name}
+                          className="max-w-[60%] max-h-[60%] object-contain" />
+                      ) : (
+                        <span className="text-[2rem] font-bold opacity-40"
+                          style={{ color: 'white', fontFamily: "'Source Sans 3', sans-serif" }}>
+                          {project.name[0]}
+                        </span>
+                      )}
+                    </span>
                   </motion.button>
                 </TooltipTrigger>
                 <TooltipContent
