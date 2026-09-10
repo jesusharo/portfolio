@@ -20,7 +20,13 @@ const RICH_TEXT_OPTIONS = {
   },
   allowedStyles: {
     '*': {
-      color: [/^#[0-9a-f]{6}$/i],
+      // Preserve colors produced by the browser/Tiptap as hex or rgb values.
+      // Keep the grammar strict so arbitrary CSS cannot enter saved content.
+      color: [
+        /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i,
+        /^rgb\(\s*(?:\d{1,3}\s*,\s*){2}\d{1,3}\s*\)$/i,
+        /^rgba\(\s*(?:\d{1,3}\s*,\s*){3}(?:0|1|0?\.\d+)\s*\)$/i,
+      ],
       'font-size': [/^(0\.85|1|1\.25|1\.5)rem$/],
       'text-align': [/^(left|center|right|justify)$/],
     },
