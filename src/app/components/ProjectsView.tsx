@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router';
 import { motion } from 'motion/react';
 import PageTransition from './PageTransition';
@@ -35,6 +35,9 @@ export default function ProjectsView() {
   const desktopHover = useDesktopHover();
   const { language, t } = useLanguage();
   const desktopGridClass = DESKTOP_GRID_CLASSES[projects_grid_columns] || DESKTOP_GRID_CLASSES[4];
+  const gridStyle = {
+    '--desktop-card-basis': `calc((100% - ${(projects_grid_columns - 1) * 0.75}rem) / ${projects_grid_columns})`,
+  } as CSSProperties;
   const displayProjects = projects.map(project => ({
     ...project,
     description: localized(project, 'description', language),
@@ -64,14 +67,14 @@ export default function ProjectsView() {
               {t('uiProjects')}
             </h2>
             <TooltipProvider delayDuration={150}>
-              <div className={`grid w-full grid-cols-3 gap-3 ${desktopGridClass.split(' ').find(className => className.startsWith('md:grid-cols-'))}`}>
+              <div className="flex w-full flex-wrap justify-center gap-3" style={gridStyle}>
                 {displayProjects.map((project, i) => (
                   <Tooltip key={project.id}>
                     <TooltipTrigger asChild>
                       <motion.button
                         onClick={() => navigate(`/projects/${project.id}`)}
                          aria-label={`${t('open')} ${project.name}`}
-                        className="group relative flex aspect-square w-full origin-center cursor-pointer items-center justify-center overflow-visible rounded-[20px] will-change-transform"
+                        className="group relative flex aspect-square basis-[calc((100%-1.5rem)/3)] origin-center cursor-pointer items-center justify-center overflow-visible rounded-[20px] will-change-transform md:basis-[var(--desktop-card-basis)]"
                         initial={{ opacity: 0, scale: 1, zIndex: 1 }}
                         animate={{ opacity: 1, scale: 1, zIndex: 1 }}
                         whileHover={desktopHover ? {
