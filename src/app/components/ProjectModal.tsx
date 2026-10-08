@@ -5,9 +5,10 @@ import { getProject } from '../lib/api';
 import { localized } from '../lib/localizedContent';
 import { useLanguage } from '../context/LanguageContext';
 import CarouselBlock, { type CarouselVisibleCount } from './editor/CarouselBlock';
+import WebsitePreview from './WebsitePreview';
 
 interface ContentBlock {
-  type: 'richtext' | 'image' | 'imagegrid' | 'carousel' | 'divider';
+  type: 'richtext' | 'image' | 'imagegrid' | 'carousel' | 'sitepreview' | 'divider';
   html?: string;
   html_es?: string;
   url?: string;
@@ -234,6 +235,7 @@ export default function ProjectModal({ projectId, onClose }: Props) {
                                visibleCount={block.visible_count || 3}
                              />
                            );
+                           if (block.type === 'sitepreview') return <WebsitePreview key={i} url={block.url || ''} language={language} />;
                           if (block.type === 'divider') return <Divider key={i} textColor={textColor} />;
                           return null;
                         })}

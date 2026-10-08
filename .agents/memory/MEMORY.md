@@ -4,3 +4,4 @@
 - [Image uploads](image-uploads.md) — images stored as bytea in Postgres `images` table; upload at POST /api/images/editor/upload; served at GET /api/images/:id; 8 MB limit
 - [Backdrop blur on scaled cards](backdrop-blur-scaled-cards.md) — sample neighboring cards with an oversized counter-scaled glass layer; filtering the scaled card itself samples the wrong area
 - [Manual bilingual content](manual-bilingual-content.md) — projects store EN/ES prose separately; shared titles/media never translate; empty selected-language fields fall back per field
+- [Embedded website previews](website-preview-security.md) — store only public HTTPS URLs; render remote pages in sandboxed, cross-origin iframes without top navigation or popups

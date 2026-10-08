@@ -83,6 +83,46 @@ export function sanitizeCaption(value) {
   return sanitizePlainText(value).replace(/\r\n?/g, '\n').split('\n').slice(0, 3).join('\n');
 }
 
+/** Accept public HTTPS URLs only; do not store credentials or local-network targets. */
+export function sanitizePreviewUrl(value) {
+  if (typeof value !== 'string' || value.length > 2048) return '';
+  try {
+    const url = new URL(value.trim());
+    const hostname = url.hostname.toLowerCase().replace(/^\[|\]$/g, '').replace(/\.$/, '');
+    if (
+      url.protocol !== 'https:' ||
+      url.username ||
+      url.password ||
+      !hostname ||
+      hostname.includes(':') ||
+      hostname === 'localhost' ||
+      hostname.endsWith('.localhost') ||
+      hostname.endsWith('.local') ||
+      hostname.endsWith('.internal') ||
+      hostname.endsWith('.test') ||
+      hostname.endsWith('.invalid') ||
+      hostname.endsWith('.example')
+    ) return '';
+
+    const octets = hostname.split('.').map(Number);
+    const isIpv4 = octets.length === 4 && octets.every(part => Number.isInteger(part) && part >= 0 && part <= 255);
+    if (isIpv4) {
+      const [a, b] = octets;
+      if (
+        a === 0 || a === 10 || a === 127 || a >= 224 ||
+        (a === 169 && b === 254) ||
+        (a === 172 && b >= 16 && b <= 31) ||
+        (a === 192 && b === 168) ||
+        (a === 100 && b >= 64 && b <= 127)
+      ) return '';
+    }
+
+    return url.toString();
+  } catch {
+    return '';
+  }
+}
+
 /**
  * Walk a content_blocks array and sanitize every richtext block's html field in place.
  * Returns a new array — does not mutate the original.
@@ -102,6 +142,13 @@ export function sanitizeContentBlocks(blocks) {
     : images;
 
   return blocks.map(block => {
+    if (block?.type === 'sitepreview') {
+      return {
+        id: sanitizePlainText(typeof block.id === 'string' ? block.id : ''),
+        type: 'sitepreview',
+        url: sanitizePreviewUrl(block.url),
+      };
+    }
     if (block?.type === 'richtext') {
       return {
         ...block,

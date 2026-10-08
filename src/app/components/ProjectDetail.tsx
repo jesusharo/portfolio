@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useState, useRef, type CSSProperties, type ReactNode } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, ArrowRight, Plus, AlignLeft, Image as ImageIcon, X, LayoutGrid, GalleryHorizontal, SeparatorHorizontal, GripVertical } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Plus, AlignLeft, Image as ImageIcon, X, LayoutGrid, GalleryHorizontal, SeparatorHorizontal, GripVertical, Globe } from 'lucide-react';
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor,
   useSensor, useSensors, type DragEndEvent,
@@ -23,13 +23,14 @@ import ImageGridBlock, {
 import CarouselBlock, { type CarouselImageItem, type CarouselVisibleCount } from './editor/CarouselBlock';
 import ImageLightbox from './ImageLightbox';
 import HeroParallax from './HeroParallax';
+import WebsitePreview from './WebsitePreview';
 
 type Mode = 'projects' | 'cases';
 type SaveStatus = 'idle' | 'unsaved' | 'saving' | 'saved' | 'error';
 
 interface ContentBlock {
   id: string;
-  type: 'richtext' | 'image' | 'imagegrid' | 'carousel' | 'divider';
+  type: 'richtext' | 'image' | 'imagegrid' | 'carousel' | 'sitepreview' | 'divider';
   // richtext
   html?: string;
   html_es?: string;
@@ -75,6 +76,7 @@ const BLOCK_OPTIONS: { type: BlockType; label: string; Icon: React.ElementType }
   { type: 'image',      label: 'Image',      Icon: ImageIcon },
   { type: 'imagegrid',  label: 'Grid',       Icon: LayoutGrid },
   { type: 'carousel',   label: 'Carousel',   Icon: GalleryHorizontal },
+  { type: 'sitepreview', label: 'Website preview', Icon: Globe },
   { type: 'divider',    label: 'Divider',    Icon: SeparatorHorizontal },
 ];
 
@@ -606,7 +608,7 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
 
                       {/* Block content */}
                       <div className="mb-1">
-                        {block.type !== 'divider' && (
+                        {block.type !== 'divider' && block.type !== 'sitepreview' && (
                           <div className="mb-2 flex justify-end">
                             <div className="flex rounded-[7px] border border-white/10 bg-white/[0.03] p-0.5">
                               {(['en', 'es'] as const).map(lang => (
@@ -672,6 +674,14 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
                             onVisibleCountChange={visible_count => updateBlock(block.id, { visible_count })}
                           />
                         )}
+                        {block.type === 'sitepreview' && (
+                          <WebsitePreview
+                            url={block.url || ''}
+                            editorMode
+                            language={language}
+                            onUrlChange={url => updateBlock(block.id, { url })}
+                          />
+                        )}
                         {block.type === 'divider' && (
                           <div className="py-5 flex items-center px-2">
                             <div className="flex-1 h-px rounded-full opacity-30" style={{ backgroundColor: textColor }} />
@@ -730,6 +740,9 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
                       images={(block.images || []) as CarouselImageItem[]}
                       visibleCount={block.visible_count ?? 3}
                     />
+                  )}
+                  {block.type === 'sitepreview' && (
+                    <WebsitePreview url={block.url || ''} language={language} />
                   )}
                   {block.type === 'divider' && (
                     <hr className="border-0 border-t my-2 opacity-30" style={{ borderColor: textColor }} />
