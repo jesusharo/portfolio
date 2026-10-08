@@ -6,3 +6,4 @@
 - [Manual bilingual content](manual-bilingual-content.md) — projects store EN/ES prose separately; shared titles/media never translate; empty selected-language fields fall back per field
 - [Embedded website previews](website-preview-security.md) — store only public HTTPS URLs; render remote pages in sandboxed, cross-origin iframes without top navigation or popups
 - [Development watcher scope](development-watcher-scope.md) — exclude workspace caches and agent tooling from source watchers; their growth can exhaust the OS watcher limit
+- [GitHub App publishing](github-app-publishing.md) — the GitHub App connection and Git CLI authentication are separate; do not request tokens when the connected App can publish
