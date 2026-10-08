@@ -94,6 +94,7 @@ export function sanitizePreviewUrl(value) {
       url.username ||
       url.password ||
       !hostname ||
+      !hostname.includes('.') ||
       hostname.includes(':') ||
       hostname === 'localhost' ||
       hostname.endsWith('.localhost') ||

@@ -20,6 +20,7 @@ export function getSafePreviewUrl(value: string): string {
       parsed.username ||
       parsed.password ||
       !hostname ||
+      !hostname.includes('.') ||
       hostname.includes(':') ||
       hostname === 'localhost' ||
       hostname.endsWith('.localhost') ||
@@ -110,6 +111,7 @@ export default function WebsitePreview({ url, editorMode = false, onUrlChange, l
             src={safeUrl}
             title={`${isSpanish ? 'Vista previa del sitio' : 'Website preview'}: ${hostname}`}
             sandbox="allow-scripts"
+            allow="camera 'none'; microphone 'none'; geolocation 'none'; payment 'none'; clipboard-read 'none'; clipboard-write 'none'; fullscreen 'none'"
             referrerPolicy="no-referrer"
             loading="lazy"
             className="block h-[min(72vh,620px)] min-h-[360px] w-full bg-white md:h-[560px]"
