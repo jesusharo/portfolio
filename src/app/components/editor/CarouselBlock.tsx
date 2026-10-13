@@ -3,6 +3,7 @@ import { X, Plus, Loader2, ChevronLeft, ChevronRight, GalleryHorizontal } from '
 import { AnimatePresence, motion } from 'motion/react';
 import { uploadImage } from '../../lib/api';
 import ImageLightbox from '../ImageLightbox';
+import ProgressiveImage from '../ProgressiveImage';
 import ImageCaptionField from './ImageCaptionField';
 
 export interface CarouselImageItem {
@@ -211,7 +212,12 @@ export default function CarouselBlock({
           {images.map(img => (
             <div key={img.id} className="shrink-0 w-[100px] flex flex-col gap-1">
               <div className="relative group/thumb h-[70px] rounded-[8px] overflow-hidden">
-                <img src={img.url} alt="" className="w-full h-full object-cover" />
+                <ProgressiveImage
+                  src={img.url}
+                  alt=""
+                  className="object-cover"
+                  frameClassName="h-full w-full"
+                />
                 <button
                   onClick={() => removeImage(img.id)}
                   className="absolute top-1 right-1 size-[18px] flex items-center justify-center rounded-full bg-black/70 border border-white/15 text-white/50 hover:text-[#d25d5f] hover:bg-black/90 transition-all opacity-0 group-hover/thumb:opacity-100"
@@ -259,10 +265,10 @@ export default function CarouselBlock({
                           className="flex min-w-0 shrink-0 items-start justify-center px-0 md:px-1"
                           style={{ width: `${100 / visibleCount}%` }}
                         >
-                          <img
+                          <ProgressiveImage
                             src={img.url}
                             alt=""
-                            className="block h-auto w-full object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.24)]"
+                            className="object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.24)]"
                           />
                         </div>
                       ))}
@@ -283,10 +289,10 @@ export default function CarouselBlock({
                       }}
                       transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
                     >
-                      <img
+                      <ProgressiveImage
                         src={img.url}
                         alt=""
-                        className="block h-auto w-full object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.24)]"
+                        className="object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.24)]"
                       />
                     </motion.div>
                   ))
@@ -383,10 +389,10 @@ export default function CarouselBlock({
                         className="flex min-w-0 shrink-0 items-start justify-center px-0 md:px-1"
                         style={{ width: `${100 / visibleCount}%` }}
                       >
-                        <img
+                        <ProgressiveImage
                           src={img.url}
                           alt={img.caption || ''}
-                          className="block h-auto w-full cursor-zoom-in object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.24)]"
+                          className="cursor-zoom-in object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.24)]"
                           onClick={() => setLightboxImage(img)}
                         />
                       </div>
@@ -408,10 +414,10 @@ export default function CarouselBlock({
                     }}
                     transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
                   >
-                    <img
+                    <ProgressiveImage
                       src={img.url}
                       alt={img.caption || ''}
-                      className="block h-auto w-full cursor-zoom-in object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.24)]"
+                      className="cursor-zoom-in object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.24)]"
                       onClick={() => setLightboxImage(img)}
                     />
                   </motion.div>

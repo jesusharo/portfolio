@@ -5,6 +5,7 @@ import { getProject } from '../lib/api';
 import { localized } from '../lib/localizedContent';
 import { useLanguage } from '../context/LanguageContext';
 import CarouselBlock, { type CarouselVisibleCount } from './editor/CarouselBlock';
+import ProgressiveImage from './ProgressiveImage';
 import WebsitePreview from './WebsitePreview';
 
 interface ContentBlock {
@@ -55,7 +56,7 @@ function RichTextBlock({ html, textColor }: { html: string; textColor: string })
 function ImageBlock({ url, caption, textColor }: { url: string; caption?: string; textColor: string }) {
   return (
     <figure className="my-4">
-      <img src={url} alt={caption || ''} className="w-full rounded-[12px] object-cover" />
+      <ProgressiveImage src={url} alt={caption || ''} frameClassName="w-full rounded-[12px]" className="rounded-[12px] object-cover" />
       {caption && <figcaption className="mt-2 text-center text-[0.75rem] opacity-55 font-['Source_Sans_3',sans-serif]" style={{ color: textColor }}>{caption}</figcaption>}
     </figure>
   );
@@ -89,7 +90,7 @@ function ImageGridBlock({
         <div key={row.id} className={`grid gap-3 ${GRID_COLUMN_CLASSES[row.columns]}`}>
           {row.images.map((img, i) => (
             <figure key={i}>
-              <img src={img.url} alt={img.caption || ''} className="w-full rounded-[10px] object-cover" />
+              <ProgressiveImage src={img.url} alt={img.caption || ''} frameClassName="w-full rounded-[10px]" className="rounded-[10px] object-cover" />
               {img.caption && <figcaption className="mt-1 text-center text-[0.72rem] opacity-55 font-['Source_Sans_3',sans-serif]" style={{ color: textColor }}>{img.caption}</figcaption>}
             </figure>
           ))}
@@ -196,10 +197,13 @@ export default function ProjectModal({ projectId, onClose }: Props) {
                     {/* Hero */}
                     {project.hero_image && (
                       <div className="w-full aspect-[16/7] overflow-hidden">
-                        <img
+                        <ProgressiveImage
                           src={project.hero_image}
                           alt={project.name}
-                          className="w-full h-full object-cover"
+                          className="object-cover"
+                          frameClassName="h-full w-full"
+                          placeholderAspectRatio="16 / 7"
+                          loading="eager"
                         />
                       </div>
                     )}

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { X, Plus, Loader2, LayoutGrid } from 'lucide-react';
 import { uploadImage } from '../../lib/api';
 import ImageLightbox from '../ImageLightbox';
+import ProgressiveImage from '../ProgressiveImage';
 import ImageCaptionField from './ImageCaptionField';
 
 export interface GridImageItem {
@@ -128,7 +129,7 @@ function FilledSlot({
   return (
     <div className="relative group/slot min-w-0">
       <div className="relative overflow-hidden rounded-[8px]">
-        <img src={item.url} alt={item.caption || ''} className="block h-auto w-full object-contain" />
+        <ProgressiveImage src={item.url} alt={item.caption || ''} className="object-contain" />
         <button
           onClick={onRemove}
           className="absolute top-1.5 right-1.5 size-[22px] flex items-center justify-center rounded-full bg-black/60 border border-white/15 text-white/50 hover:text-[#d25d5f] hover:bg-black/80 transition-all opacity-0 group-hover/slot:opacity-100"
@@ -298,10 +299,10 @@ export default function ImageGridBlock({ images, columns, rows, editorMode, lang
           <div key={row.id} className={`grid ${COLUMN_CLASSES[row.columns]} gap-2`}>
             {row.images.map(image => (
               <figure key={image.id} className="m-0">
-                <img
+                <ProgressiveImage
                   src={image.url}
                   alt={image.caption || ''}
-                  className="block h-auto w-full cursor-zoom-in object-contain"
+                  className="cursor-zoom-in object-contain"
                   onClick={() => setLightboxImage(image)}
                 />
                 {image.caption && (

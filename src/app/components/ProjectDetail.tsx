@@ -23,6 +23,7 @@ import ImageGridBlock, {
 import CarouselBlock, { type CarouselImageItem, type CarouselVisibleCount } from './editor/CarouselBlock';
 import ImageLightbox from './ImageLightbox';
 import HeroParallax from './HeroParallax';
+import ProgressiveImage from './ProgressiveImage';
 import WebsitePreview from './WebsitePreview';
 
 type Mode = 'projects' | 'cases';
@@ -712,10 +713,10 @@ export default function ProjectDetail({ mode, reviewMode = false }: { mode: Mode
                   )}
                   {block.type === 'image' && block.url && (
                     <figure>
-                      <img
+                      <ProgressiveImage
                         src={block.url}
                         alt={block.caption || ''}
-                        className="w-full h-auto cursor-zoom-in rounded-[12px] object-contain"
+                        className="cursor-zoom-in rounded-[12px] object-contain"
                         onClick={() => setLightboxImage({ src: block.url!, alt: block.caption || '' })}
                       />
                       {block.caption && (

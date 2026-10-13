@@ -182,6 +182,38 @@ export async function updateResume(resume_content: string) {
 
 // Images (editor)
 export async function uploadImage(file: File): Promise<{ id: string; url: string }> {
+  let dimensions: { width: number; height: number } | null = null;
+  try {
+    if (typeof createImageBitmap === 'function') {
+      const bitmap = await createImageBitmap(file);
+      dimensions = { width: bitmap.width, height: bitmap.height };
+      bitmap.close();
+    }
+  } catch {
+    // Fall back to the browser's image decoder below.
+  }
+  if (!dimensions) {
+    try {
+      const objectUrl = URL.createObjectURL(file);
+      dimensions = await new Promise(resolve => {
+        const image = new Image();
+        image.onload = () => {
+          URL.revokeObjectURL(objectUrl);
+          resolve(image.naturalWidth > 0 && image.naturalHeight > 0
+            ? { width: image.naturalWidth, height: image.naturalHeight }
+            : null);
+        };
+        image.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          resolve(null);
+        };
+        image.src = objectUrl;
+      });
+    } catch {
+      // Keep uploads working even if the browser cannot decode dimensions.
+    }
+  }
+
   const form = new FormData();
   form.append('file', file);
   const res = await fetch(`${BASE}/images/editor/upload`, {
@@ -191,5 +223,10 @@ export async function uploadImage(file: File): Promise<{ id: string; url: string
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Upload failed');
+  if (dimensions && dimensions.width > 0 && dimensions.height > 0) {
+    // Store intrinsic dimensions in the URL fragment: browsers do not send it
+    // to the server, but the content renderer can use it before loading.
+    data.url = `${data.url}#portfolio-image=${dimensions.width}x${dimensions.height}`;
+  }
   return data;
 }

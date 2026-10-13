@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback } from 'react';
 import { Upload, Loader2, X, ImageIcon } from 'lucide-react';
 import { uploadImage } from '../../lib/api';
+import ProgressiveImage from '../ProgressiveImage';
 
 interface Props {
   value: string;
@@ -60,10 +61,11 @@ export default function ImageDropZone({ value, onChange, caption, caption_es, la
     return (
       <div className="flex flex-col gap-3">
         <div className="relative group/preview rounded-[12px] overflow-hidden">
-          <img
+          <ProgressiveImage
             src={value}
             alt=""
-            className="w-full h-auto object-contain rounded-[12px]"
+            className="object-contain rounded-[12px]"
+            loading="eager"
           />
           {/* Overlay on hover */}
           <div className="absolute inset-0 bg-black/0 group-hover/preview:bg-black/40 transition-colors rounded-[12px] flex items-center justify-center gap-3 opacity-0 group-hover/preview:opacity-100">

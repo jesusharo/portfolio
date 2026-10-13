@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from 'motion/react';
+import { getImageDimensions } from '../lib/imageDimensions';
 
 interface Props {
   background: string;
@@ -28,7 +29,16 @@ export default function HeroParallax({ background, foreground, alt }: Props) {
   const frameRef = useRef<number | null>(null);
   const targetRef = useRef({ x: 0, y: 0 });
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const backgroundDimensions = getImageDimensions(background);
+  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
+  const [naturalDimensions, setNaturalDimensions] = useState<{ width: number; height: number } | null>(null);
+  const resolvedDimensions = backgroundDimensions || naturalDimensions;
   const hasParallax = Boolean(background && foreground) && !reduceMotion;
+
+  useEffect(() => {
+    setBackgroundLoaded(false);
+    setNaturalDimensions(null);
+  }, [background]);
 
   useEffect(() => {
     if (
@@ -186,23 +196,46 @@ export default function HeroParallax({ background, foreground, alt }: Props) {
     <div
       ref={containerRef}
       className="relative mx-auto max-w-[760px] rounded-[12px]"
+      style={{
+        aspectRatio: resolvedDimensions
+          ? `${resolvedDimensions.width} / ${resolvedDimensions.height}`
+          : '16 / 10',
+      }}
     >
+      {!backgroundLoaded && (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 animate-pulse rounded-[12px] bg-gradient-to-br from-white/[0.025] via-white/[0.075] to-white/[0.025]"
+        />
+      )}
       {hasParallax && (
         <img
           src={background}
           alt=""
           aria-hidden="true"
-          className="block w-full h-auto invisible pointer-events-none select-none"
+          className="absolute inset-0 h-full w-full invisible pointer-events-none select-none"
         />
       )}
       <img
         src={background}
         alt={alt}
-        className={`block w-full h-auto object-contain ${hasParallax ? 'absolute inset-0 h-full' : ''}`}
-        style={hasParallax ? {
-          transform: `translate3d(${offset.x * 0.45}px, ${offset.y * 0.45}px, 0) scale(1.05)`,
-          transition: 'transform 180ms ease-out',
-        } : undefined}
+        onLoad={event => {
+          if (!backgroundDimensions) {
+            const { naturalWidth, naturalHeight } = event.currentTarget;
+            if (naturalWidth > 0 && naturalHeight > 0) {
+              setNaturalDimensions({ width: naturalWidth, height: naturalHeight });
+            }
+          }
+          setBackgroundLoaded(true);
+        }}
+        className={`block w-full h-full object-contain transition-opacity duration-300 ${hasParallax ? 'absolute inset-0' : ''}`}
+        style={{
+          opacity: backgroundLoaded ? 1 : 0,
+          ...(hasParallax ? {
+            transform: `translate3d(${offset.x * 0.45}px, ${offset.y * 0.45}px, 0) scale(1.05)`,
+            transition: 'transform 180ms ease-out, opacity 300ms ease',
+          } : {}),
+        }}
       />
       {foreground && (
         <img
