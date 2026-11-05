@@ -40,7 +40,7 @@ export default function ProgressiveImage({
 
   return (
     <span
-      className={`relative block overflow-hidden bg-white/[0.045] ${frameClassName}`}
+      className={`relative block overflow-hidden ${frameClassName}`}
       style={{ aspectRatio, ...frameStyle }}
     >
       {!loaded && !failed && (
