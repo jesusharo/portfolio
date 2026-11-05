@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Eye, EyeOff } from 'lucide-react';
 import { login } from '../../lib/api';
 
 interface Props {
@@ -12,6 +13,7 @@ export default function AuthModal({ open, onSuccess, onClose }: Props) {
   const [passcode, setPasscode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPasscode, setShowPasscode] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -58,14 +60,29 @@ export default function AuthModal({ open, onSuccess, onClose }: Props) {
                 </p>
               </div>
 
-              <input
-                type="password"
-                autoFocus
-                value={passcode}
-                onChange={e => setPasscode(e.target.value)}
-                placeholder="Passcode"
-                className="bg-white/5 border border-white/10 rounded-[12px] px-4 py-3 text-white text-[0.9rem] outline-none focus:border-white/25 placeholder:text-white/25 font-['Source_Sans_3',sans-serif]"
-              />
+              <div className="relative">
+                <input
+                  type={showPasscode ? 'text' : 'password'}
+                  autoFocus
+                  autoComplete="current-password"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  value={passcode}
+                  onChange={e => setPasscode(e.target.value)}
+                  placeholder="Passcode"
+                  className="w-full bg-white/5 border border-white/10 rounded-[12px] pl-4 pr-12 py-3 text-white text-[0.9rem] outline-none focus:border-white/25 placeholder:text-white/25 font-['Source_Sans_3',sans-serif]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPasscode(visible => !visible)}
+                  aria-label={showPasscode ? 'Hide passcode' : 'Show passcode'}
+                  aria-pressed={showPasscode}
+                  title={showPasscode ? 'Hide passcode' : 'Show passcode'}
+                  className="absolute inset-y-0 right-1 flex w-10 items-center justify-center rounded-r-[12px] text-white/45 transition-colors hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                >
+                  {showPasscode ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
 
               {error && (
                 <p className="text-[#d25d5f] text-[0.8rem] font-['Source_Sans_3',sans-serif]">{error}</p>
